@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.AddElementFragment">
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+
+       <AutoCompleteTextView
+           android:focusable="false"
+           android:textSize="@dimen/abc_text_view_text_size"
+           android:id="@+id/txtCompany"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:hint="@string/title_bar_company"
+           android:inputType="number"
+           android:maxLines="1"
+           android:singleLine="true" />
+   </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">RCN Bodegas</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Usuario</string>
+    <string name="nav_header_subtitle"></string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_sign_in">Ingresar</string>
+    <string name="error_user_empty">Usuario es requerido</string>
+    <string name="error_password_empty">Contraseña es requerido</string>
+    <string name="Texto_Boton_Ok">Aceptar</string>
+    <string name="title_bar_company">Empresa</string>
+    <string name="title_parameters">Parametros</string>
+    <string name="action_accept">Aceptar</string>
+    <string name="action_continue">Continuar</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

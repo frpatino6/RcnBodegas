@@ -1,0 +1,17 @@
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.deps.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.runtimeconfig.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.runtimeconfig.dev.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.pdb
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.csprojAssemblyReference.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.csproj.CoreCompileInputs.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.RazorAssemblyInfo.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.RazorAssemblyInfo.cs
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.AssemblyInfoInputs.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.AssemblyInfo.cs
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.RazorTargetAssemblyInfo.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.pdb
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Core.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Core.pdb
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.csproj.CopyComplete

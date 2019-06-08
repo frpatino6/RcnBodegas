@@ -1,0 +1,9 @@
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Core.deps.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Core.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Core.pdb
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.csprojAssemblyReference.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.csproj.CoreCompileInputs.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.AssemblyInfoInputs.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.AssemblyInfo.cs
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.pdb

@@ -1,0 +1,14 @@
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\xunit.runner.reporters.netcoreapp10.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\xunit.runner.utility.netcoreapp10.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Test.deps.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Test.runtimeconfig.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Test.runtimeconfig.dev.json
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Test.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Test.pdb
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.csprojAssemblyReference.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.csproj.CoreCompileInputs.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.AssemblyInfoInputs.cache
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.AssemblyInfo.cs
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.dll
+D:\Rcn\App\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.pdb
