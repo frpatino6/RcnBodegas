@@ -95,8 +95,16 @@ public class LoginActivity extends AppCompatActivity {
         if (cancel) {
             focusView.requestFocus();
         } else {
-            showProgress(true);
-            asyncLogin();
+            //showProgress(true);
+            //TODO SE DEJA EN COMENTARIO ESTA LINEA PARA EFECTOS DE PRUEBAS
+            //asyncLogin();
+
+            //TODO, SOLO PARA PRUEBAS SIN CONEXION A BASE DE DATOS
+            globalVariable.setUserName("PRUEBAS");
+            globalVariable.setUserRole("ADMIN");
+            Intent intent = null;
+            intent = new Intent(LoginActivity.this,  SelectParametersActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -171,10 +179,11 @@ public class LoginActivity extends AppCompatActivity {
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
                             data = gson.fromJson(res, token.getType());
-                            Intent intent = null;
-                            intent = new Intent(LoginActivity.this,  SelectParametersActivity.class);
+
                             globalVariable.setUserName(input_email.getText().toString());
                             globalVariable.setUserRole(data.roleName);
+                            Intent intent = null;
+                            intent = new Intent(LoginActivity.this,  SelectParametersActivity.class);
                             startActivity(intent);
 
                         } catch (JsonSyntaxException e) {

@@ -3,36 +3,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/navAddElement"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Ingresar elementos" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Tools" />
-    </group>
-
-    <item android:title="Communicate">
+    <item android:title="Bodegas">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/navBodegasAmbientacion"
+                android:icon="@drawable/baseline_landscape_24"
+                android:title="Ambientación" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/navBodegasVestuario"
+                android:icon="@drawable/baseline_local_offer_24"
+                android:title="Vestuario" />
+            <item
+                android:id="@+id/navBodegasProduccion"
+                android:icon="@drawable/baseline_local_play_24"
+                android:title="Producción" />
+            <item
+                android:id="@+id/navBodegasBTL"
+                android:icon="@drawable/baseline_local_shipping_24"
+                android:title="Bodegas BTL" />
+            <item
+                android:id="@+id/navBodegasLavanderia"
+                android:icon="@drawable/baseline_local_laundry_service_24"
+                android:title="Lavandería" />
         </menu>
     </item>
 
+    <item android:title="Inventario">
+        <menu>
+            <item
+                android:id="@+id/navInventario"
+                android:icon="@drawable/baseline_style_24"
+                android:title="Realizar Inventario" />
+        </menu>
+    </item>
 </menu>

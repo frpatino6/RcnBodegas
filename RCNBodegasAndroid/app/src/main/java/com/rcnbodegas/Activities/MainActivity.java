@@ -91,17 +91,17 @@ public class MainActivity extends AppCompatActivity
 
         Fragment fragment = null;
 
-        if (id == R.id.navAddElement) {
+        if (id == R.id.navBodegasAmbientacion) {
             fragment = new AddElementFragment();
-        } else if (id == R.id.nav_gallery) {
+        }  else if (id == R.id.navBodegasVestuario) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.navBodegasProduccion) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.navBodegasBTL) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.navBodegasLavanderia) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.navInventario) {
 
         }
 
