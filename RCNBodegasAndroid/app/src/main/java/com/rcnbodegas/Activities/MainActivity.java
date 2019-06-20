@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.navBodegasAmbientacion) {
             fragment = new AddElementFragment();
+
         }  else if (id == R.id.navBodegasVestuario) {
 
         } else if (id == R.id.navBodegasProduccion) {
