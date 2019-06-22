@@ -692,11 +692,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Rcn\\App\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj",
+      "projectUniqueName": "D:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj",
       "projectName": "Rcn.Bodegas.Core",
-      "projectPath": "D:\\Rcn\\App\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj",
+      "projectPath": "D:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj",
       "packagesPath": "C:\\Users\\fernando\\.nuget\\packages\\",
-      "outputPath": "D:\\Rcn\\App\\RCNBodegasServices\\Rcn.Bodegas.Core\\obj\\",
+      "outputPath": "D:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
