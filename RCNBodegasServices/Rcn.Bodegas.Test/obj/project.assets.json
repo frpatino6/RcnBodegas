@@ -4008,7 +4008,7 @@
       ]
     },
     "System.Private.DataContractSerialization/4.1.1": {
-      "sha512": "lcqFBUaCZxPiUkA4dlSOoPZGtZsAuuElH2XHgLwGLxd7ZozWetV5yiz0qGAV2AUYOqw97MtZBjbLMN16Xz4vXA==",
+      "sha512": "3yaz6opzmO3zW6b2/KnEPzBzlVIdjJ1ISoDhHIu/AR4H/eM7Nxs0+Ht4BGmC56bYiJ1lgUCmx/usNbcxJujHhQ==",
       "type": "package",
       "path": "system.private.datacontractserialization/4.1.1",
       "files": [
@@ -5842,11 +5842,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Rcn\\App\\RCNBodegasServices\\Rcn.Bodegas.Test\\Rcn.Bodegas.Test.csproj",
+      "projectUniqueName": "D:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Test\\Rcn.Bodegas.Test.csproj",
       "projectName": "Rcn.Bodegas.Test",
-      "projectPath": "D:\\Rcn\\App\\RCNBodegasServices\\Rcn.Bodegas.Test\\Rcn.Bodegas.Test.csproj",
+      "projectPath": "D:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Test\\Rcn.Bodegas.Test.csproj",
       "packagesPath": "C:\\Users\\fernando\\.nuget\\packages\\",
-      "outputPath": "D:\\Rcn\\App\\RCNBodegasServices\\Rcn.Bodegas.Test\\obj\\",
+      "outputPath": "D:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
