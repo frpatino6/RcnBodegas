@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.rcnbodegas.Fragments.AddElementFragment;
+import com.rcnbodegas.Fragments.InventoryFragment;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.R;
 
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.navBodegasLavanderia) {
 
         } else if (id == R.id.navInventario) {
+            fragment= new InventoryFragment();
 
         }
 
