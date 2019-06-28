@@ -7,11 +7,13 @@
     android:padding="16dp">
 
     <LinearLayout
+        android:id="@+id/warehouse_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/warehouse_type_txt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"
@@ -25,12 +27,14 @@
             android:background="#ddd" />
 
         <LinearLayout
+            android:id="@+id/warehouse_option_one"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_option_one_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Programa"
@@ -38,6 +42,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/warehouse_option_one_selected"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Programa Seleccionado"
@@ -50,12 +55,14 @@
             android:background="#ddd" />
 
         <LinearLayout
+            android:id="@+id/warehouse_option_two"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_option_two_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Legalizado por"
@@ -63,6 +70,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/warehouse_option_two_selected"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Persona Seleccionada"
@@ -75,12 +83,14 @@
             android:background="#ddd" />
 
         <LinearLayout
+            android:id="@+id/warehouse_option_three"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_option_three_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Fecha de legalización"
@@ -88,6 +98,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/warehouse_option_selected"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Fecha Seleccionada"
@@ -100,6 +111,7 @@
             android:background="#ddd" />
 
         <Button
+            android:id="@+id/warehouse_btn_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
@@ -110,18 +122,21 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/warehouse_element"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#eee">
 
         <LinearLayout
+            android:id="@+id/warehouse_element_barcode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_barcode_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Código de Barras"
@@ -129,18 +144,21 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/warehouse_element_barcode_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Ingrese el código de barras" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/warehouse_element_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_desc_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Descripción"
@@ -148,18 +166,21 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/warehouse_element_desc_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="max. X caracteres" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/warehouse_element_type"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_type_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Tipo de Elemento"
@@ -167,6 +188,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/warehouse_element_type_selected"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Opcion Seleccionada"
@@ -174,12 +196,14 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/warehouse_element_brand"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_brand_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Marca"
@@ -187,18 +211,21 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/warehouse_element_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="max. X caracteres" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/warehouse_element_price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_price_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Precio"
@@ -206,18 +233,21 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/warehouse_element_price_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="max. X caracteres" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/warehouse_element_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_value_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Valor"
@@ -225,18 +255,21 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:id="@+id/warehouse_element_value_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="max. X caracteres" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/warehouse_element_photos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="8dp">
 
             <TextView
+                android:id="@+id/warehouse_element_photos_txt"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Capturar Fotos"
@@ -244,11 +277,13 @@
                 android:textStyle="bold" />
 
             <LinearLayout
+                android:id="@+id/warehouse_element_photos_items"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <Button
+                    android:id="@+id/warehouse_element_photos_item_one"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".15"
@@ -257,6 +292,7 @@
                     tools:ignore="Suspicious0dp" />
 
                 <Button
+                    android:id="@+id/warehouse_element_photos_item_two"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".15"
@@ -265,6 +301,7 @@
                     tools:ignore="Suspicious0dp" />
 
                 <Button
+                    android:id="@+id/warehouse_element_photos_item_three"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".15"
@@ -273,6 +310,7 @@
                     tools:ignore="Suspicious0dp" />
 
                 <Button
+                    android:id="@+id/warehouse_element_photos_item_four"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".15"
@@ -281,6 +319,7 @@
                     tools:ignore="Suspicious0dp" />
 
                 <Button
+                    android:id="@+id/warehouse_element_photos_item_five"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".15"
@@ -289,6 +328,7 @@
                     tools:ignore="Suspicious0dp" />
 
                 <Button
+                    android:id="@+id/warehouse_element_photos_item_six"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".15"
@@ -302,6 +342,7 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/warehouse_btn_new_element"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
