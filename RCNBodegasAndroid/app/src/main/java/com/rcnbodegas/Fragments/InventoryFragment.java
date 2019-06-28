@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.rcnbodegas.R;
 
@@ -23,21 +24,14 @@ public class InventoryFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
+    private LinearLayout inventory_element;
+    private LinearLayout inventory_data;
 
     public InventoryFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AddElementFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+
     public static InventoryFragment newInstance(String param1, String param2) {
         InventoryFragment fragment = new InventoryFragment();
         Bundle args = new Bundle();
@@ -60,7 +54,16 @@ public class InventoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.activity_inventory, container, false);
+        View view=inflater.inflate(R.layout.activity_inventory, container, false);
+        inventory_element= view.findViewById(R.id.inventory_element);
+        inventory_data= view.findViewById(R.id.inventory_data);
+
+        inventory_element.setVisibility(View.GONE);
+        return view;
+    }
+
+    private void InitializeControls(){
+
     }
 
 }
