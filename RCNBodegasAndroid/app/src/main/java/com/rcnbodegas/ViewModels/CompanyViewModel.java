@@ -2,11 +2,11 @@ package com.rcnbodegas.ViewModels;
 
 public class CompanyViewModel {
 
-    private Integer id ;
+    private String id ;
 
     private String companyName ;
 
-    public CompanyViewModel(int id, String companyName) {
+    public CompanyViewModel(String id, String companyName) {
         this.id = id;
         this.companyName = companyName;
     }
@@ -14,11 +14,11 @@ public class CompanyViewModel {
     public CompanyViewModel() {
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 

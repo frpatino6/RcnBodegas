@@ -9,14 +9,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.rcnbodegas.R;
-import com.rcnbodegas.ViewModels.WareHouseViewModel;
+import com.rcnbodegas.ViewModels.CompanyViewModel;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WareHouseAdapter extends RecyclerView.Adapter<WareHouseAdapter.MyViewHolder> {
-    private ArrayList<WareHouseViewModel> dataSet;
-    private onRecyclerWarehouseListItemClick _event;
+public class ProductionAdapter extends RecyclerView.Adapter<ProductionAdapter.MyViewHolder> {
+    private ArrayList<ProductionViewModel> dataSet;
+    private onRecyclerProductionListItemClick _event;
     private int row_index;
     private boolean isClicked = false;
     private View _view;
@@ -25,18 +26,18 @@ public class WareHouseAdapter extends RecyclerView.Adapter<WareHouseAdapter.MyVi
 
         TextView txtId;
         TextView txtName;
-        ConstraintLayout layoutWareHouseView;
+        ConstraintLayout layoutCompanyView;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            layoutWareHouseView = itemView.findViewById(R.id.layoutWareHouse);
+            layoutCompanyView = itemView.findViewById(R.id.layoutCompany);
             this.txtName= (TextView) itemView.findViewById(R.id.txtName);
             this.txtId= (TextView) itemView.findViewById(R.id.txtId);
 
         }
     }
 
-    public WareHouseAdapter(ArrayList<WareHouseViewModel> data, onRecyclerWarehouseListItemClick event) {
+    public ProductionAdapter(ArrayList<ProductionViewModel> data, onRecyclerProductionListItemClick event) {
         this.dataSet = data;
         this._event = event;
 
@@ -52,7 +53,7 @@ public class WareHouseAdapter extends RecyclerView.Adapter<WareHouseAdapter.MyVi
         try {
 
             _view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.activity_warehouse_item, parent, false);
+                    .inflate(R.layout.activity_company_item, parent, false);
             myViewHolder = new MyViewHolder(_view);
 
 
@@ -69,10 +70,10 @@ public class WareHouseAdapter extends RecyclerView.Adapter<WareHouseAdapter.MyVi
         TextView txtName= holder.txtName;
 
 
-        txtName.setText(dataSet.get(listPosition).getWareHouseName());
+        txtName.setText(dataSet.get(listPosition).getProductionName());
         txtId.setText(dataSet.get(listPosition).getId().toString());
 
-        holder.layoutWareHouseView.setOnClickListener(new View.OnClickListener() {
+        holder.layoutCompanyView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 row_index = listPosition;

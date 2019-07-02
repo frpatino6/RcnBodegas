@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +19,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.rcnbodegas.Fragments.AddElementFragment;
+import com.rcnbodegas.Fragments.InventoryFragment;
+import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.R;
 
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity
         View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
         txtUser= headerView.findViewById(R.id.txtUserName);
         txtUser.setText(globalVariable.getUserName());
-
+        drawer.openDrawer(Gravity.LEFT);
     }
 
     @Override
@@ -92,17 +95,22 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = null;
 
         if (id == R.id.navBodegasAmbientacion) {
-            fragment = new AddElementFragment();
+            fragment= new WarehouseFragment();
 
         }  else if (id == R.id.navBodegasVestuario) {
+            fragment= new WarehouseFragment();
 
         } else if (id == R.id.navBodegasProduccion) {
+            fragment= new WarehouseFragment();
 
         } else if (id == R.id.navBodegasBTL) {
+            fragment= new WarehouseFragment();
 
         } else if (id == R.id.navBodegasLavanderia) {
+            fragment= new WarehouseFragment();
 
         } else if (id == R.id.navInventario) {
+            fragment= new InventoryFragment();
 
         }
 

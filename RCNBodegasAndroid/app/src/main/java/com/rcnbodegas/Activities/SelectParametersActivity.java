@@ -54,7 +54,8 @@ public class SelectParametersActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 String result=data.getStringExtra("wareHouseName");
                 this.txtWarehouse.setText(result);
-                globalVariable.setIdSelectedWareHouse(Integer.valueOf(data.getStringExtra("wareHouseId")));
+                globalVariable.setIdSelectedWareHouse(data.getStringExtra("wareHouseId"));
+                globalVariable.setNameSelectedWareHouse(data.getStringExtra("wareHouseName"));
             }
         }
 
