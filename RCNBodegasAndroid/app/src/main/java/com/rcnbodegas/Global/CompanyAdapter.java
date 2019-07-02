@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CompanyAdapter  extends RecyclerView.Adapter<CompanyAdapter.MyViewHolder> {
     private ArrayList<CompanyViewModel> dataSet;
-    private onRecyclerItemClick _event;
+    private onRecyclerCompanyItemClick _event;
     private int row_index;
     private boolean isClicked = false;
     private View _view;
@@ -36,7 +36,7 @@ public class CompanyAdapter  extends RecyclerView.Adapter<CompanyAdapter.MyViewH
         }
     }
 
-    public CompanyAdapter(ArrayList<CompanyViewModel> data, onRecyclerItemClick event) {
+    public CompanyAdapter(ArrayList<CompanyViewModel> data, onRecyclerCompanyItemClick event) {
         this.dataSet = data;
         this._event = event;
 
@@ -78,7 +78,7 @@ public class CompanyAdapter  extends RecyclerView.Adapter<CompanyAdapter.MyViewH
                 row_index = listPosition;
                 isClicked = true;
                 if (_event != null)
-                    _event.onClick(dataSet.get(listPosition).getId());
+                    _event.onClick(dataSet.get(listPosition));
                 notifyDataSetChanged();
             }
         });

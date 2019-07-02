@@ -34,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private View mProgressView;
 
     private EditText input_email;
+
     private EditText input_password;
     private Button btn_login;
     private ProgressDialog dialogo;

@@ -23,7 +23,7 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.CompanyAdapter;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.onRecyclerItemClick;
+import com.rcnbodegas.Global.onRecyclerCompanyItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.CompanyViewModel;
 
@@ -137,12 +137,12 @@ public class CompanyListActivity extends AppCompatActivity {
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
                             data = gson.fromJson(res, token.getType());
-                            adapter = new CompanyAdapter(data, new onRecyclerItemClick() {
+                            adapter = new CompanyAdapter(data, new onRecyclerCompanyItemClick() {
                                 @Override
-                                public void onClick(Integer result) {
+                                public void onClick(CompanyViewModel result) {
                                     final Intent _data = new Intent();
-                                    _data.putExtra("companyName", String.valueOf(data.get(result).getCompanyName()));
-                                    _data.putExtra("companyId", String.valueOf(data.get(result).getId().toString()));
+                                    _data.putExtra("companyName",result.getCompanyName());
+                                    _data.putExtra("companyId", result.getId());
 
                                     setResult(RESULT_OK, _data);
 

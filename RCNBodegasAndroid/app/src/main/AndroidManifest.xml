@@ -15,6 +15,8 @@
         <activity android:name=".Activities.SelectParametersActivity"></activity>
         <activity android:name=".Activities.WareHouseListActivity" />
         <activity android:name=".Activities.CompanyListActivity" />
+        <activity android:name=".Activities.ProductionListActivity" />
+        <activity android:name=".Activities.ResponsibleListActivity" />
         <activity android:name=".Activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

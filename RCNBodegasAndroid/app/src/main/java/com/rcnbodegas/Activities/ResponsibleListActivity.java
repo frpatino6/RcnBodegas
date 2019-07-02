@@ -22,17 +22,17 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.WareHouseAdapter;
-import com.rcnbodegas.Global.onRecyclerWarehouseListItemClick;
+import com.rcnbodegas.Global.ResponsibleAdapter;
+import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
-import com.rcnbodegas.ViewModels.WareHouseViewModel;
+import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-public class WareHouseListActivity extends AppCompatActivity {
+public class ResponsibleListActivity extends AppCompatActivity {
 
 
     private View mIncidenciasFormView;
@@ -40,29 +40,29 @@ public class WareHouseListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
-    private ArrayList<WareHouseViewModel> data;
-    private WareHouseAdapter adapter;
+    private ArrayList<ResponsibleViewModel> data;
+    private ResponsibleAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_company_list);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_warehouse));
+        setContentView(R.layout.activity_responsible_list);
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
         InitializeControls();
-        asyncListWareHouse();
+        asyncListResponsibles();
 
     }
 
     private void InitializeControls() {
 
-        mIncidenciasFormView = findViewById(R.id.company_recycler_view);
-        mProgressView = findViewById(R.id.company_progress);
-        recyclerView = (RecyclerView) findViewById(R.id.company_recycler_view);
+        mIncidenciasFormView = findViewById(R.id.responsible_recycler_view);
+        mProgressView = findViewById(R.id.responsible_progress);
+        recyclerView = (RecyclerView) findViewById(R.id.responsible_recycler_view);
         recyclerView.setHasFixedSize(true);
 
         globalVariable = (GlobalClass) getApplicationContext();
 
-        layoutManager = new LinearLayoutManager(WareHouseListActivity.this);
+        layoutManager = new LinearLayoutManager(ResponsibleListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
     }
@@ -101,7 +101,7 @@ public class WareHouseListActivity extends AppCompatActivity {
     }
 
     private void shwoMessage(String res) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(WareHouseListActivity.this);
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ResponsibleListActivity.this);
 
         dlgAlert.setMessage(res);
         dlgAlert.setTitle(getString(R.string.app_name));
@@ -117,10 +117,10 @@ public class WareHouseListActivity extends AppCompatActivity {
         dlgAlert.create().show();
     }
 
-    private void asyncListWareHouse() {
+    private void asyncListResponsibles() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "WareHouse/GetLisWareHouse/" + globalVariable.getUserName() + "/" + globalVariable.getIdSelectedCompany();
+        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListResponsable/" + globalVariable.getIdSelectedProduction() ;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -131,17 +131,17 @@ public class WareHouseListActivity extends AppCompatActivity {
                         // called when response HTTP status is "200 OK"
                         try {
 
-                            TypeToken<List<WareHouseViewModel>> token = new TypeToken<List<WareHouseViewModel>>() {
+                            TypeToken<List<ResponsibleViewModel>> token = new TypeToken<List<ResponsibleViewModel>>() {
                             };
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
                             data = gson.fromJson(res, token.getType());
-                            adapter = new WareHouseAdapter(data, new onRecyclerWarehouseListItemClick() {
+                            adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
                                 @Override
-                                public void onClick(WareHouseViewModel result) {
+                                public void onClick(ResponsibleViewModel result) {
                                     final Intent _data = new Intent();
-                                    _data.putExtra("wareHouseName",result.getWareHouseName());
-                                    _data.putExtra("wareHouseId", result.getId());
+                                    _data.putExtra("responsibleName",result.getName());
+                                    _data.putExtra("responsibleId", result.getId().toString());
 
                                     setResult(RESULT_OK, _data);
 

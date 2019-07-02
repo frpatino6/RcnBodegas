@@ -5,9 +5,21 @@ import android.app.Application;
 public class GlobalClass extends Application {
 
     private String userName;
-    private String urlServices="http://192.168.0.3/bodegas/";
+    private String urlServices="http://192.168.0.5/bodegas/";
     private Integer idSelectedCompany;
-    private Integer idSelectedWareHouse;
+    private String idSelectedWareHouse;
+    private String idSelectedProduction;
+    private int idSelectedResponsible;
+
+    public String getNameSelectedWareHouse() {
+        return nameSelectedWareHouse;
+    }
+
+    public void setNameSelectedWareHouse(String nameSelectedWareHouse) {
+        this.nameSelectedWareHouse = nameSelectedWareHouse;
+    }
+
+    private String nameSelectedWareHouse;
     private String userRole;
 
     public String getUserRole() {
@@ -28,11 +40,11 @@ public class GlobalClass extends Application {
         this.idSelectedCompany = idSelectedCompany;
     }
 
-    public Integer getIdSelectedWareHouse() {
+    public String getIdSelectedWareHouse() {
         return idSelectedWareHouse;
     }
 
-    public void setIdSelectedWareHouse(Integer idSelectedWareHouse) {
+    public void setIdSelectedWareHouse(String idSelectedWareHouse) {
         this.idSelectedWareHouse = idSelectedWareHouse;
     }
 
@@ -48,5 +60,21 @@ public class GlobalClass extends Application {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getIdSelectedProduction() {
+        return idSelectedProduction;
+    }
+
+    public void setIdSelectedProduction(String idSelectedProduction) {
+        this.idSelectedProduction = idSelectedProduction;
+    }
+
+    public int getIdSelectedResponsible() {
+        return idSelectedResponsible;
+    }
+
+    public void setIdSelectedResponsible(int idSelectedResponsible) {
+        this.idSelectedResponsible = idSelectedResponsible;
     }
 }

@@ -30,7 +30,9 @@
                         android:id="@+id/inventory_warehouse_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:focusable="false"
                         android:hint="Bodega"
+
                         android:text=""
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
@@ -41,11 +43,12 @@
                     android:layout_marginTop="2dp">
 
                     <EditText
-                        android:id="@+id/inventory_show_option"
+                        android:id="@+id/inventory_program_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="Programa"
                         android:text=""
+                        android:focusable="false"
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -59,34 +62,24 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="Responsable"
+                        android:focusable="false"
                         android:text=""
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
+
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
 
-                    <EditText
-                        android:id="@+id/inventory_type_option"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="Tipo de Elemento"
-                        android:text=""
-                        android:textColor="#333" />
-                </android.support.design.widget.TextInputLayout>
-
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp">
                     <EditText
                         android:id="@+id/inventory_date_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text=""
                         android:hint="Fecha de Inventario"
+                        android:text=""
+                        android:focusable="false"
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -112,142 +105,82 @@
                     android:background="#eee"
                     android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/inventory_element_barcode"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
-
-                        <TextView
-                            android:id="@+id/inventory_element_barcode_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Código de Barras"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
+                        android:layout_marginTop="2dp">
 
                         <EditText
                             android:id="@+id/inventory_element_barcode_edit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Ingrese el código de barras" />
-                    </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
 
-                    <LinearLayout
-                        android:id="@+id/inventory_element_desc"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
-
-                        <TextView
-                            android:id="@+id/inventory_element_desc_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Descripción"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
+                        android:layout_marginTop="2dp">
 
                         <EditText
                             android:id="@+id/inventory_element_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="Descripción del elemento"
+                            android:hint="Descripción"
+                            android:text=""
                             android:textColor="#333" />
-                    </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
 
-                    <LinearLayout
-                        android:id="@+id/inventory_element_type"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
-
-                        <TextView
-                            android:id="@+id/inventory_element_type_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Tipo de Elemento"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
+                        android:layout_marginTop="2dp">
 
                         <EditText
                             android:id="@+id/inventory_element_type_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="Tipo"
+                            android:hint="Tipo de Elemento"
                             android:textColor="#333" />
-                    </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
 
-                    <LinearLayout
-                        android:id="@+id/inventory_element_brand"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
-
-                        <TextView
-                            android:id="@+id/inventory_element_brand_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Marca"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
+                        android:layout_marginTop="2dp">
 
                         <EditText
                             android:id="@+id/inventory_element_brand_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="Marca del Elemento"
+                            android:hint="Marca"
                             android:textColor="#333" />
-                    </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
 
-                    <LinearLayout
-                        android:id="@+id/inventory_element_price"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
-
-                        <TextView
-                            android:id="@+id/inventory_element_price_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Precio"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
+                        android:layout_marginTop="2dp">
 
                         <EditText
                             android:id="@+id/inventory_element_price_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="Precio del Elemento"
+                            android:hint="Precio del Elemento"
                             android:textColor="#333" />
-                    </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
 
-                    <LinearLayout
-                        android:id="@+id/inventory_element_value"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="4dp">
-
-                        <TextView
-                            android:id="@+id/inventory_element_value_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Valor Materia"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
-
+                        android:layout_marginTop="2dp">
                         <EditText
                             android:id="@+id/inventory_element_value_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:text="Valor del Elemento"
+                            android:hint="Valor del Elemento"
                             android:textColor="#333" />
-                    </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
 
                     <LinearLayout
                         android:id="@+id/inventory_element_photos"
