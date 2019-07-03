@@ -1,14 +1,34 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.2",
-    "signature": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    "signature": "611c84d8d5e2abc1458fc90a3c34009fc53bfb40"
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.2": {
       "Rcn.Bodegas.Core/1.0.0": {
+        "dependencies": {
+          "Oracle.ManagedDataAccess.Core": "2.19.3",
+          "Microsoft.Extensions.Configuration.Abstractions": "2.2.0.0"
+        },
         "runtime": {
           "Rcn.Bodegas.Core.dll": {}
+        }
+      },
+      "Oracle.ManagedDataAccess.Core/2.19.3": {
+        "runtime": {
+          "lib/netstandard2.0/Oracle.ManagedDataAccess.dll": {
+            "assemblyVersion": "2.0.19.1",
+            "fileVersion": "2.0.19.1"
+          }
+        }
+      },
+      "Microsoft.Extensions.Configuration.Abstractions/2.2.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Configuration.Abstractions.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.2.0.18315"
+          }
         }
       }
     }
@@ -16,6 +36,18 @@
   "libraries": {
     "Rcn.Bodegas.Core/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Oracle.ManagedDataAccess.Core/2.19.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-yRlHxzI4ca/uJGRdedWE8SiGT3c2fWCc8BbLEUNb7TP1OjE54gCgXGaAqxnfjP6HzyaMsoSKAFPwaehGB2ETBA==",
+      "path": "oracle.manageddataaccess.core/2.19.3",
+      "hashPath": "oracle.manageddataaccess.core.2.19.3.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Configuration.Abstractions/2.2.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

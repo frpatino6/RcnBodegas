@@ -207,6 +207,15 @@
         "build": {
           "build/netstandard2.0/NETStandard.Library.targets": {}
         }
+      },
+      "Oracle.ManagedDataAccess.Core/2.19.3": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Oracle.ManagedDataAccess.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Oracle.ManagedDataAccess.dll": {}
+        }
       }
     }
   },
@@ -678,11 +687,28 @@
         "netstandard.library.2.0.3.nupkg.sha512",
         "netstandard.library.nuspec"
       ]
+    },
+    "Oracle.ManagedDataAccess.Core/2.19.3": {
+      "sha512": "yRlHxzI4ca/uJGRdedWE8SiGT3c2fWCc8BbLEUNb7TP1OjE54gCgXGaAqxnfjP6HzyaMsoSKAFPwaehGB2ETBA==",
+      "type": "package",
+      "path": "oracle.manageddataaccess.core/2.19.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "PerfCounters/register_odpc_perfmon_counters.ps1",
+        "PerfCounters/unregister_odpc_perfmon_counters.ps1",
+        "info.txt",
+        "lib/netstandard2.0/Oracle.ManagedDataAccess.dll",
+        "oracle.manageddataaccess.core.2.19.3.nupkg.sha512",
+        "oracle.manageddataaccess.core.nuspec",
+        "readme.txt"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.2": [
-      "Microsoft.NETCore.App >= 2.2.0"
+      "Microsoft.NETCore.App >= 2.2.0",
+      "Oracle.ManagedDataAccess.Core >= 2.19.3"
     ]
   },
   "packageFolders": {
@@ -731,6 +757,10 @@
             "target": "Package",
             "version": "[2.2.0, )",
             "autoReferenced": true
+          },
+          "Oracle.ManagedDataAccess.Core": {
+            "target": "Package",
+            "version": "[2.19.3, )"
           }
         },
         "imports": [

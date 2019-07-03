@@ -6,7 +6,7 @@ namespace Rcn.Bodegas.Core.ViewModel
 {
   public class WareHouseViewModel
   {
-    public int Id { get; set; }
+    public string Id { get; set; }
 
     public string WareHouseName { get; set; }
 
