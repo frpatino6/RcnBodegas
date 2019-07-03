@@ -10,6 +10,7 @@ public class GlobalClass extends Application {
     private String idSelectedWareHouse;
     private String idSelectedProduction;
     private int idSelectedResponsible;
+    private int idSelectedTypeElement;
 
     public String getNameSelectedWareHouse() {
         return nameSelectedWareHouse;
@@ -76,5 +77,13 @@ public class GlobalClass extends Application {
 
     public void setIdSelectedResponsible(int idSelectedResponsible) {
         this.idSelectedResponsible = idSelectedResponsible;
+    }
+
+    public int getIdSelectedTypeElement() {
+        return idSelectedTypeElement;
+    }
+
+    public void setIdSelectedTypeElement(int idSelectedTypeElement) {
+        this.idSelectedTypeElement = idSelectedTypeElement;
     }
 }

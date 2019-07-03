@@ -1,9 +1,15 @@
 package com.rcnbodegas.Fragments;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -14,17 +20,33 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Activities.MainActivity;
 import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
 import com.rcnbodegas.Activities.SelectParametersActivity;
+import com.rcnbodegas.Activities.TypeElementListActivity;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
+import com.rcnbodegas.Global.ProductionAdapter;
+import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
 
 import java.util.Calendar;
+import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,7 +60,11 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
     private static final String ARG_PARAM2 = "param2";
     private static final int REQUEST_PRODUCTION = 1;
     private static final int REQUEST_RESPONSIBLE = 2;
+    private static final int REQUEST_TYPE_ELEMENT = 3;
+
     // TODO: Rename and change types of parameters
+    private ImageButton btnSearch;
+    private Button inventory_btn_new_element;
     private String mParam1;
     private String mParam2;
     private LinearLayout inventory_element;
@@ -49,8 +75,17 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
     private EditText inventory_program_option;
     private EditText inventory_date_option;
     private EditText inventory_responsible_option;
+    private EditText inventory_element_type_edit;
+    private EditText inventory_element_barcode_edit;
+    private EditText inventory_element_edit;
+    private EditText inventory_element_brand_edit;
+    private EditText inventory_element_price_edit;
+    private EditText inventory_element_value_edit;
     private DatePickerDialog datePickerDialog = null;
     private DateTimeUtilities dateTimeUtilities;
+    private View mIncidenciasFormView;
+    private View mProgressView;
+    private MaterialViewModel data;
 
 
     public InventoryFragment() {
@@ -115,23 +150,57 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
             }
         }
+        if (requestCode == REQUEST_TYPE_ELEMENT) {
+            if (resultCode == -1) {
+                String result = data.getStringExtra("typeElementName");
+                globalVariable.setIdSelectedTypeElement(Integer.valueOf(data.getStringExtra("typeElementId")));
+                this.inventory_element_type_edit.setText(result);
+
+            }
+        }
     }
 
     private void InitializeControls(View v) {
 
+        btnSearch = v.findViewById(R.id.btnSearch);
+        inventory_btn_new_element= v.findViewById(R.id.inventory_btn_new_element);
         inventory_element = v.findViewById(R.id.inventory_element);
         inventory_data = v.findViewById(R.id.inventory_data);
         inventory_warehouse_option = v.findViewById(R.id.inventory_warehouse_option);
         inventory_program_option = v.findViewById(R.id.inventory_program_option);
         inventory_date_option = v.findViewById(R.id.inventory_date_option);
         inventory_responsible_option = v.findViewById(R.id.inventory_responsible_option);
+        inventory_element_type_edit = v.findViewById(R.id.inventory_element_type_edit);
+        inventory_element_barcode_edit = v.findViewById(R.id.inventory_element_barcode_edit);
+        inventory_element_edit = v.findViewById(R.id.inventory_element_edit);
+        inventory_element_brand_edit= v.findViewById(R.id.inventory_element_brand_edit);
+        inventory_element_price_edit= v.findViewById(R.id.inventory_element_price_edit);
+        inventory_element_value_edit= v.findViewById(R.id.inventory_element_value_edit);
+
         inventory_btn_ok = v.findViewById(R.id.inventory_btn_ok);
 
         inventory_date_option.setText(dateTimeUtilities.parseDateTurno());
         inventory_warehouse_option.setText(globalVariable.getNameSelectedWareHouse());
+
+        mIncidenciasFormView = v.findViewById(R.id.inventory_element);
+        mProgressView = v.findViewById(R.id.inventroy_progress);
     }
 
     private void InitializeEvents() {
+
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                asyncListProductions();
+            }
+        });
+
+        inventory_btn_new_element.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClearFIelds();
+            }
+        });
 
         inventory_program_option.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,11 +231,21 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
                 if (inventory_program_option.getText().toString().equals("")) {
                     inventory_program_option.setError(getString(R.string.error_program_empty));
                     return;
-                }
-                else
+                } else
                     inventory_program_option.setError(null);
 
                 startActivityForResult(intent, REQUEST_RESPONSIBLE);
+            }
+        });
+
+        inventory_element_type_edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = null;
+                intent = new Intent(getActivity(), TypeElementListActivity.class);
+
+
+                startActivityForResult(intent, REQUEST_TYPE_ELEMENT);
             }
         });
         inventory_btn_ok.setOnClickListener(new View.OnClickListener() {
@@ -175,6 +254,16 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
                 validateFiels();
             }
         });
+    }
+
+    private void ClearFIelds() {
+        inventory_element_barcode_edit.setText("");
+        inventory_element_edit.setText("");
+        inventory_element_type_edit.setText("");
+        inventory_element_brand_edit.setText("");
+        inventory_element_price_edit.setText("");
+        inventory_element_value_edit.setText("");
+
     }
 
     private void validateFiels() {
@@ -200,6 +289,11 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
             focusView = inventory_date_option;
             cancel = true;
         }
+        if (TextUtils.isEmpty(inventory_responsible_option.getText().toString())) {
+            inventory_responsible_option.setError(getString(R.string.error_responsible_empty));
+            focusView = inventory_responsible_option;
+            cancel = true;
+        }
         if (cancel) {
             focusView.requestFocus();
         } else {
@@ -212,6 +306,112 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mIncidenciasFormView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    private void shwoMessage(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // if this button is clicked, close
+                // current activity
+
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
+    }
+
+    private void asyncListProductions() {
+
+
+        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(urlIncidencias, new TextHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<MaterialViewModel> token = new TypeToken<MaterialViewModel>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            data = gson.fromJson(res, token.getType());
+
+                            if (data != null)
+                                setMaterialData(data);
+                            else
+                                shwoMessage("No se encontró elemento con el código de barras ingresado");
+
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        shwoMessage(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+                }
+        );
+    }
+
+    private void setMaterialData(MaterialViewModel data) {
+        inventory_element_edit.setText(data.getMaterialName());
+        inventory_element_type_edit.setText(data.getTypeElementName());
+        inventory_element_brand_edit.setText(data.getMarca().toString());
     }
 
     public static class DatePickerFragment extends DialogFragment

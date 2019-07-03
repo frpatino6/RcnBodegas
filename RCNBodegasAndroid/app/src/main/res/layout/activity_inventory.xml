@@ -3,7 +3,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:id="@+id/lyInvewntory"
     android:padding="4dp">
 
     <ScrollView
@@ -46,9 +48,9 @@
                         android:id="@+id/inventory_program_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:focusable="false"
                         android:hint="Programa"
                         android:text=""
-                        android:focusable="false"
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -61,8 +63,8 @@
                         android:id="@+id/inventory_responsible_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:hint="Responsable"
                         android:focusable="false"
+                        android:hint="Responsable"
                         android:text=""
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
@@ -77,9 +79,9 @@
                         android:id="@+id/inventory_date_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:focusable="false"
                         android:hint="Fecha de Inventario"
                         android:text=""
-                        android:focusable="false"
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -110,11 +112,29 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp">
 
-                        <EditText
-                            android:id="@+id/inventory_element_barcode_edit"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Ingrese el código de barras" />
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal"
+                            android:weightSum="12">
+
+                            <EditText
+                                android:layout_weight="10"
+                                android:id="@+id/inventory_element_barcode_edit"
+                                android:layout_width="0dp"
+                                android:text="5041966"
+                                android:layout_height="wrap_content"
+                                android:hint="Ingrese el código de barras" />
+                            <ImageButton
+                                android:id="@+id/btnSearch"
+                                android:layout_weight="2"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:background="@android:color/transparent"
+                                android:src="@mipmap/ic_search"/>
+
+                        </LinearLayout>
+
                     </android.support.design.widget.TextInputLayout>
 
                     <android.support.design.widget.TextInputLayout
@@ -126,6 +146,7 @@
                             android:id="@+id/inventory_element_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="false"
                             android:hint="Descripción"
                             android:text=""
                             android:textColor="#333" />
@@ -140,6 +161,8 @@
                             android:id="@+id/inventory_element_type_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="false"
+                            android:focusable="false"
                             android:hint="Tipo de Elemento"
                             android:textColor="#333" />
                     </android.support.design.widget.TextInputLayout>
@@ -153,6 +176,7 @@
                             android:id="@+id/inventory_element_brand_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="false"
                             android:hint="Marca"
                             android:textColor="#333" />
                     </android.support.design.widget.TextInputLayout>
@@ -166,6 +190,7 @@
                             android:id="@+id/inventory_element_price_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="false"
                             android:hint="Precio del Elemento"
                             android:textColor="#333" />
                     </android.support.design.widget.TextInputLayout>
@@ -174,10 +199,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp">
+
                         <EditText
                             android:id="@+id/inventory_element_value_edit"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:enabled="false"
                             android:hint="Valor del Elemento"
                             android:textColor="#333" />
                     </android.support.design.widget.TextInputLayout>
@@ -232,7 +259,15 @@
                         android:textColor="@color/primaryTextColor" />
                 </LinearLayout>
             </ScrollView>
-
+            <ProgressBar
+                android:id="@+id/inventroy_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -17,6 +17,8 @@
         <activity android:name=".Activities.CompanyListActivity" />
         <activity android:name=".Activities.ProductionListActivity" />
         <activity android:name=".Activities.ResponsibleListActivity" />
+        <activity android:name=".Activities.TypeElementListActivity" />
+
         <activity android:name=".Activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

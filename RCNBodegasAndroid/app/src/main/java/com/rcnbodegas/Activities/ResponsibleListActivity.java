@@ -120,7 +120,7 @@ public class ResponsibleListActivity extends AppCompatActivity {
     private void asyncListResponsibles() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListResponsable/" + globalVariable.getIdSelectedProduction() ;
+        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListResponsable/" + globalVariable.getIdSelectedWareHouse() + "/" + globalVariable.getIdSelectedProduction();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
