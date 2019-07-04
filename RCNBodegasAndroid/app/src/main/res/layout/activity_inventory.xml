@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lyInvewntory"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:id="@+id/lyInvewntory"
     android:padding="4dp">
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
-
             <LinearLayout
                 android:id="@+id/inventory_data"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <android.support.design.widget.TextInputLayout
@@ -69,7 +63,6 @@
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
 
-
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -94,8 +87,17 @@
                     android:background="@color/primaryColor"
                     android:text="OK"
                     android:textColor="@color/primaryTextColor" />
-            </LinearLayout>
 
+            </LinearLayout>
+            <ProgressBar
+                android:id="@+id/inventroy_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="visible"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_centerInParent="true" />
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -119,19 +121,20 @@
                             android:weightSum="12">
 
                             <EditText
-                                android:layout_weight="10"
                                 android:id="@+id/inventory_element_barcode_edit"
                                 android:layout_width="0dp"
-                                android:text="5041966"
                                 android:layout_height="wrap_content"
-                                android:hint="Ingrese el código de barras" />
+                                android:layout_weight="10"
+                                android:hint="Ingrese el código de barras"
+                                android:text="5041966" />
+
                             <ImageButton
                                 android:id="@+id/btnSearch"
-                                android:layout_weight="2"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="2"
                                 android:background="@android:color/transparent"
-                                android:src="@mipmap/ic_search"/>
+                                android:src="@mipmap/ic_search" />
 
                         </LinearLayout>
 
@@ -259,15 +262,5 @@
                         android:textColor="@color/primaryTextColor" />
                 </LinearLayout>
             </ScrollView>
-            <ProgressBar
-                android:id="@+id/inventroy_progress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
         </LinearLayout>
-    </ScrollView>
 </LinearLayout>

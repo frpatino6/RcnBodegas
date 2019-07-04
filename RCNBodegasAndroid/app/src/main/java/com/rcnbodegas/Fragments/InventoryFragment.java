@@ -86,6 +86,7 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
     private View mIncidenciasFormView;
     private View mProgressView;
     private MaterialViewModel data;
+    private List<MaterialViewModel> dataMaterial;
 
 
     public InventoryFragment() {
@@ -160,10 +161,15 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         }
     }
 
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+    }
+
     private void InitializeControls(View v) {
 
         btnSearch = v.findViewById(R.id.btnSearch);
-        inventory_btn_new_element= v.findViewById(R.id.inventory_btn_new_element);
+        inventory_btn_new_element = v.findViewById(R.id.inventory_btn_new_element);
         inventory_element = v.findViewById(R.id.inventory_element);
         inventory_data = v.findViewById(R.id.inventory_data);
         inventory_warehouse_option = v.findViewById(R.id.inventory_warehouse_option);
@@ -173,9 +179,9 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         inventory_element_type_edit = v.findViewById(R.id.inventory_element_type_edit);
         inventory_element_barcode_edit = v.findViewById(R.id.inventory_element_barcode_edit);
         inventory_element_edit = v.findViewById(R.id.inventory_element_edit);
-        inventory_element_brand_edit= v.findViewById(R.id.inventory_element_brand_edit);
-        inventory_element_price_edit= v.findViewById(R.id.inventory_element_price_edit);
-        inventory_element_value_edit= v.findViewById(R.id.inventory_element_value_edit);
+        inventory_element_brand_edit = v.findViewById(R.id.inventory_element_brand_edit);
+        inventory_element_price_edit = v.findViewById(R.id.inventory_element_price_edit);
+        inventory_element_value_edit = v.findViewById(R.id.inventory_element_value_edit);
 
         inventory_btn_ok = v.findViewById(R.id.inventory_btn_ok);
 
@@ -191,13 +197,14 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                asyncListProductions();
+                asyncListMaterialsByBarCode();
             }
         });
 
         inventory_btn_new_element.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ValidaRequieredElementInfo();
                 ClearFIelds();
             }
         });
@@ -251,22 +258,61 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         inventory_btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                validateFiels();
+                if (validateFiels()) asyncListMaterialsByProduction();
+
             }
         });
     }
 
+
     private void ClearFIelds() {
-        inventory_element_barcode_edit.setText("");
-        inventory_element_edit.setText("");
-        inventory_element_type_edit.setText("");
-        inventory_element_brand_edit.setText("");
-        inventory_element_price_edit.setText("");
-        inventory_element_value_edit.setText("");
+
+        if (ValidaRequieredElementInfo()) {
+            inventory_element_barcode_edit.setText("");
+            inventory_element_edit.setText("");
+            inventory_element_type_edit.setText("");
+            inventory_element_brand_edit.setText("");
+            inventory_element_price_edit.setText("");
+            inventory_element_value_edit.setText("");
+        }
+    }
+
+    private boolean ValidaRequieredElementInfo() {
+        inventory_element_barcode_edit.setError(null);
+        inventory_element_edit.setError(null);
+        inventory_element_type_edit.setError(null);
+
+        boolean cancel = false;
+        View focusView = null;
+
+        if (TextUtils.isEmpty(inventory_element_barcode_edit.getText().toString())) {
+            inventory_element_barcode_edit.setError(getString(R.string.error_barcode_empty));
+            focusView = inventory_element_barcode_edit;
+            cancel = true;
+        }
+        if (TextUtils.isEmpty(inventory_element_edit.getText().toString())) {
+            inventory_element_edit.setError(getString(R.string.error_description_empty));
+            focusView = inventory_element_edit;
+            cancel = true;
+        }
+        if (TextUtils.isEmpty(inventory_element_type_edit.getText().toString())) {
+            inventory_element_type_edit.setError(getString(R.string.error_type_empty));
+            focusView = inventory_element_type_edit;
+            cancel = true;
+        }
+
+        if (cancel) {
+            focusView.requestFocus();
+            return false;
+        } else {
+            inventory_element.setVisibility(View.VISIBLE);
+            inventory_data.setVisibility(View.GONE);
+        }
+        return true;
 
     }
 
-    private void validateFiels() {
+    private boolean validateFiels() {
         inventory_warehouse_option.setError(null);
         inventory_program_option.setError(null);
         inventory_date_option.setError(null);
@@ -296,18 +342,13 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         }
         if (cancel) {
             focusView.requestFocus();
+            return false;
         } else {
             inventory_element.setVisibility(View.VISIBLE);
             inventory_data.setVisibility(View.GONE);
         }
-
+        return true;
     }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-
-    }
-
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
@@ -359,15 +400,15 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         dlgAlert.create().show();
     }
 
-    private void asyncListProductions() {
+    private void asyncListMaterialsByBarCode() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
+        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
         showProgress(true);
-        client.get(urlIncidencias, new TextHttpResponseHandler() {
+        client.get(url, new TextHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, String res) {
                         // called when response HTTP status is "200 OK"
@@ -381,6 +422,55 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
                             if (data != null)
                                 setMaterialData(data);
+                            else
+                                shwoMessage("No se encontró elemento con el código de barras ingresado");
+
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        shwoMessage(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+                }
+        );
+    }
+
+    private void asyncListMaterialsByProduction() {
+
+
+        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouse() + "/" + globalVariable.getIdSelectedProduction() + "/" + globalVariable.getIdSelectedResponsible();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(url, new TextHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            dataMaterial = gson.fromJson(res, token.getType());
+
+                            if (dataMaterial != null)
+                                globalVariable.setListMaterialBYProduction(dataMaterial);
                             else
                                 shwoMessage("No se encontró elemento con el código de barras ingresado");
 

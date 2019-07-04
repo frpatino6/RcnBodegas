@@ -24,4 +24,7 @@
     <string name="error_fecha_empty">Fecha es requerida</string>
     <string name="title_bar_responsible">Responsable</string>
     <string name="error_responsible_empty">REsponsable obligatorio</string>
+    <string name="error_barcode_empty">Código de barras requerido</string>
+    <string name="error_description_empty">Descripción es requerido</string>
+    <string name="error_type_empty">Tipo elemento es requerido</string>
 </resources>

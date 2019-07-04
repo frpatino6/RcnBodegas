@@ -2,6 +2,10 @@ package com.rcnbodegas.Global;
 
 import android.app.Application;
 
+import com.rcnbodegas.ViewModels.MaterialViewModel;
+
+import java.util.List;
+
 public class GlobalClass extends Application {
 
     private String userName;
@@ -11,6 +15,15 @@ public class GlobalClass extends Application {
     private String idSelectedProduction;
     private int idSelectedResponsible;
     private int idSelectedTypeElement;
+    private List<MaterialViewModel>listMaterialBYProduction;
+
+    public List<MaterialViewModel> getListMaterialBYProduction() {
+        return listMaterialBYProduction;
+    }
+
+    public void setListMaterialBYProduction(List<MaterialViewModel> listMaterialBYProduction) {
+        this.listMaterialBYProduction = listMaterialBYProduction;
+    }
 
     public String getNameSelectedWareHouse() {
         return nameSelectedWareHouse;
