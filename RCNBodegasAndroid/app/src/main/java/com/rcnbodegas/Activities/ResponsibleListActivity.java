@@ -12,6 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -22,9 +25,12 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
+import com.rcnbodegas.Global.ProductionAdapter;
 import com.rcnbodegas.Global.ResponsibleAdapter;
+import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
@@ -42,14 +48,55 @@ public class ResponsibleListActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ArrayList<ResponsibleViewModel> data;
     private ResponsibleAdapter adapter;
+    private ArrayList<ResponsibleViewModel> sortEmpList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_responsible_list);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
+        globalVariable = (GlobalClass) getApplicationContext();
+
+        if(globalVariable.isResponsable())
+            ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
+        else
+            ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_legalized_by));
+
         InitializeControls();
         asyncListResponsibles();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
+
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
+
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                //clear the previous data in search arraylist if exist
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
+        });
+
+
+        return true;
 
     }
 
@@ -60,7 +107,7 @@ public class ResponsibleListActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.responsible_recycler_view);
         recyclerView.setHasFixedSize(true);
 
-        globalVariable = (GlobalClass) getApplicationContext();
+
 
         layoutManager = new LinearLayoutManager(ResponsibleListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
@@ -140,7 +187,7 @@ public class ResponsibleListActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(ResponsibleViewModel result) {
                                     final Intent _data = new Intent();
-                                    _data.putExtra("responsibleName",result.getName());
+                                    _data.putExtra("responsibleName", result.getName());
                                     _data.putExtra("responsibleId", result.getId().toString());
 
                                     setResult(RESULT_OK, _data);
@@ -171,5 +218,46 @@ public class ResponsibleListActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void FilterListView(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<ResponsibleViewModel, String> filter = new Filter<ResponsibleViewModel, String>() {
+                public boolean isMatched(ResponsibleViewModel object, String text) {
+
+                    boolean result = false;
+
+
+                    result = object.getName().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            sortEmpList = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ResponsibleAdapter(sortEmpList, new onRecyclerResponsibleListItemClick() {
+                @Override
+                public void onClick(ResponsibleViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("responsibleName", result.getName());
+                    _data.putExtra("responsibleId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

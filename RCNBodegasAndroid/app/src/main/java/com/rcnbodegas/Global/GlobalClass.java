@@ -4,24 +4,55 @@ import android.app.Application;
 
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GlobalClass extends Application {
 
     private String userName;
-    private String urlServices="http://192.168.0.5/bodegas/";
+    private String urlServices="http://172.20.0.154/";
     private Integer idSelectedCompany;
     private String idSelectedWareHouse;
     private String idSelectedProduction;
+    private String mCurrentPhotoPath;
     private int idSelectedResponsible;
     private int idSelectedTypeElement;
-    private List<MaterialViewModel>listMaterialBYProduction;
+    private boolean responsable=true;//Indica si la pantalla que se carga es responsable o legalizado por
+    private ArrayList<MaterialViewModel>listMaterialBYProduction;
+    private ArrayList<MaterialViewModel>listMaterialForAdd;
 
-    public List<MaterialViewModel> getListMaterialBYProduction() {
+    public boolean isResponsable() {
+        return responsable;
+    }
+
+    public void setResponsable(boolean responsable) {
+        this.responsable = responsable;
+    }
+
+    public String getmCurrentPhotoPath() {
+        return mCurrentPhotoPath;
+    }
+
+    public void setmCurrentPhotoPath(String mCurrentPhotoPath) {
+        this.mCurrentPhotoPath = mCurrentPhotoPath;
+    }
+
+
+    public ArrayList<MaterialViewModel> getListMaterialForAdd() {
+        return listMaterialForAdd;
+    }
+
+    public void setListMaterialForAdd(ArrayList<MaterialViewModel> listMaterialForAdd) {
+
+        if(this.listMaterialForAdd ==null) this.listMaterialForAdd=new ArrayList<>();
+        this.listMaterialForAdd = listMaterialForAdd;
+    }
+
+    public ArrayList<MaterialViewModel> getListMaterialBYProduction() {
         return listMaterialBYProduction;
     }
 
-    public void setListMaterialBYProduction(List<MaterialViewModel> listMaterialBYProduction) {
+    public void setListMaterialBYProduction(ArrayList<MaterialViewModel> listMaterialBYProduction) {
         this.listMaterialBYProduction = listMaterialBYProduction;
     }
 

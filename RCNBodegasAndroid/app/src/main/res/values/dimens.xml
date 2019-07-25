@@ -1,12 +1,14 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin">8dp</dimen>
+    <dimen name="activity_vertical_margin">8dp</dimen>
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">176dp</dimen>
     <dimen name="abc_action_bar_cardElevation">8dp</dimen>
     <dimen name="abc_text_view_hint_size">13dp</dimen>
-    <dimen name="abc_text_view_text_size">14dp</dimen>
+    <dimen name="abc_text_view_title_resumen_size">18dp</dimen>
+    <dimen name="abc_text_view_text_size">15dp</dimen>
+    <dimen name="abc_text_view_text_size_item_recycler">15dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="abc_action_bar_cardElevation_detail">2dp</dimen>
     <dimen name="margin_list_incidencias">15dp</dimen>

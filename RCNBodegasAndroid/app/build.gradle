@@ -20,7 +20,7 @@ android {
 
 dependencies {
     def nav_version = "1.0.0-alpha09"
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
@@ -31,10 +31,15 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.loopj.android:android-async-http:1.4.9'
     implementation 'com.google.code.gson:gson:2.8.2'
-    implementation "android.arch.navigation:navigation-fragment:$nav_version" // use -ktx for Kotlin
+    implementation "android.arch.navigation:navigation-fragment:$nav_version"
+    // use -ktx for Kotlin
     implementation "android.arch.navigation:navigation-ui:$nav_version"
-    implementation 'com.android.support:recyclerview-v7:28.0.0'// use -ktx for Kotlin
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    // use -ktx for Kotlin
     implementation 'me.dm7.barcodescanner:zxing:1.9'
     implementation 'com.android.support:gridlayout-v7:28.0.0'
     implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'me.dm7.barcodescanner:zxing:1.9'
+    implementation files('libs/com.symbol.emdk.jar')
+    implementation files('libs/com.symbol.emdk.wizard.core.jar')
 }

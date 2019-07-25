@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appcompat="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:icon="@mipmap/ic_review"
+        android:id="@+id/mnu_review"
+        android:title="Revisar"
+        appcompat:showAsAction="always"/>
+</menu>

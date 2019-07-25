@@ -12,6 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -24,7 +27,6 @@ import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ProductionAdapter;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
-import com.rcnbodegas.Global.onRecyclerWarehouseListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 
@@ -43,6 +45,7 @@ public class ProductionListActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ArrayList<ProductionViewModel> data;
     private ProductionAdapter adapter;
+    private ArrayList<ProductionViewModel> sortEmpList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,40 @@ public class ProductionListActivity extends AppCompatActivity {
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_production));
         InitializeControls();
         asyncListProductions();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
+
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
+
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                //clear the previous data in search arraylist if exist
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
+        });
+
+
+        return true;
 
     }
 
@@ -121,7 +158,7 @@ public class ProductionListActivity extends AppCompatActivity {
     private void asyncListProductions() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListProduction/" + globalVariable.getIdSelectedWareHouse() ;
+        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListProduction/" + globalVariable.getIdSelectedWareHouse();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -141,7 +178,7 @@ public class ProductionListActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(ProductionViewModel result) {
                                     final Intent _data = new Intent();
-                                    _data.putExtra("productionName",result.getProductionName());
+                                    _data.putExtra("productionName", result.getProductionName());
                                     _data.putExtra("productionId", result.getProductionCode().toString());
 
                                     setResult(RESULT_OK, _data);
@@ -172,5 +209,48 @@ public class ProductionListActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void FilterListView(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<ProductionViewModel, String> filter = new Filter<ProductionViewModel, String>() {
+                public boolean isMatched(ProductionViewModel object, String text) {
+
+                    boolean result = false;
+
+
+                    result = object.getProductionName().toString().toLowerCase().contains(String.valueOf(text));
+
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+
+            sortEmpList = (ArrayList<ProductionViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ProductionAdapter(sortEmpList, new onRecyclerProductionListItemClick() {
+                @Override
+                public void onClick(ProductionViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("productionName", result.getProductionName());
+                    _data.putExtra("productionId", result.getProductionCode().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -5,26 +5,12 @@
 
     <item android:title="Bodegas">
         <menu>
-            <item
-                android:id="@+id/navBodegasAmbientacion"
-                android:icon="@drawable/baseline_landscape_24"
-                android:title="Ambientación" />
+
             <item
                 android:id="@+id/navBodegasVestuario"
                 android:icon="@drawable/baseline_local_offer_24"
-                android:title="Vestuario" />
-            <item
-                android:id="@+id/navBodegasProduccion"
-                android:icon="@drawable/baseline_local_play_24"
-                android:title="Producción" />
-            <item
-                android:id="@+id/navBodegasBTL"
-                android:icon="@drawable/baseline_local_shipping_24"
-                android:title="Bodegas BTL" />
-            <item
-                android:id="@+id/navBodegasLavanderia"
-                android:icon="@drawable/baseline_local_laundry_service_24"
-                android:title="Lavandería" />
+                android:title="Ingreso de mercancia" />
+
         </menu>
     </item>
 

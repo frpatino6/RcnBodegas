@@ -3,6 +3,9 @@
     package="com.rcnbodegas">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
 
     <application
         android:name=".Global.GlobalClass"
@@ -12,12 +15,43 @@
         android:roundIcon="@mipmap/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.SelectParametersActivity"></activity>
-        <activity android:name=".Activities.WareHouseListActivity" />
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.rcnbodegas.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <uses-library android:name="com.symbol.emdk" />
+
+        <activity android:name=".Activities.ScanActivity" />
+        <activity android:name=".Activities.ListItemReviewActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity android:name=".Activities.SelectParametersActivity" />
+        <activity android:name=".Activities.WareHouseListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
         <activity android:name=".Activities.CompanyListActivity" />
         <activity android:name=".Activities.ProductionListActivity" />
         <activity android:name=".Activities.ResponsibleListActivity" />
         <activity android:name=".Activities.TypeElementListActivity" />
+        <activity android:name=".Activities.ListItemAddedActivity" />
 
         <activity android:name=".Activities.LoginActivity">
             <intent-filter>

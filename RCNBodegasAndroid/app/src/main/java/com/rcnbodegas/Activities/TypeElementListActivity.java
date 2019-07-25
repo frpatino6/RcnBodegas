@@ -12,6 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -45,12 +48,12 @@ public class TypeElementListActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ArrayList<TypeElementViewModel> data;
     private TypeElementAdapter adapter;
-
+    private ArrayList<TypeElementViewModel> sortEmpList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_type_element_list);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_type_element));
         InitializeControls();
         asyncListResponsibles();
 
@@ -68,6 +71,40 @@ public class TypeElementListActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(TypeElementListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
+
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
+
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                //clear the previous data in search arraylist if exist
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
+        });
+
+
+        return true;
+
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -174,5 +211,45 @@ public class TypeElementListActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void FilterListView(String query) {
+
+        try {
+            Filter<ResponsibleViewModel, String> filter = new Filter<ResponsibleViewModel, String>() {
+                public boolean isMatched(ResponsibleViewModel object, String text) {
+
+                    boolean result = false;
+
+
+                    result = object.getName().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            sortEmpList = (ArrayList<TypeElementViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
+                @Override
+                public void onClick(TypeElementViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("typeElementName",result.getName());
+                    _data.putExtra("typeElementId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

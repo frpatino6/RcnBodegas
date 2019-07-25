@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:yourapp="http://schemas.android.com/apk/res-auto" >
+
+    <item
+        android:id="@+id/menu_camera"
+        yourapp:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:title="Camara"/>
+    <item
+        android:id="@+id/menu_review"
+        yourapp:showAsAction="always"
+        android:icon="@mipmap/ic_review_material"
+        android:title="Camara"/>
+
+
+</menu>

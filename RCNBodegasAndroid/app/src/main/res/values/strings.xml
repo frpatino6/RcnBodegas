@@ -27,4 +27,12 @@
     <string name="error_barcode_empty">Código de barras requerido</string>
     <string name="error_description_empty">Descripción es requerido</string>
     <string name="error_type_empty">Tipo elemento es requerido</string>
+    <string name="message_resume_review_list">Cantidad de elementos faltantes:</string>
+    <string name="message_not_find_element">No se encontró el elemento</string>
+    <string name="message_element_exist">Ya se reviso el elemento</string>
+    <string name="search_hint">Buscar</string>
+    <string name="message_not_barcode">Ingrese el código de barras</string>
+    <string name="title_legalized_by">Legalizado por</string>
+    <string name="title_type_element">Tipo elemento</string>
+
 </resources>

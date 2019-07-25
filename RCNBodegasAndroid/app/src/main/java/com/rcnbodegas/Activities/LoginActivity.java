@@ -104,7 +104,7 @@ public class LoginActivity extends AppCompatActivity {
             globalVariable.setUserName("PRUEBAS");
             globalVariable.setUserRole("ADMIN");
             Intent intent = null;
-            intent = new Intent(LoginActivity.this,  SelectParametersActivity.class);
+            intent = new Intent(LoginActivity.this,  MainActivity.class);
             startActivity(intent);
         }
     }

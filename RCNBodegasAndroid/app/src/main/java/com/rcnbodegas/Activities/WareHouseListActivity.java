@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -12,6 +14,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -22,9 +28,12 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
+import com.rcnbodegas.Global.ResponsibleAdapter;
 import com.rcnbodegas.Global.WareHouseAdapter;
+import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.Global.onRecyclerWarehouseListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
@@ -42,6 +51,7 @@ public class WareHouseListActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ArrayList<WareHouseViewModel> data;
     private WareHouseAdapter adapter;
+    private ArrayList<WareHouseViewModel> sortEmpList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +60,50 @@ public class WareHouseListActivity extends AppCompatActivity {
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_warehouse));
         InitializeControls();
         asyncListWareHouse();
+
+        // Get the intent, verify the action and get the query
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+
+        }
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
+
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
+
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                //clear the previous data in search arraylist if exist
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
+        });
+
+
+
+
+        return true;
 
     }
 
@@ -171,5 +225,46 @@ public class WareHouseListActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void FilterListView(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<WareHouseViewModel, String> filter = new Filter<WareHouseViewModel, String>() {
+                public boolean isMatched(WareHouseViewModel object, String text) {
+
+                    boolean result = false;
+
+
+                    result = object.getWareHouseName().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            sortEmpList = (ArrayList<WareHouseViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new WareHouseAdapter(sortEmpList, new onRecyclerWarehouseListItemClick() {
+                @Override
+                public void onClick(WareHouseViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("wareHouseName",result.getWareHouseName());
+                    _data.putExtra("wareHouseId", result.getId());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

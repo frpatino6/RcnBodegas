@@ -4,6 +4,7 @@ package com.rcnbodegas.Fragments;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -11,12 +12,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -30,30 +36,36 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
-import com.rcnbodegas.Activities.MainActivity;
+import com.rcnbodegas.Activities.ListItemReviewActivity;
 import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
-import com.rcnbodegas.Activities.SelectParametersActivity;
 import com.rcnbodegas.Activities.TypeElementListActivity;
+import com.rcnbodegas.Activities.WareHouseListActivity;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ProductionAdapter;
-import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
+import com.rcnbodegas.Global.IObserver;
+import com.rcnbodegas.Global.ScannerFactory;
+import com.rcnbodegas.Global.TScanner;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
-import com.rcnbodegas.ViewModels.ProductionViewModel;
+import com.symbol.emdk.EMDKManager;
+import com.symbol.emdk.barcode.BarcodeManager;
+import com.symbol.emdk.barcode.Scanner;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link InventoryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class InventoryFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
+public class InventoryFragment extends Fragment implements IObserver, DatePickerDialog.OnDateSetListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -61,16 +73,17 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
     private static final int REQUEST_PRODUCTION = 1;
     private static final int REQUEST_RESPONSIBLE = 2;
     private static final int REQUEST_TYPE_ELEMENT = 3;
-
-    // TODO: Rename and change types of parameters
+    private static final int REQUEST_WAREHOUSE = 4;
+    // TODO: Rename and change types of parameter
     private ImageButton btnSearch;
-    private Button inventory_btn_new_element;
+    private FloatingActionButton inventory_btn_new_element;
+    private Button inventory_btn_ok;
+    private Button inventory_btn_review;
     private String mParam1;
     private String mParam2;
     private LinearLayout inventory_element;
     private LinearLayout inventory_data;
     private GlobalClass globalVariable;
-    private Button inventory_btn_ok;
     private EditText inventory_warehouse_option;
     private EditText inventory_program_option;
     private EditText inventory_date_option;
@@ -85,9 +98,14 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
     private DateTimeUtilities dateTimeUtilities;
     private View mIncidenciasFormView;
     private View mProgressView;
-    private MaterialViewModel data;
-    private List<MaterialViewModel> dataMaterial;
-
+    private MaterialViewModel itemMaterialAdded;
+    private ArrayList<MaterialViewModel> dataMaterial;
+    private ArrayList<MaterialViewModel> dataReviewMaterial;
+    private EMDKManager emdkManager = null;
+    private BarcodeManager barcodeManager = null;
+    private Scanner scanner = null;
+    private TScanner Scanner_manager = null;
+    private MenuItem review;
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -111,6 +129,12 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         dateTimeUtilities = new DateTimeUtilities(getActivity());
+        setHasOptionsMenu(true);
+
+        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
+        Scanner_manager.AddObserver(this);
+        Scanner_manager.ScannerON(true);
+
     }
 
     @Override
@@ -159,6 +183,14 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
             }
         }
+        if (requestCode == REQUEST_WAREHOUSE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("wareHouseName");
+                this.inventory_warehouse_option.setText(result);
+                globalVariable.setIdSelectedWareHouse(data.getStringExtra("wareHouseId"));
+                globalVariable.setNameSelectedWareHouse(data.getStringExtra("wareHouseName"));
+            }
+        }
     }
 
     @Override
@@ -166,9 +198,41 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
     }
 
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        review = menu.findItem(R.id.mnu_review);
+        review.setVisible(false);
+
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_inventory, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        Intent intent = null;
+        switch (id) {
+
+            case R.id.mnu_review:
+                intent = null;
+                intent = new Intent(getActivity(), ListItemReviewActivity.class);
+                startActivity(intent);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item); // important line
+    }
+
     private void InitializeControls(View v) {
 
         btnSearch = v.findViewById(R.id.btnSearch);
+
         inventory_btn_new_element = v.findViewById(R.id.inventory_btn_new_element);
         inventory_element = v.findViewById(R.id.inventory_element);
         inventory_data = v.findViewById(R.id.inventory_data);
@@ -197,15 +261,30 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                asyncListMaterialsByBarCode();
+
+                itemMaterialAdded = findElementByBarCode();
+
+                if (itemMaterialAdded == null) {
+                    showMessageDialog(getString(R.string.message_not_find_element));
+                    return;
+                }
+                if (!validaIsAddeddElement(inventory_element_barcode_edit.getText().toString())) {
+                    setMaterialData(itemMaterialAdded);
+                } else
+                    showMessageDialog(getString(R.string.message_element_exist) + itemMaterialAdded.getBarCode());
+
+
             }
         });
+
 
         inventory_btn_new_element.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ValidaRequieredElementInfo();
-                ClearFIelds();
+                if (ValidaRequieredElementInfo()) {
+                    ClearFields();
+                    AddElementToReview();
+                }
             }
         });
 
@@ -240,7 +319,7 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
                     return;
                 } else
                     inventory_program_option.setError(null);
-
+                globalVariable.setResponsable(true);
                 startActivityForResult(intent, REQUEST_RESPONSIBLE);
             }
         });
@@ -262,19 +341,49 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
             }
         });
+        inventory_warehouse_option.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OpenListWareHouse();
+            }
+        });
+
     }
 
+    private void OpenListWareHouse() {
+        Intent intent = new Intent(getActivity(), WareHouseListActivity.class);
+        startActivityForResult(intent, REQUEST_WAREHOUSE);
+    }
 
-    private void ClearFIelds() {
+    private void AddElementToReview() {
 
-        if (ValidaRequieredElementInfo()) {
-            inventory_element_barcode_edit.setText("");
-            inventory_element_edit.setText("");
-            inventory_element_type_edit.setText("");
-            inventory_element_brand_edit.setText("");
-            inventory_element_price_edit.setText("");
-            inventory_element_value_edit.setText("");
+        if (dataReviewMaterial == null)
+            dataReviewMaterial = new ArrayList<>();
+
+        dataReviewMaterial.add(itemMaterialAdded);
+        itemMaterialAdded.setReview(true);
+
+        hideKeyboard(getActivity());
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
         }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void ClearFields() {
+        inventory_element_barcode_edit.setText("");
+        inventory_element_edit.setText("");
+        inventory_element_type_edit.setText("");
+        inventory_element_brand_edit.setText("");
+        inventory_element_price_edit.setText("");
+        inventory_element_value_edit.setText("");
     }
 
     private boolean ValidaRequieredElementInfo() {
@@ -295,11 +404,11 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
             focusView = inventory_element_edit;
             cancel = true;
         }
-        if (TextUtils.isEmpty(inventory_element_type_edit.getText().toString())) {
+        /*if (TextUtils.isEmpty(inventory_element_type_edit.getText().toString())) {
             inventory_element_type_edit.setError(getString(R.string.error_type_empty));
             focusView = inventory_element_type_edit;
             cancel = true;
-        }
+        }*/
 
         if (cancel) {
             focusView.requestFocus();
@@ -350,6 +459,16 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         return true;
     }
 
+    private boolean validaIsAddeddElement(String barcode) {
+
+        if (dataReviewMaterial != null)
+            for (MaterialViewModel materialViewModel : dataReviewMaterial) {
+                if (materialViewModel.getBarCode().equals(barcode))
+                    return true;
+            }
+        return false;
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -383,7 +502,7 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         }
     }
 
-    private void shwoMessage(String res) {
+    private void showMessageDialog(String res) {
         AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
 
         dlgAlert.setMessage(res);
@@ -398,6 +517,80 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
         });
         dlgAlert.setCancelable(true);
         dlgAlert.create().show();
+    }
+
+    private MaterialViewModel findElementByBarCode() {
+
+        for (MaterialViewModel materialViewModel : dataMaterial) {
+            if (materialViewModel.getBarCode().equals(inventory_element_barcode_edit.getText().toString()))
+                return materialViewModel;
+        }
+        return null;
+    }
+
+    private void setMaterialData(MaterialViewModel data) {
+        inventory_element_edit.setText(data.getMaterialName());
+        inventory_element_type_edit.setText(data.getTypeElementName());
+        inventory_element_brand_edit.setText(data.getMarca().toString());
+        inventory_element_price_edit.setText(data.getUnitPrice().toString());
+        hideKeyboard(getActivity());
+
+    }
+
+    @Override
+    public void DataRecived(String BarcodeData) {
+        final String _barcodeData = BarcodeData;
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                inventory_element_barcode_edit.setText(_barcodeData);
+
+                if (itemMaterialAdded != null) {
+                }
+                itemMaterialAdded = findElementByBarCode();
+
+                if (itemMaterialAdded == null) {
+                    showMessageDialog(getString(R.string.message_not_find_element));
+                    return;
+                }
+                if (!validaIsAddeddElement(inventory_element_barcode_edit.getText().toString())) {
+                    setMaterialData(itemMaterialAdded);
+                } else
+                    showMessageDialog(getString(R.string.message_element_exist) + itemMaterialAdded.getBarCode());
+            }
+        });
+
+    }
+
+    @Override
+    public void ScannerReady() {
+        Scanner_manager.ScannerON(true);
+    }
+
+    public static class DatePickerFragment extends DialogFragment
+            implements DatePickerDialog.OnDateSetListener {
+
+        public EditText txtDate;
+        private DateTimeUtilities dateTimeUtilities;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
+            dialog.getDatePicker().setMaxDate(c.getTimeInMillis());
+            return dialog;
+        }
+
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            int _month = month + 1;
+            //btnDate.setText(ConverterDate.ConvertDate(year, month + 1, day));
+            txtDate.setText(dateTimeUtilities.parseDateTurno(year, month + 1, day));
+        }
     }
 
     private void asyncListMaterialsByBarCode() {
@@ -418,12 +611,12 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
                             };
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
-                            data = gson.fromJson(res, token.getType());
+                            itemMaterialAdded = gson.fromJson(res, token.getType());
 
-                            if (data != null)
-                                setMaterialData(data);
+                            if (itemMaterialAdded != null)
+                                setMaterialData(itemMaterialAdded);
                             else
-                                shwoMessage("No se encontró elemento con el código de barras ingresado");
+                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
 
                             showProgress(false);
 
@@ -435,7 +628,7 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        shwoMessage(res);
+                        showMessageDialog(res);
 
                     }
 
@@ -472,9 +665,10 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
                             if (dataMaterial != null)
                                 globalVariable.setListMaterialBYProduction(dataMaterial);
                             else
-                                shwoMessage("No se encontró elemento con el código de barras ingresado");
+                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
 
                             showProgress(false);
+                            review.setVisible(true);
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
@@ -484,7 +678,7 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        shwoMessage(res);
+                        showMessageDialog(res);
 
                     }
 
@@ -496,38 +690,6 @@ public class InventoryFragment extends Fragment implements DatePickerDialog.OnDa
                     }
                 }
         );
-    }
-
-    private void setMaterialData(MaterialViewModel data) {
-        inventory_element_edit.setText(data.getMaterialName());
-        inventory_element_type_edit.setText(data.getTypeElementName());
-        inventory_element_brand_edit.setText(data.getMarca().toString());
-    }
-
-    public static class DatePickerFragment extends DialogFragment
-            implements DatePickerDialog.OnDateSetListener {
-
-        public EditText txtDate;
-        private DateTimeUtilities dateTimeUtilities;
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-
-
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
-            DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
-            dialog.getDatePicker().setMaxDate(c.getTimeInMillis());
-            return dialog;
-        }
-
-        public void onDateSet(DatePicker view, int year, int month, int day) {
-            int _month = month + 1;
-            //btnDate.setText(ConverterDate.ConvertDate(year, month + 1, day));
-            txtDate.setText(dateTimeUtilities.parseDateTurno(year, month + 1, day));
-        }
     }
 
 

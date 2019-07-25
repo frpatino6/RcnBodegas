@@ -1,5 +1,9 @@
 package com.rcnbodegas.ViewModels;
 
+import android.graphics.Bitmap;
+
+import java.util.ArrayList;
+
 public class MaterialViewModel {
 
     private String wareHouseId;
@@ -13,6 +17,9 @@ public class MaterialViewModel {
     private String marca;
     private String barCode;
     private String materialName;
+    private Double unitPrice;
+    private ArrayList<Bitmap> ListaImagenes;
+    private boolean isReview;
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
@@ -28,7 +35,37 @@ public class MaterialViewModel {
         this.materialName = materialName;
     }
 
+    public ArrayList<Bitmap> getListaImagenes() {
+        return ListaImagenes;
+    }
+
+    public void setListaImagenes(ArrayList<Bitmap> listaImagenes) {
+        ListaImagenes = listaImagenes;
+    }
+
     public MaterialViewModel() {
+        this.isReview=false;
+    }
+
+    public Double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(Double unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public boolean isReview() {
+        return isReview;
+    }
+
+    public void setReview(boolean review) {
+        isReview = review;
+    }
+
+    @Override
+    public String toString() {
+        return this.barCode.toString();
     }
 
     public String getWareHouseId() {

@@ -32,9 +32,9 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:gravity="center_vertical"
-                android:text="CpmpanyName"
+                android:text=""
                 android:textAppearance="?android:attr/textAppearanceListItemSmall"
-                android:textSize="18sp"
+                android:textSize="@dimen/abc_text_view_text_size_item_recycler"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
