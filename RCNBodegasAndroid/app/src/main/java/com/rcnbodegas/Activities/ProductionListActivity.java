@@ -157,8 +157,10 @@ public class ProductionListActivity extends AppCompatActivity {
 
     private void asyncListProductions() {
 
+        String responsable=globalVariable.getQueryByInventory()? globalVariable.getIdSelectedWareHouseInventory(): globalVariable.getIdSelectedWareHouseWarehouse();
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListProduction/" + globalVariable.getIdSelectedWareHouse();
+
+        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListProduction/" + responsable;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

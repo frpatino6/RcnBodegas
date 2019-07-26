@@ -5,66 +5,48 @@ import android.app.Application;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class GlobalClass extends Application {
 
+
     private String userName;
-    private String urlServices="http://172.20.0.154/";
-    private Integer idSelectedCompany;
-    private String idSelectedWareHouse;
-    private String idSelectedProduction;
+    private String urlServices = "http://172.20.0.154:8083/";
+    private Integer idSelectedCompanyInventory;
+    private String idSelectedWareHouseInventory;
+    private String idSelectedProductionInventory;
+    private int idSelectedResponsibleInventory;
+    private int idSelectedTypeElementInventory;
+    private Boolean queryByInventory = false;
+    private Integer idSelectedCompanyWarehouse;
+    private String idSelectedWareHouseWarehouse;
+    private String idSelectedProductionWarehouse;
+    private int idSelectedResponsibleWarehouse;
+    private int idSelectedTypeElementWarehouse;
+
     private String mCurrentPhotoPath;
-    private int idSelectedResponsible;
-    private int idSelectedTypeElement;
-    private boolean responsable=true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private ArrayList<MaterialViewModel>listMaterialBYProduction;
-    private ArrayList<MaterialViewModel>listMaterialForAdd;
 
-    public boolean isResponsable() {
-        return responsable;
+    private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
+    private ArrayList<MaterialViewModel> listMaterialBYProduction;
+    private ArrayList<MaterialViewModel> listMaterialForAdd;
+
+    public String getNameSelectedWareHouseWarehouse() {
+        return nameSelectedWareHouseWarehouse;
     }
 
-    public void setResponsable(boolean responsable) {
-        this.responsable = responsable;
+    public void setNameSelectedWareHouseWarehouse(String nameSelectedWareHouseWarehouse) {
+        this.nameSelectedWareHouseWarehouse = nameSelectedWareHouseWarehouse;
     }
 
-    public String getmCurrentPhotoPath() {
-        return mCurrentPhotoPath;
+    public Boolean getQueryByInventory() {
+        return queryByInventory;
     }
 
-    public void setmCurrentPhotoPath(String mCurrentPhotoPath) {
-        this.mCurrentPhotoPath = mCurrentPhotoPath;
+    public void setQueryByInventory(Boolean queryByInventory) {
+        this.queryByInventory = queryByInventory;
     }
 
-
-    public ArrayList<MaterialViewModel> getListMaterialForAdd() {
-        return listMaterialForAdd;
-    }
-
-    public void setListMaterialForAdd(ArrayList<MaterialViewModel> listMaterialForAdd) {
-
-        if(this.listMaterialForAdd ==null) this.listMaterialForAdd=new ArrayList<>();
-        this.listMaterialForAdd = listMaterialForAdd;
-    }
-
-    public ArrayList<MaterialViewModel> getListMaterialBYProduction() {
-        return listMaterialBYProduction;
-    }
-
-    public void setListMaterialBYProduction(ArrayList<MaterialViewModel> listMaterialBYProduction) {
-        this.listMaterialBYProduction = listMaterialBYProduction;
-    }
-
-    public String getNameSelectedWareHouse() {
-        return nameSelectedWareHouse;
-    }
-
-    public void setNameSelectedWareHouse(String nameSelectedWareHouse) {
-        this.nameSelectedWareHouse = nameSelectedWareHouse;
-    }
-
-    private String nameSelectedWareHouse;
+    private String nameSelectedWareHouseWarehouse;
+    private String nameSelectedWareHouseInventory;
     private String userRole;
 
     public String getUserRole() {
@@ -75,30 +57,6 @@ public class GlobalClass extends Application {
         this.userRole = userRole;
     }
 
-
-
-    public Integer getIdSelectedCompany() {
-        return idSelectedCompany;
-    }
-
-    public void setIdSelectedCompany(Integer idSelectedCompany) {
-        this.idSelectedCompany = idSelectedCompany;
-    }
-
-    public String getIdSelectedWareHouse() {
-        return idSelectedWareHouse;
-    }
-
-    public void setIdSelectedWareHouse(String idSelectedWareHouse) {
-        this.idSelectedWareHouse = idSelectedWareHouse;
-    }
-
-
-
-    public String getUrlServices() {
-        return urlServices;
-    }
-
     public String getUserName() {
         return userName;
     }
@@ -107,27 +65,123 @@ public class GlobalClass extends Application {
         this.userName = userName;
     }
 
-    public String getIdSelectedProduction() {
-        return idSelectedProduction;
+    public String getUrlServices() {
+        return urlServices;
     }
 
-    public void setIdSelectedProduction(String idSelectedProduction) {
-        this.idSelectedProduction = idSelectedProduction;
+    public void setUrlServices(String urlServices) {
+        this.urlServices = urlServices;
     }
 
-    public int getIdSelectedResponsible() {
-        return idSelectedResponsible;
+    public Integer getIdSelectedCompanyInventory() {
+        return idSelectedCompanyInventory;
     }
 
-    public void setIdSelectedResponsible(int idSelectedResponsible) {
-        this.idSelectedResponsible = idSelectedResponsible;
+    public void setIdSelectedCompanyInventory(Integer idSelectedCompanyInventory) {
+        this.idSelectedCompanyInventory = idSelectedCompanyInventory;
     }
 
-    public int getIdSelectedTypeElement() {
-        return idSelectedTypeElement;
+    public String getIdSelectedWareHouseInventory() {
+        return idSelectedWareHouseInventory;
     }
 
-    public void setIdSelectedTypeElement(int idSelectedTypeElement) {
-        this.idSelectedTypeElement = idSelectedTypeElement;
+    public void setIdSelectedWareHouseInventory(String idSelectedWareHouseInventory) {
+        this.idSelectedWareHouseInventory = idSelectedWareHouseInventory;
+    }
+
+    public String getIdSelectedProductionInventory() {
+        return idSelectedProductionInventory;
+    }
+
+    public void setIdSelectedProductionInventory(String idSelectedProductionInventory) {
+        this.idSelectedProductionInventory = idSelectedProductionInventory;
+    }
+
+    public int getIdSelectedResponsibleInventory() {
+        return idSelectedResponsibleInventory;
+    }
+
+    public void setIdSelectedResponsibleInventory(int idSelectedResponsibleInventory) {
+        this.idSelectedResponsibleInventory = idSelectedResponsibleInventory;
+    }
+
+    public int getIdSelectedTypeElementInventory() {
+        return idSelectedTypeElementInventory;
+    }
+
+    public void setIdSelectedTypeElementInventory(int idSelectedTypeElementInventory) {
+        this.idSelectedTypeElementInventory = idSelectedTypeElementInventory;
+    }
+
+    public Integer getIdSelectedCompanyWarehouse() {
+        return idSelectedCompanyWarehouse;
+    }
+
+    public void setIdSelectedCompanyWarehouse(Integer idSelectedCompanyWarehouse) {
+        this.idSelectedCompanyWarehouse = idSelectedCompanyWarehouse;
+    }
+
+    public String getIdSelectedWareHouseWarehouse() {
+        return idSelectedWareHouseWarehouse;
+    }
+
+    public void setIdSelectedWareHouseWarehouse(String idSelectedWareHouseWarehouse) {
+        this.idSelectedWareHouseWarehouse = idSelectedWareHouseWarehouse;
+    }
+
+    public String getIdSelectedProductionWarehouse() {
+        return idSelectedProductionWarehouse;
+    }
+
+    public void setIdSelectedProductionWarehouse(String idSelectedProductionWarehouse) {
+        this.idSelectedProductionWarehouse = idSelectedProductionWarehouse;
+    }
+
+    public int getIdSelectedResponsibleWarehouse() {
+        return idSelectedResponsibleWarehouse;
+    }
+
+    public void setIdSelectedResponsibleWarehouse(int idSelectedResponsibleWarehouse) {
+        this.idSelectedResponsibleWarehouse = idSelectedResponsibleWarehouse;
+    }
+
+    public int getIdSelectedTypeElementWarehouse() {
+        return idSelectedTypeElementWarehouse;
+    }
+
+    public void setIdSelectedTypeElementWarehouse(int idSelectedTypeElementWarehouse) {
+        this.idSelectedTypeElementWarehouse = idSelectedTypeElementWarehouse;
+    }
+
+    public String getmCurrentPhotoPath() {
+        return mCurrentPhotoPath;
+    }
+
+    public void setmCurrentPhotoPath(String mCurrentPhotoPath) {
+        this.mCurrentPhotoPath = mCurrentPhotoPath;
+    }
+
+    public boolean isResponsable() {
+        return responsable;
+    }
+
+    public void setResponsable(boolean responsable) {
+        this.responsable = responsable;
+    }
+
+    public ArrayList<MaterialViewModel> getListMaterialBYProduction() {
+        return listMaterialBYProduction;
+    }
+
+    public void setListMaterialBYProduction(ArrayList<MaterialViewModel> listMaterialBYProduction) {
+        this.listMaterialBYProduction = listMaterialBYProduction;
+    }
+
+    public ArrayList<MaterialViewModel> getListMaterialForAdd() {
+        return listMaterialForAdd;
+    }
+
+    public void setListMaterialForAdd(ArrayList<MaterialViewModel> listMaterialForAdd) {
+        this.listMaterialForAdd = listMaterialForAdd;
     }
 }

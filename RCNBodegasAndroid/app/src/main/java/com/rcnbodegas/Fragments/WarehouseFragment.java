@@ -6,10 +6,12 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +20,6 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,8 +38,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.rcnbodegas.Activities.CustomActivity;
 import com.rcnbodegas.Activities.ListItemAddedActivity;
-import com.rcnbodegas.Activities.ListItemReviewActivity;
 import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
 import com.rcnbodegas.Activities.TypeElementListActivity;
@@ -68,7 +69,7 @@ import java.util.List;
 import static android.app.Activity.RESULT_OK;
 
 
-public class WarehouseFragment extends Fragment implements IObserver, DatePickerDialog.OnDateSetListener {
+public class WarehouseFragment extends CustomActivity implements IObserver, DatePickerDialog.OnDateSetListener {
     private static final int REQUEST_PRODUCTION = 1;
     private static final int REQUEST_RESPONSIBLE = 2;
     private static final int REQUEST_TYPE_ELEMENT = 3;
@@ -132,9 +133,7 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
-        Scanner_manager.AddObserver(this);
-        Scanner_manager.ScannerON(true);
+
 
         dateTimeUtilities = new DateTimeUtilities(getActivity());
 
@@ -174,6 +173,29 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
 
     }
 
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+        Scanner_manager.ScannerOFF();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Scanner_manager.ScannerOFF();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
+        Scanner_manager.AddObserver(this);
+        Scanner_manager.ScannerON(true);
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -184,7 +206,7 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
         if (requestCode == REQUEST_PRODUCTION) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("productionName");
-                globalVariable.setIdSelectedProduction(data.getStringExtra("productionId"));
+                globalVariable.setIdSelectedProductionWarehouse(data.getStringExtra("productionId"));
                 this.warehouse_program_option.setText(result);
 
             }
@@ -192,7 +214,7 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
         if (requestCode == REQUEST_RESPONSIBLE) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("responsibleName");
-                globalVariable.setIdSelectedResponsible(Integer.valueOf(data.getStringExtra("responsibleId")));
+                globalVariable.setIdSelectedResponsibleWarehouse(Integer.valueOf(data.getStringExtra("responsibleId")));
                 this.warehouse_legalizedBy_option.setText(result);
 
             }
@@ -200,7 +222,7 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
         if (requestCode == REQUEST_TYPE_ELEMENT) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("typeElementName");
-                globalVariable.setIdSelectedTypeElement(Integer.valueOf(data.getStringExtra("typeElementId")));
+                globalVariable.setIdSelectedTypeElementWarehouse(Integer.valueOf(data.getStringExtra("typeElementId")));
                 this.warehouse_element_type_edit.setText(result);
 
             }
@@ -209,8 +231,8 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
             if (resultCode == RESULT_OK) {
                 String result = data.getStringExtra("wareHouseName");
                 this.warehouse_option.setText(result);
-                globalVariable.setIdSelectedWareHouse(data.getStringExtra("wareHouseId"));
-                globalVariable.setNameSelectedWareHouse(data.getStringExtra("wareHouseName"));
+                globalVariable.setIdSelectedWareHouseWarehouse(data.getStringExtra("wareHouseId"));
+                globalVariable.setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
             }
         }
 
@@ -222,7 +244,7 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
         super.onPrepareOptionsMenu(menu);
         mnuCamera = menu.findItem(R.id.menu_camera);
         mnuCamera.setVisible(false);
-        menuReview=menu.findItem(R.id.menu_review);
+        menuReview = menu.findItem(R.id.menu_review);
         menuReview.setVisible(false);
 
     }
@@ -366,6 +388,7 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
     }
 
     private void InitializeEvents() {
+        globalVariable.setQueryByInventory(false);
         warehouse_btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -524,13 +547,13 @@ public class WarehouseFragment extends Fragment implements IObserver, DatePicker
     private void addElement() {
         MaterialViewModel newElement = new MaterialViewModel();
         newElement.setBarCode(warehouse_element_barcode_edit.getText().toString());
-        newElement.setWareHouseId(globalVariable.getIdSelectedWareHouse());
-        newElement.setProductionId(Integer.valueOf(globalVariable.getIdSelectedProduction()));
-        newElement.setResponsibleId(globalVariable.getIdSelectedResponsible());
+        newElement.setWareHouseId(globalVariable.getIdSelectedWareHouseWarehouse());
+        newElement.setProductionId(Integer.valueOf(globalVariable.getIdSelectedProductionWarehouse()));
+        newElement.setResponsibleId(globalVariable.getIdSelectedResponsibleWarehouse());
         newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
         newElement.setMarca(warehouse_element_edit.getText().toString());
         newElement.setUnitPrice(warehouse_element_price_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_price_edit.getText().toString()));
-        newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElement()));
+        newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElementWarehouse()));
         if (ListaImagenes != null && ListaImagenes.size() > 0)
             newElement.setListaImagenes(ListaImagenes);
 

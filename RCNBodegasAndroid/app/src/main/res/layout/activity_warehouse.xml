@@ -88,7 +88,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:focusable="false"
-                        android:hint="Fecha de Inventario"
+                        android:hint="Fecha de legalización"
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
@@ -160,6 +160,7 @@
                         android:focusable="false"
                         android:hint="Tipo de Elemento"
                         android:text=""
+                        android:textSize="@dimen/abc_text_view_text_size"
                         android:textColor="#333" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -190,6 +191,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Precio"
+                        android:textSize="@dimen/abc_text_view_text_size"
                         android:inputType="number"
                         android:text=""
                         android:textColor="#333" />
@@ -205,7 +207,7 @@
                         android:id="@+id/warehouse_element_value_edit"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Valor"
+                        android:hint="Valor materia"
                         android:inputType="number"
                         android:text=""
                         android:textColor="#333"

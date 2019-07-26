@@ -174,7 +174,7 @@ public class WareHouseListActivity extends AppCompatActivity {
     private void asyncListWareHouse() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "WareHouse/GetLisWareHouse/" + globalVariable.getUserName() + "/" + globalVariable.getIdSelectedCompany();
+        String urlIncidencias = globalVariable.getUrlServices() + "WareHouse/GetLisWareHouse/" + globalVariable.getUserName() + "/" + globalVariable.getIdSelectedCompanyInventory();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

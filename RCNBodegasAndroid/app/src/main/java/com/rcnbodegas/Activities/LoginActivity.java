@@ -184,7 +184,7 @@ public class LoginActivity extends AppCompatActivity {
                             globalVariable.setUserName(input_email.getText().toString());
                             globalVariable.setUserRole(data.roleName);
                             Intent intent = null;
-                            intent = new Intent(LoginActivity.this,  SelectParametersActivity.class);
+                            intent = new Intent(LoginActivity.this,  MainActivity.class);
                             startActivity(intent);
 
                         } catch (JsonSyntaxException e) {

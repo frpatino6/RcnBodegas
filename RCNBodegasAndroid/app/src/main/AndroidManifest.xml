@@ -25,7 +25,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <uses-library android:name="com.symbol.emdk" />
+        <uses-library android:name="com.symbol.emdk" android:required="false" />
 
         <activity android:name=".Activities.ScanActivity" />
         <activity android:name=".Activities.ListItemReviewActivity">
@@ -37,7 +37,6 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".Activities.SelectParametersActivity" />
         <activity android:name=".Activities.WareHouseListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

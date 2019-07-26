@@ -45,8 +45,9 @@ public class ListItemAddedActivity extends AppCompatActivity   implements Search
 
 
     private void InitializeControls() {
-        txtResumen.setVisibility(View.GONE);
+
         txtResumen = findViewById(R.id.txtResumen);
+        txtResumen.setVisibility(View.GONE);
         mIncidenciasFormView = findViewById(R.id.review_recycler_view);
         mProgressView = findViewById(R.id.review_progress);
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);

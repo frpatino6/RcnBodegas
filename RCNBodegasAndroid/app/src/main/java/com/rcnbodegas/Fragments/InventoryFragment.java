@@ -10,6 +10,8 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -36,6 +38,7 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
+import com.rcnbodegas.Activities.CustomActivity;
 import com.rcnbodegas.Activities.ListItemReviewActivity;
 import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
@@ -65,7 +68,7 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link InventoryFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class InventoryFragment extends Fragment implements IObserver, DatePickerDialog.OnDateSetListener {
+public class InventoryFragment extends CustomActivity implements IObserver, DatePickerDialog.OnDateSetListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -131,9 +134,6 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
         dateTimeUtilities = new DateTimeUtilities(getActivity());
         setHasOptionsMenu(true);
 
-        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
-        Scanner_manager.AddObserver(this);
-        Scanner_manager.ScannerON(true);
 
     }
 
@@ -162,7 +162,7 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
         if (requestCode == REQUEST_PRODUCTION) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("productionName");
-                globalVariable.setIdSelectedProduction(data.getStringExtra("productionId"));
+                globalVariable.setIdSelectedProductionInventory(data.getStringExtra("productionId"));
                 this.inventory_program_option.setText(result);
 
             }
@@ -170,7 +170,7 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
         if (requestCode == REQUEST_RESPONSIBLE) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("responsibleName");
-                globalVariable.setIdSelectedResponsible(Integer.valueOf(data.getStringExtra("responsibleId")));
+                globalVariable.setIdSelectedResponsibleInventory(Integer.valueOf(data.getStringExtra("responsibleId")));
                 this.inventory_responsible_option.setText(result);
 
             }
@@ -178,7 +178,7 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
         if (requestCode == REQUEST_TYPE_ELEMENT) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("typeElementName");
-                globalVariable.setIdSelectedTypeElement(Integer.valueOf(data.getStringExtra("typeElementId")));
+                globalVariable.setIdSelectedTypeElementInventory(Integer.valueOf(data.getStringExtra("typeElementId")));
                 this.inventory_element_type_edit.setText(result);
 
             }
@@ -187,8 +187,8 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
             if (resultCode == RESULT_OK) {
                 String result = data.getStringExtra("wareHouseName");
                 this.inventory_warehouse_option.setText(result);
-                globalVariable.setIdSelectedWareHouse(data.getStringExtra("wareHouseId"));
-                globalVariable.setNameSelectedWareHouse(data.getStringExtra("wareHouseName"));
+                globalVariable.setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
+                globalVariable.setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
             }
         }
     }
@@ -229,6 +229,31 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
         return super.onOptionsItemSelected(item); // important line
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        Scanner_manager.ScannerOFF();
+    }
+
+    @Override
+    public void onDestroy() {
+
+        Scanner_manager.ScannerOFF();
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
+        Scanner_manager.AddObserver(this);
+        Scanner_manager.ScannerON(true);
+
+    }
+
     private void InitializeControls(View v) {
 
         btnSearch = v.findViewById(R.id.btnSearch);
@@ -250,7 +275,7 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
         inventory_btn_ok = v.findViewById(R.id.inventory_btn_ok);
 
         inventory_date_option.setText(dateTimeUtilities.parseDateTurno());
-        inventory_warehouse_option.setText(globalVariable.getNameSelectedWareHouse());
+        inventory_warehouse_option.setText(globalVariable.getNameSelectedWareHouseWarehouse());
 
         mIncidenciasFormView = v.findViewById(R.id.inventory_element);
         mProgressView = v.findViewById(R.id.inventroy_progress);
@@ -258,6 +283,7 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
 
     private void InitializeEvents() {
 
+        globalVariable.setQueryByInventory(true);
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -645,7 +671,7 @@ public class InventoryFragment extends Fragment implements IObserver, DatePicker
     private void asyncListMaterialsByProduction() {
 
 
-        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouse() + "/" + globalVariable.getIdSelectedProduction() + "/" + globalVariable.getIdSelectedResponsible();
+        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
