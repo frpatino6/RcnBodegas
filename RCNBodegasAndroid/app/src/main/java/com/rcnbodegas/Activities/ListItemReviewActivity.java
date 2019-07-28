@@ -45,6 +45,8 @@ public class ListItemReviewActivity extends AppCompatActivity   implements Searc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_item_review);
         globalVariable = (GlobalClass) getApplicationContext();
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_review));
+
         InitializeControls();
         filterListByNotReview();
         setRecyclerViewData();

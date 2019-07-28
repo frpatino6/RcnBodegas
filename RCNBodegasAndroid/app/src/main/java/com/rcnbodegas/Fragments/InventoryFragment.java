@@ -80,8 +80,9 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     // TODO: Rename and change types of parameter
     private ImageButton btnSearch;
     private FloatingActionButton inventory_btn_new_element;
+    private FloatingActionButton inventory_btn_camera;
     private Button inventory_btn_ok;
-    private Button inventory_btn_review;
+
     private String mParam1;
     private String mParam2;
     private LinearLayout inventory_element;
@@ -102,13 +103,12 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private View mIncidenciasFormView;
     private View mProgressView;
     private MaterialViewModel itemMaterialAdded;
-    private ArrayList<MaterialViewModel> dataMaterial;
-    private ArrayList<MaterialViewModel> dataReviewMaterial;
     private EMDKManager emdkManager = null;
     private BarcodeManager barcodeManager = null;
     private Scanner scanner = null;
     private TScanner Scanner_manager = null;
-    private MenuItem review;
+    private MenuItem mnuReview;
+    private MenuItem mnuSave;
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -127,6 +127,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().setTitle(getString(R.string.title_inventory_fragment));
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -144,7 +146,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         View view = inflater.inflate(R.layout.activity_inventory, container, false);
         inventory_element = view.findViewById(R.id.inventory_element);
         inventory_data = view.findViewById(R.id.inventory_data);
-
         inventory_element.setVisibility(View.GONE);
 
         globalVariable = (GlobalClass) getActivity().getApplicationContext();
@@ -152,6 +153,15 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         InitializeControls(view);
         InitializeEvents();
 
+        if (!validateInventoryProcess()) {
+            inventory_element.setVisibility(View.GONE);
+            inventory_data.setVisibility(View.VISIBLE);
+        } else {
+            inventory_element.setVisibility(View.VISIBLE);
+            inventory_data.setVisibility(View.GONE);
+
+        }
+        showProgress(false);
         return view;
     }
 
@@ -188,7 +198,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 String result = data.getStringExtra("wareHouseName");
                 this.inventory_warehouse_option.setText(result);
                 globalVariable.setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
-                globalVariable.setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
+                globalVariable.setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
             }
         }
     }
@@ -201,16 +211,24 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        review = menu.findItem(R.id.mnu_review);
-        review.setVisible(false);
+        mnuReview = menu.findItem(R.id.mnu_review);
+        mnuSave = menu.findItem(R.id.mnu_save);
 
-
+        if (validateInventoryProcess()) {
+            mnuReview.setVisible(true);
+            mnuSave.setVisible(true);
+        } else {
+            mnuReview.setVisible(false);
+            mnuSave.setVisible(false);
+        }
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_inventory, menu);
         super.onCreateOptionsMenu(menu, inflater);
+
+
     }
 
     @Override
@@ -223,6 +241,9 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 intent = null;
                 intent = new Intent(getActivity(), ListItemReviewActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.mnu_save:
+                confirmCancelEntrega();
                 return true;
         }
 
@@ -252,6 +273,28 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         Scanner_manager.AddObserver(this);
         Scanner_manager.ScannerON(true);
 
+
+    }
+
+    //Valida si hay un proceso de inventario en proceso
+    private boolean validateInventoryProcess() {
+
+        return globalVariable.getCurrentInventoryActiveProcess();
+    }
+
+    private void InitializeNewInventroyProcess() {
+        globalVariable.setCurrentInventoryActiveProcess(false);
+        inventory_element.setVisibility(View.GONE);
+        inventory_data.setVisibility(View.VISIBLE);
+        globalVariable.setIdSelectedProductionInventory("");
+        globalVariable.setIdSelectedResponsibleInventory(-1);
+        globalVariable.setIdSelectedTypeElementInventory(-1);
+        inventory_program_option.setText("");
+        inventory_responsible_option.setText("");
+        globalVariable.setDataMaterialInventory(new ArrayList<MaterialViewModel>());
+        globalVariable.setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
+        mnuReview.setVisible(false);
+        mnuSave.setVisible(false);
     }
 
     private void InitializeControls(View v) {
@@ -275,7 +318,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_btn_ok = v.findViewById(R.id.inventory_btn_ok);
 
         inventory_date_option.setText(dateTimeUtilities.parseDateTurno());
-        inventory_warehouse_option.setText(globalVariable.getNameSelectedWareHouseWarehouse());
+        inventory_warehouse_option.setText(globalVariable.getNameSelectedWareHouseInventory());
 
         mIncidenciasFormView = v.findViewById(R.id.inventory_element);
         mProgressView = v.findViewById(R.id.inventroy_progress);
@@ -313,6 +356,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 }
             }
         });
+
 
         inventory_program_option.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -383,13 +427,38 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private void AddElementToReview() {
 
-        if (dataReviewMaterial == null)
-            dataReviewMaterial = new ArrayList<>();
 
-        dataReviewMaterial.add(itemMaterialAdded);
+        globalVariable.getDataReviewMaterial().add(itemMaterialAdded);
         itemMaterialAdded.setReview(true);
 
         hideKeyboard(getActivity());
+    }
+
+    private void confirmCancelEntrega() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(getString(R.string.message_confirm_save));
+        builder.setPositiveButton(getString(R.string.btn_confirm),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        if (globalVariable.getDataReviewMaterial().size() > 0)
+                            InitializeNewInventroyProcess();
+                        else
+                            showMessageDialog(getString(R.string.message_not_elements_inventory));
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -487,8 +556,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private boolean validaIsAddeddElement(String barcode) {
 
-        if (dataReviewMaterial != null)
-            for (MaterialViewModel materialViewModel : dataReviewMaterial) {
+        if (globalVariable.getDataReviewMaterial() != null)
+            for (MaterialViewModel materialViewModel : globalVariable.getDataReviewMaterial()) {
                 if (materialViewModel.getBarCode().equals(barcode))
                     return true;
             }
@@ -547,7 +616,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private MaterialViewModel findElementByBarCode() {
 
-        for (MaterialViewModel materialViewModel : dataMaterial) {
+        for (MaterialViewModel materialViewModel : globalVariable.getDataMaterialInventory()) {
             if (materialViewModel.getBarCode().equals(inventory_element_barcode_edit.getText().toString()))
                 return materialViewModel;
         }
@@ -686,7 +755,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             };
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
-                            dataMaterial = gson.fromJson(res, token.getType());
+                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
+                            globalVariable.setDataMaterialInventory(dataMaterial);
 
                             if (dataMaterial != null)
                                 globalVariable.setListMaterialBYProduction(dataMaterial);
@@ -694,7 +764,9 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                                 showMessageDialog("No se encontró elemento con el código de barras ingresado");
 
                             showProgress(false);
-                            review.setVisible(true);
+                            mnuReview.setVisible(true);
+                            mnuSave.setVisible(true);
+                            globalVariable.setCurrentInventoryActiveProcess(true);
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();

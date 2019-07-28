@@ -8,26 +8,75 @@ import java.util.ArrayList;
 
 public class GlobalClass extends Application {
 
-
+    private int idSelectedResponsibleInventory;
+    private int idSelectedTypeElementInventory;
+    private int idSelectedResponsibleWarehouse;
+    private int idSelectedTypeElementWarehouse;
     private String userName;
-    private String urlServices = "http://172.20.0.154:8083/";
+    //private String urlServices = "http://172.20.0.154:8083/";
+    private String urlServices = "http://192.168.0.5/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
-    private int idSelectedResponsibleInventory;
-    private int idSelectedTypeElementInventory;
     private Boolean queryByInventory = false;
+    private Boolean isCurrentInventoryActiveProcess = false;
+    private Boolean isCurrentAddElementActiveProcess = false;
     private Integer idSelectedCompanyWarehouse;
     private String idSelectedWareHouseWarehouse;
     private String idSelectedProductionWarehouse;
-    private int idSelectedResponsibleWarehouse;
-    private int idSelectedTypeElementWarehouse;
-
+    private ArrayList<MaterialViewModel> dataMaterial;
+    private ArrayList<MaterialViewModel> dataMaterialInventory;
+    private ArrayList<MaterialViewModel> dataReviewMaterial;
+    private String nameSelectedWareHouseWarehouse = "";
+    private String nameSelectedWareHouseInventory = "";
+    private String userRole;
     private String mCurrentPhotoPath;
-
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
     private ArrayList<MaterialViewModel> listMaterialBYProduction;
     private ArrayList<MaterialViewModel> listMaterialForAdd;
+
+    public ArrayList<MaterialViewModel> getDataReviewMaterial() {
+
+        if (dataReviewMaterial == null) dataReviewMaterial = new ArrayList<>();
+        return dataReviewMaterial;
+    }
+
+    public void setDataReviewMaterial(ArrayList<MaterialViewModel> dataReviewMaterial) {
+        this.dataReviewMaterial = dataReviewMaterial;
+    }
+
+    public ArrayList<MaterialViewModel> getDataMaterialInventory() {
+        if (dataMaterialInventory == null) dataMaterialInventory = new ArrayList<>();
+        return dataMaterialInventory;
+    }
+
+    public void setDataMaterialInventory(ArrayList<MaterialViewModel> dataMaterialInventory) {
+        this.dataMaterialInventory = dataMaterialInventory;
+    }
+
+    public ArrayList<MaterialViewModel> getDataMaterial() {
+        return dataMaterial;
+    }
+
+    public void setDataMaterial(ArrayList<MaterialViewModel> dataMaterial) {
+        this.dataMaterial = dataMaterial;
+    }
+
+    public Boolean getCurrentAddElementActiveProcess() {
+        return isCurrentAddElementActiveProcess;
+    }
+
+    public void setCurrentAddElementActiveProcess(Boolean currentAddElementActiveProcess) {
+        isCurrentAddElementActiveProcess = currentAddElementActiveProcess;
+    }
+
+    public Boolean getCurrentInventoryActiveProcess() {
+        return isCurrentInventoryActiveProcess;
+    }
+
+    public void setCurrentInventoryActiveProcess(Boolean currentActiveProcess) {
+        isCurrentInventoryActiveProcess = currentActiveProcess;
+    }
 
     public String getNameSelectedWareHouseWarehouse() {
         return nameSelectedWareHouseWarehouse;
@@ -45,9 +94,6 @@ public class GlobalClass extends Application {
         this.queryByInventory = queryByInventory;
     }
 
-    private String nameSelectedWareHouseWarehouse;
-    private String nameSelectedWareHouseInventory;
-    private String userRole;
 
     public String getUserRole() {
         return userRole;
@@ -178,10 +224,19 @@ public class GlobalClass extends Application {
     }
 
     public ArrayList<MaterialViewModel> getListMaterialForAdd() {
+        if (listMaterialForAdd == null) listMaterialForAdd = new ArrayList<>();
         return listMaterialForAdd;
     }
 
     public void setListMaterialForAdd(ArrayList<MaterialViewModel> listMaterialForAdd) {
         this.listMaterialForAdd = listMaterialForAdd;
+    }
+
+    public String getNameSelectedWareHouseInventory() {
+        return nameSelectedWareHouseInventory;
+    }
+
+    public void setNameSelectedWareHouseInventory(String nameSelectedWareHouseInventory) {
+        this.nameSelectedWareHouseInventory = nameSelectedWareHouseInventory;
     }
 }

@@ -1,16 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:yourapp="http://schemas.android.com/apk/res-auto" >
-
-    <item
-        android:id="@+id/menu_camera"
-        yourapp:showAsAction="always"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="Camara"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_review"
-        yourapp:showAsAction="always"
-        android:icon="@mipmap/ic_review_material"
-        android:title="Camara"/>
-
+        app:showAsAction="always"
+        android:icon="@mipmap/ic_review"
+        android:title="Agregados"/>
+    <item
+        android:icon="@android:drawable/ic_menu_save"
+        android:id="@+id/mnu_save"
+        android:title="Envuar"
+        app:showAsAction="always"/>
 
 </menu>

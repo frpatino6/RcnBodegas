@@ -216,12 +216,10 @@ public class TypeElementListActivity extends AppCompatActivity {
     private void FilterListView(String query) {
 
         try {
-            Filter<ResponsibleViewModel, String> filter = new Filter<ResponsibleViewModel, String>() {
-                public boolean isMatched(ResponsibleViewModel object, String text) {
+            Filter<TypeElementViewModel, String> filter = new Filter<TypeElementViewModel, String>() {
+                public boolean isMatched(TypeElementViewModel object, String text) {
 
                     boolean result = false;
-
-
                     result = object.getName().toString().toLowerCase().contains(String.valueOf(text));
 
                     if (result)
@@ -233,7 +231,7 @@ public class TypeElementListActivity extends AppCompatActivity {
 
             sortEmpList = (ArrayList<TypeElementViewModel>) new FilterList().filterList(data, filter, query);
 
-            adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
+            adapter = new TypeElementAdapter(sortEmpList, new onRecyclerTypeElementListItemClick() {
                 @Override
                 public void onClick(TypeElementViewModel result) {
                     final Intent _data = new Intent();
