@@ -42,4 +42,5 @@ dependencies {
     implementation 'me.dm7.barcodescanner:zxing:1.9'
     implementation files('libs/com.symbol.emdk.jar')
     implementation files('libs/com.symbol.emdk.wizard.core.jar')
+    implementation 'com.google.code.gson:gson:2.8.2'
 }

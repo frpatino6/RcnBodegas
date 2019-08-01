@@ -1,7 +1,10 @@
 package com.rcnbodegas.Fragments;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -39,6 +42,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.rcnbodegas.Activities.CustomActivity;
 import com.rcnbodegas.Activities.ListItemAddedActivity;
 import com.rcnbodegas.Activities.ProductionListActivity;
@@ -61,11 +67,15 @@ import com.symbol.emdk.barcode.Scanner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -321,21 +331,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     }
 
     @SuppressLint("RestrictedApi")
-    private void InitializaNewAddElement(){
-        globalVariable.setIdSelectedProductionWarehouse("");
-        this.warehouse_program_option.setText("");
-        globalVariable.setIdSelectedResponsibleWarehouse(-1);
-        this.warehouse_legalizedBy_option.setText("");
-        globalVariable.setIdSelectedTypeElementWarehouse(-1);
-        this.warehouse_element_type_edit.setText("");
+    private void InitializaNewAddElement() {
 
-        warehouse_element.setVisibility(View.GONE);
-        warehouse_data.setVisibility(View.VISIBLE);
-        globalVariable.setCurrentAddElementActiveProcess(false);
-        warehouse_btn_camera.setVisibility(View.GONE);
-        warehouse_btn_new_element.setVisibility(View.GONE);
-        menuSave.setVisible(false);
-        menuReview.setVisible(false);
+        try {
+
+            asyncListMaterialsByProduction();
+        } catch (Exception ex) {
+            showMessageDialog(ex.getMessage());
+        }
 
     }
 
@@ -424,7 +427,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         photos_recycler_view = (RecyclerView) v.findViewById(R.id.photos_recycler_view);
         photos_recycler_view.setHasFixedSize(true);
 
-
+        mIncidenciasFormView = v.findViewById(R.id.warehouse_element);
+        mProgressView = v.findViewById(R.id.warehouse_progress);
         layoutManager = new LinearLayoutManager(getActivity());
         photos_recycler_view.setLayoutManager(layoutManager);
         photos_recycler_view.setItemAnimator(new DefaultItemAnimator());
@@ -652,9 +656,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         dialog.show();
     }
 
-
-
-
     private void clearFields() {
         warehouse_element_barcode_edit.setText("");
         warehouse_element_desc_edit.setText("");
@@ -742,6 +743,39 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         });
         dlgAlert.setCancelable(true);
         dlgAlert.create().show();
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mIncidenciasFormView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     private static File getOutputMediaFile() {
@@ -838,6 +872,54 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             }
         });
         photos_recycler_view.setAdapter(adapter);
+    }
+
+    private void asyncListMaterialsByProduction() {
+
+        showProgress(true);
+        String url = globalVariable.getUrlServices() + "warehouse/CreateElement/";
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        String tipo = "application/json";
+
+        StringEntity entity = null;
+        try {
+            Gson json = new Gson();
+
+            String resultJson = json.toJson(globalVariable.getDataMaterial());
+            entity = new StringEntity(resultJson);
+
+        } catch (UnsupportedEncodingException ex) {
+
+        }
+        client.post(getActivity().getApplicationContext(), url, entity, tipo, new AsyncHttpResponseHandler() {
+
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                globalVariable.setIdSelectedProductionWarehouse("");
+                warehouse_program_option.setText("");
+                globalVariable.setIdSelectedResponsibleWarehouse(-1);
+                warehouse_legalizedBy_option.setText("");
+                globalVariable.setIdSelectedTypeElementWarehouse(-1);
+                warehouse_element_type_edit.setText("");
+
+                warehouse_element.setVisibility(View.GONE);
+                warehouse_data.setVisibility(View.VISIBLE);
+                globalVariable.setCurrentAddElementActiveProcess(false);
+                warehouse_btn_camera.setVisibility(View.GONE);
+                warehouse_btn_new_element.setVisibility(View.GONE);
+                menuSave.setVisible(false);
+                menuReview.setVisible(false);
+                showProgress(false);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                showProgress(false);
+                showMessageDialog(error.getMessage());
+            }
+        });
     }
 
     public static class DatePickerFragment extends DialogFragment

@@ -18,6 +18,7 @@ public class MaterialViewModel {
     private String barCode;
     private String materialName;
     private Double unitPrice;
+    private Double purchaseValue;
     private ArrayList<Bitmap> ListaImagenes;
     private boolean isReview;
 
@@ -33,6 +34,14 @@ public class MaterialViewModel {
         this.marca = marca;
         this.barCode = barCode;
         this.materialName = materialName;
+    }
+
+    public Double getPurchaseValue() {
+        return purchaseValue;
+    }
+
+    public void setPurchaseValue(Double purchaseValue) {
+        this.purchaseValue = purchaseValue;
     }
 
     public ArrayList<Bitmap> getListaImagenes() {

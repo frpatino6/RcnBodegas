@@ -96,16 +96,16 @@ public class LoginActivity extends AppCompatActivity {
         if (cancel) {
             focusView.requestFocus();
         } else {
-            //showProgress(true);
+            showProgress(true);
             //TODO SE DEJA EN COMENTARIO ESTA LINEA PARA EFECTOS DE PRUEBAS
-            //asyncLogin();
+            asyncLogin();
 
             //TODO, SOLO PARA PRUEBAS SIN CONEXION A BASE DE DATOS
-            globalVariable.setUserName("PRUEBAS");
-            globalVariable.setUserRole("ADMIN");
-            Intent intent = null;
-            intent = new Intent(LoginActivity.this,  MainActivity.class);
-            startActivity(intent);
+            //globalVariable.setUserName("PRUEBAS");
+            //globalVariable.setUserRole("ADMIN");
+            //Intent intent = null;
+            //intent = new Intent(LoginActivity.this,  MainActivity.class);
+            //startActivity(intent);
         }
     }
 

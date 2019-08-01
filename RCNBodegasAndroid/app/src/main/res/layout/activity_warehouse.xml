@@ -231,8 +231,18 @@
 
         </LinearLayout>
 
-    </ScrollView>
 
+
+    </ScrollView>
+    <ProgressBar
+        android:id="@+id/warehouse_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:visibility="gone" />
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/warehouse_btn_camera"
         android:layout_width="wrap_content"
