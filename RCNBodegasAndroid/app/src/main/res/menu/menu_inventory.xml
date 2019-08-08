@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/mnu_review"
+        android:icon="@mipmap/ic_review"
+        android:title="Revisar"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/mnu_save"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Cerrar inventario"
+        app:showAsAction="always" />
+</menu>

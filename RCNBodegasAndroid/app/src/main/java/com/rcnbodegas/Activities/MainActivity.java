@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity
 
         globalVariable = (GlobalClass) getApplicationContext();
         View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
-        txtUser= headerView.findViewById(R.id.txtUserName);
+        txtUser = headerView.findViewById(R.id.txtUserName);
         txtUser.setText(globalVariable.getUserName());
         drawer.openDrawer(Gravity.LEFT);
     }
@@ -66,9 +66,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        return false;
     }
 
     @Override
@@ -94,23 +92,11 @@ public class MainActivity extends AppCompatActivity
 
         Fragment fragment = null;
 
-        if (id == R.id.navBodegasAmbientacion) {
-            fragment= new WarehouseFragment();
-
-        }  else if (id == R.id.navBodegasVestuario) {
-            fragment= new WarehouseFragment();
-
-        } else if (id == R.id.navBodegasProduccion) {
-            fragment= new WarehouseFragment();
-
-        } else if (id == R.id.navBodegasBTL) {
-            fragment= new WarehouseFragment();
-
-        } else if (id == R.id.navBodegasLavanderia) {
-            fragment= new WarehouseFragment();
+        if (id == R.id.navBodegasVestuario) {
+            fragment = new WarehouseFragment();
 
         } else if (id == R.id.navInventario) {
-            fragment= new InventoryFragment();
+            fragment = new InventoryFragment();
 
         }
 

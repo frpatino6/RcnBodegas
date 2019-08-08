@@ -1,24 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/lyInvewntory"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="4dp">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/inventory_data"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/inventory_data"
+            <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <EditText
+                    android:textSize="@dimen/abc_text_view_text_size"
+                    android:id="@+id/inventory_warehouse_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:hint="Bodega"
+                    android:text=""
+                    android:textColor="#333" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <EditText
+                    android:textSize="@dimen/abc_text_view_text_size"
+                    android:id="@+id/inventory_program_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:hint="Programa"
+                    android:text=""
+                    android:textColor="#333" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <EditText
+                    android:textSize="@dimen/abc_text_view_text_size"
+                    android:id="@+id/inventory_responsible_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:hint="Responsable"
+                    android:text=""
+                    android:textColor="#333" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <EditText
+                    android:textSize="@dimen/abc_text_view_text_size"
+                    android:id="@+id/inventory_date_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:hint="Fecha de Inventario"
+                    android:text=""
+                    android:textColor="#333" />
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/inventory_btn_ok"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="8dp"
+                android:background="@color/primaryColor"
+                android:text="OK"
+                android:textColor="@color/primaryTextColor" />
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/inventroy_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/inventory_element"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#eee"
                 android:orientation="vertical">
 
                 <android.support.design.widget.TextInputLayout
@@ -26,213 +122,135 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
 
-                    <EditText
-                        android:id="@+id/inventory_warehouse_option"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:focusable="false"
-                        android:hint="Bodega"
-
-                        android:text=""
-                        android:textColor="#333" />
-                </android.support.design.widget.TextInputLayout>
-
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp">
-
-                    <EditText
-                        android:id="@+id/inventory_program_option"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="Programa"
-                        android:text=""
-                        android:focusable="false"
-                        android:textColor="#333" />
-                </android.support.design.widget.TextInputLayout>
-
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp">
-
-                    <EditText
-                        android:id="@+id/inventory_responsible_option"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="Responsable"
-                        android:focusable="false"
-                        android:text=""
-                        android:textColor="#333" />
-                </android.support.design.widget.TextInputLayout>
-
-
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp">
-
-                    <EditText
-                        android:id="@+id/inventory_date_option"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="Fecha de Inventario"
-                        android:text=""
-                        android:focusable="false"
-                        android:textColor="#333" />
-                </android.support.design.widget.TextInputLayout>
-
-                <Button
-                    android:id="@+id/inventory_btn_ok"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_margin="8dp"
-                    android:background="@color/primaryColor"
-                    android:text="OK"
-                    android:textColor="@color/primaryTextColor" />
-            </LinearLayout>
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <LinearLayout
-                    android:id="@+id/inventory_element"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#eee"
-                    android:orientation="vertical">
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp">
-
-                        <EditText
-                            android:id="@+id/inventory_element_barcode_edit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Ingrese el código de barras" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp">
-
-                        <EditText
-                            android:id="@+id/inventory_element_edit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="Descripción"
-                            android:text=""
-                            android:textColor="#333" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp">
-
-                        <EditText
-                            android:id="@+id/inventory_element_type_edit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="Tipo de Elemento"
-                            android:textColor="#333" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp">
-
-                        <EditText
-                            android:id="@+id/inventory_element_brand_edit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="Marca"
-                            android:textColor="#333" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp">
-
-                        <EditText
-                            android:id="@+id/inventory_element_price_edit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="Precio del Elemento"
-                            android:textColor="#333" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp">
-                        <EditText
-                            android:id="@+id/inventory_element_value_edit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:hint="Valor del Elemento"
-                            android:textColor="#333" />
-                    </android.support.design.widget.TextInputLayout>
-
                     <LinearLayout
-                        android:id="@+id/inventory_element_photos"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="8dp">
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="12">
 
-                        <TextView
-                            android:id="@+id/inventory_element_photos_txt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Fotos Capturadas"
-                            android:textColor="#333"
-                            android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:id="@+id/inventory_element_photos_list"
-                            android:layout_width="match_parent"
+                        <EditText
+                            android:textSize="@dimen/abc_text_view_text_size"
+                            android:id="@+id/inventory_element_barcode_edit"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:layout_weight="10"
+                            android:hint="Ingrese el código de barras"
+                            android:text="" />
 
+                        <ImageButton
+                            android:id="@+id/btnSearch"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:background="@android:color/transparent"
+                            android:src="@mipmap/ic_search" />
 
-                        </LinearLayout>
                     </LinearLayout>
 
-                    <Button
-                        android:id="@+id/inventory_btn_new_element"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@color/primaryColor"
-                        android:text="Nuevo Elemento"
-                        android:textColor="@color/primaryTextColor" />
+                </android.support.design.widget.TextInputLayout>
 
-                    <Button
-                        android:id="@+id/inventory_btn_review"
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp">
+
+                    <EditText
+                        android:id="@+id/inventory_element_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:textSize="@dimen/abc_text_view_text_size"
+                        android:hint="Descripción"
+                        android:text=""
+                        android:textColor="#333" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp">
+
+                    <EditText
+                        android:textSize="@dimen/abc_text_view_text_size"
+                        android:id="@+id/inventory_element_type_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:focusable="false"
+                        android:hint="Tipo de Elemento"
+                        android:textColor="#333" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp">
+
+                    <EditText
+                        android:textSize="@dimen/abc_text_view_text_size"
+                        android:id="@+id/inventory_element_brand_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:hint="Marca"
+                        android:textColor="#333" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp">
+
+                    <EditText
+                        android:textSize="@dimen/abc_text_view_text_size"
+                        android:id="@+id/inventory_element_price_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:hint="Precio"
+                        android:textColor="#333" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp">
+
+                    <EditText
+                        android:textSize="@dimen/abc_text_view_text_size"
+                        android:id="@+id/inventory_element_value_edit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:enabled="false"
+                        android:hint="Valor materia"
+                        android:textColor="#333" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:textSize="@dimen/abc_text_view_text_size"
+                    android:id="@+id/inventory_btn_new_element"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    app:fabSize="normal"
+                    android:layout_marginBottom="@dimen/fab_margin"
+                    android:src="@mipmap/ic_add_material" />
+
+                <LinearLayout
+                    android:id="@+id/inventory_element_photos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <LinearLayout
+                        android:id="@+id/inventory_element_photos_list"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@color/primaryColor"
-                        android:paddingLeft="64dp"
-                        android:paddingTop="16dp"
-                        android:paddingRight="64dp"
-                        android:paddingBottom="16dp"
-                        android:text="Revisar"
-                        android:textColor="@color/primaryTextColor" />
+                        android:orientation="horizontal">
+                    </LinearLayout>
                 </LinearLayout>
-            </ScrollView>
-
-        </LinearLayout>
-    </ScrollView>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 </LinearLayout>
