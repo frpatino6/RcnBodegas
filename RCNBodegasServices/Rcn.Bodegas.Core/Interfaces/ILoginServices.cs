@@ -8,6 +8,6 @@ namespace Rcn.Bodegas.Core.Interfaces
 {
   public interface ILoginServices
   {
-    Task<UserViewModel> GetUserAsync(string userName);
+    Task<UserViewModel> GetUserAsync(string userName, string password);
   }
 }
