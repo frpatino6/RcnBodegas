@@ -15,5 +15,9 @@ namespace Rcn.Bodegas.Core.Interfaces
     Task<MaterialViewModel> GetMaterialByBarCode(string barcode);
 
     Task<List<MaterialViewModel>> GetMaterialsForProduction(string warehouseType, string productionId, int responsibleId);
+
+    Task<bool> CreateInconsistency(string warehouseType, string productionId, int responsibleId);
+
+
   }
 }

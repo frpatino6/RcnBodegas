@@ -17,6 +17,70 @@ namespace Rcn.Bodegas.Core.Services
       _IOracleManagment = oracleManagment;
     }
 
+    public Task<bool> CreateInconsistency(string warehouseType, string productionId, int responsibleId)
+    {
+      OracleParameter OraEmpresa = new OracleParameter(":AD_EMPRESA_CODIGO", OracleDbType.Int32, 20, ParameterDirection.Input);
+      OracleParameter OraCodigo = new OracleParameter(":new_id", OracleDbType.Int32,  ParameterDirection.Output);
+      OracleParameter OraTipoBodega = new OracleParameter(":CODIGO_TIPO_BODEGA", OracleDbType.Varchar2, 1, ParameterDirection.Input);
+      OracleParameter OraProduccion = new OracleParameter(":CODIGO_PRODUCCION", OracleDbType.Int32, ParameterDirection.Input);
+      OracleParameter OraResponsable = new OracleParameter(":CODIGO_RESPONSABLE", OracleDbType.Int32, 1, ParameterDirection.Input);
+      OracleParameter OraTipoElemento = new OracleParameter(":CODIGO_TIPO_ELEMENTO", OracleDbType.Int32, ParameterDirection.Input);
+      OracleParameter OraCodigoBarras = new OracleParameter(":CODIGO_BARRAS", OracleDbType.Varchar2, 20, ParameterDirection.Input);
+      OracleParameter OraFechaInventario = new OracleParameter(":FECHA_INVENTARIO", OracleDbType.Date, ParameterDirection.Input);
+      OracleParameter OraHoraInventario = new OracleParameter(":HORA_INVENTARIO", OracleDbType.TimeStamp, 1, ParameterDirection.Input);
+      OracleParameter OraEncontrado = new OracleParameter(":ENCONTRADO", OracleDbType.Int16, ParameterDirection.Input);
+
+
+
+      string query = $@" INSERT INTO BD_IMAGENES (AD_EMPRESA_CODIGO,CODIGO_TIPO_BODEGA,CODIGO_PRODUCCION,CODIGO_RESPONSABLE,CODIGO_TIPO_ELEMENTO,CODIGO_BARRAS,FECHA_INVENTARIO,HORA_INVENTARIO,ENCONTRADO)
+                                          VALUES(:AD_EMPRESA_CODIGO,:CODIGO_TIPO_BODEGA,:CODIGO_PRODUCCION,:CODIGO_RESPONSABLE,:CODIGO_TIPO_ELEMENTO,:CODIGO_BARRAS,:FECHA_INVENTARIO,:HORA_INVENTARIO,:ENCONTRADO) returning CODIGO into :new_id";
+
+      using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
+      {
+        con.Open();
+        using (OracleCommand oraUpdate = con.CreateCommand())
+        {
+          using (OracleTransaction transaction = con.BeginTransaction(IsolationLevel.ReadCommitted))
+          {
+            oraUpdate.Transaction = transaction;
+            try
+            {
+              oraUpdate.CommandText = query;
+              oraUpdate.Parameters.Add(OraEmpresa);
+              oraUpdate.Parameters.Add(OraCodigo);
+              oraUpdate.Parameters.Add(OraTipoBodega);
+              oraUpdate.Parameters.Add(OraProduccion);
+              oraUpdate.Parameters.Add(OraResponsable);
+              oraUpdate.Parameters.Add(OraTipoElemento);
+              oraUpdate.Parameters.Add(OraCodigoBarras);
+              oraUpdate.Parameters.Add(OraFechaInventario);
+              oraUpdate.Parameters.Add(OraHoraInventario);
+              oraUpdate.Parameters.Add(OraEncontrado);
+
+              OraEmpresa.Value = 1;              
+              OraTipoBodega.Value = 1;
+              OraProduccion.Value = 1;
+              OraResponsable.Value = 1;
+              OraTipoElemento.Value = 1;
+              OraCodigoBarras.Value = 1;
+              OraFechaInventario.Value = 1;
+              OraHoraInventario.Value = 1;
+              OraEncontrado.Value = 1;
+
+
+            }
+            catch (System.Exception)
+            {
+              transaction.Rollback();
+              throw;
+            }
+          }
+        }
+
+        return null;
+      }
+    }
+
     /// <summary>
     /// Get list productions
     /// </summary>
@@ -117,9 +181,10 @@ namespace Rcn.Bodegas.Core.Services
       string query = string.Empty;
 
       if (wareHouseid.Equals(WAREHOUSE_TYPE_V))
-        query = @"select CODIGO_TIPO, NOMBRE_TIPO from BD_TIPO_PRENDA ORDER BY NOMBRE_TIPO";
-      else {
-        query = @"select CODIGO_TIPO, NOMBRE_TIPO from BD_TIPO_ELEMENTO ORDER BY NOMBRE_TIPO";
+        query = @"select CODIGO_TIPO, NOMBRE_TIPO from BD_TIPO_PRENDA  WHERE ESTADO='A' ORDER BY NOMBRE_TIPO";
+      else
+      {
+        query = @"select CODIGO_TIPO, NOMBRE_TIPO from BD_TIPO_ELEMENTO WHERE ESTADO='A' ORDER BY NOMBRE_TIPO ";
       }
 
       var records = _IOracleManagment.GetData(null, query);
@@ -200,7 +265,7 @@ namespace Rcn.Bodegas.Core.Services
       string materialName = string.Empty;
       string typeElement = string.Empty;
       string barCode = string.Empty;
-      decimal unitPrice=0;
+      decimal unitPrice = 0;
 
       List<MaterialViewModel> result = new List<MaterialViewModel>();
       List<OracleParameter> parameters = new List<OracleParameter>();
@@ -248,18 +313,18 @@ namespace Rcn.Bodegas.Core.Services
         if (!rec.IsDBNull(rec.GetOrdinal("PRECIO_UNITARIO")))
           unitPrice = rec.GetDecimal(rec.GetOrdinal("PRECIO_UNITARIO"));
 
-        result.Add(new MaterialViewModel 
+        result.Add(new MaterialViewModel
         {
           materialName = materialName,
           typeElementName = typeElement,
           marca = marca,
           barCode = barCode,
-          unitPrice=unitPrice
-        
+          unitPrice = unitPrice
+
         });
-    }
+      }
 
       return result;
     }
-}
+  }
 }

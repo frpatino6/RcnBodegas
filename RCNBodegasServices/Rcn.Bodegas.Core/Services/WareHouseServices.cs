@@ -1,8 +1,11 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -99,20 +102,21 @@ namespace Rcn.Bodegas.Core.Services
                 OraEmpresaCodigo.Value = 1;
                 OraUbicacionCodigo.Value = 1;
                 OraUsuarioCreacion.Value = "BODEGAS";
-                OraTerceroActual.Value = "42877557";
+                OraTerceroActual.Value = "42877557"; //TODO: CEDULA DEL USUARIO LOGEADO
                 OraValorCompra.Value = newMaterial.unitPrice;
                 OraElementType.Value = newMaterial.typeElementId;
 
                 rowCount = oraUpdate.ExecuteNonQuery();
 
-                InsertImagesByMaterial(OraCodigoElemento.Value.ToString(), newMaterial.ListaImagenesStr, con, transaction);
+                if (newMaterial.ListaImagenesStr != null && newMaterial.ListaImagenesStr.Count > 0)
+                  InsertImagesByMaterial(OraCodigoElemento.Value.ToString(), newMaterial.ListaImagenesStr, con, transaction);
               }
               transaction.Commit();
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
               transaction.Rollback();
-              throw;
+              throw new System.Exception(ex.Message);
             }
           }
         }
@@ -130,8 +134,8 @@ namespace Rcn.Bodegas.Core.Services
       OracleParameter OraArchivo = new OracleParameter(":ARCHIVO", OracleDbType.Varchar2, 1, ParameterDirection.Input);
       OracleParameter OraFoto = new OracleParameter(":FOTO", OracleDbType.Blob, ParameterDirection.Input);
 
-      string query = $@" INSERT INTO BD_IMAGENES (AD_EMPRESA_CODIGO,BD_MATERIAL_CODIGO,CONSECUTIVO,DESCRIPCION,ARCHIVO,FOTO)
-                                          VALUES(:AD_EMPRESA_CODIGO,:BD_MATERIAL_CODIGO,:CONSECUTIVO,:DESCRIPCION,:ARCHIVO,:FOTO)";
+      string query = $@" INSERT INTO BD_IMAGENES (AD_EMPRESA_CODIGO,BD_MATERIAL_CODIGO,CONSECUTIVO,DESCRIPCION,ARCHIVO,FOTO,FOTO_JAVA)
+                                          VALUES(:AD_EMPRESA_CODIGO,:BD_MATERIAL_CODIGO,:CONSECUTIVO,:DESCRIPCION,:ARCHIVO,:FOTO,:FOTO)";
 
       OracleCommand oraUpdate = con.CreateCommand();
       int consecutivo = 1;
@@ -144,17 +148,24 @@ namespace Rcn.Bodegas.Core.Services
       oraUpdate.Parameters.Add(OraArchivo);
       oraUpdate.Parameters.Add(OraFoto);
 
+      Image imageForSave;
 
       foreach (var item in listImages)
       {
 
-        byte[] bytesImage = Encoding.ASCII.GetBytes(item);
+        byte[] bytesImage =Convert.FromBase64String(item);
+
+        using (MemoryStream mStream = new MemoryStream(bytesImage))
+        {
+          imageForSave = Image.FromStream(mStream);
+        }
+
      
         OraEmpresae.Value = 1;
         OraMaterialCodigo.Value = codigoMaterial;
         OraConsecutivo.Value = consecutivo;
         OraDescripcion.Value = string.Empty;
-        OraArchivo.Value = string.Empty;
+        OraArchivo.Value = string.Empty;//ESTE CAMPO SE LLENA CON EL CÓDIGO DE BARRAS MÁS LA EXTENSIÓN DEL ARCHIVO
         OraFoto.Value = bytesImage;
         consecutivo++;
         rowCount = oraUpdate.ExecuteNonQuery();
