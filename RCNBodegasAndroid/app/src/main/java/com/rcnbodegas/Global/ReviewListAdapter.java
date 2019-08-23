@@ -2,6 +2,7 @@ package com.rcnbodegas.Global;
 
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,8 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
         TextView txtMaterial;
         TextView txtMarca;
         TextView txtBarcode;
+        TextView txtTipoElement;
+        Toolbar toolbarCard;
         ConstraintLayout layoutWareHouseView;
 
         public MyViewHolder(View itemView) {
@@ -35,6 +38,10 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
             this.txtMaterial= (TextView) itemView.findViewById(R.id.txtMaterial);
             this.txtMarca= (TextView) itemView.findViewById(R.id.txtMarca);
             this.txtBarcode= (TextView) itemView.findViewById(R.id.txtBarcode);
+            this.txtTipoElement= (TextView) itemView.findViewById(R.id.txtTipoElement);
+            this.toolbarCard=itemView.findViewById(R.id.toolbarCard);
+
+
 
         }
     }
@@ -71,10 +78,13 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
         TextView txtMaterial = holder.txtMaterial;
         TextView txtMarca= holder.txtMarca;
         TextView txtBarcode= holder.txtBarcode;
+        TextView txtTipoElement= holder.txtTipoElement;
+        Toolbar toolbarCard=holder.toolbarCard;
 
         txtMaterial.setText(dataSet.get(listPosition).getMaterialName());
         txtMarca.setText(dataSet.get(listPosition).getMarca().toString());
         txtBarcode.setText(dataSet.get(listPosition).getBarCode().toString());
+        txtTipoElement.setText(dataSet.get(listPosition).getTypeElementName().toString());
 
         holder.layoutWareHouseView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +95,9 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
                 notifyDataSetChanged();
             }
         });
+
+        toolbarCard.inflateMenu(R.menu.card_menu);
+
     }
 
     @Override

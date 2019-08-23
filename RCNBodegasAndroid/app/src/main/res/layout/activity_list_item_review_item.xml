@@ -16,8 +16,17 @@
         app:layout_constraintTop_toTopOf="parent"
         card_view:cardElevation="@dimen/abc_action_bar_cardElevation_detail"
         card_view:cardUseCompatPadding="true"
-        card_view:contentPadding="3dp">
-
+        card_view:contentPadding="2dp">
+        <android.support.v7.widget.Toolbar
+            android:visibility="gone"
+            android:id="@+id/toolbarCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            app:popupTheme="@style/Theme.AppCompat.Light"
+            app:subtitleTextAppearance="@style/Card.Subtitle"
+            app:theme="@style/ToolbarCard"
+            app:titleTextAppearance="@style/Card.Title" />
         <android.support.constraint.ConstraintLayout
             android:id="@+id/layoutReview"
             android:layout_width="match_parent"
@@ -29,9 +38,9 @@
                 android:id="@+id/txtMaterial"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginLeft="3dp"
+                android:layout_marginTop="3dp"
                 android:text="Material"
 
                 android:textSize="@dimen/abc_text_view_text_size_item_recycler"
@@ -43,25 +52,37 @@
                 android:id="@+id/txtMarca"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="3dp"
                 android:text="Marca"
                 android:textColor="#333"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtMaterial" />
 
             <TextView
-                android:textColor="#333"
                 android:id="@+id/txtBarcode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="3dp"
                 android:text=""
+                android:textColor="#333"
                 app:layout_constraintStart_toEndOf="@+id/txtMarca"
                 app:layout_constraintTop_toBottomOf="@+id/txtMaterial" />
+            <TextView
+                android:id="@+id/txtTipoElement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="3dp"
+                android:text="Tipo elemento"
+                android:textColor="#333"
+                app:layout_constraintStart_toEndOf="@+id/txtBarcode"
+                app:layout_constraintTop_toBottomOf="@+id/txtMaterial" />
+
         </android.support.constraint.ConstraintLayout>
 
     </android.support.v7.widget.CardView>
