@@ -17,12 +17,12 @@ namespace Rcn.Bodegas.Api.Controllers
 
 
     [HttpGet("/User/LoginActiveDirectory/{userName=0}/{pws=''}")]
-    public async Task<IActionResult> GetUserByUserName(string userName,string pws)
+    public async Task<IActionResult> GetUserByUserName(string userName, string pws)
     {
       try
       {
-        var result = _ILoginServices.GetUserAsync(userName);
-        return Ok(result.Result);
+        var result = await _ILoginServices.GetUserAsync(userName, pws);
+        return Ok(result);
       }
 
       catch (WareHouseExceptions ex)
@@ -37,16 +37,17 @@ namespace Rcn.Bodegas.Api.Controllers
     }
 
 
-    [HttpGet("/User/GetUserByUserName/{userName=0}")]
-    public async Task<IActionResult> GetUserByUserName(string userName)
+    [HttpGet("/User/GetUserByUserName/{userName}/{password}")]
+    public async Task<IActionResult> GetUserByUserNameasync(string userName, string password)
     {
       try
       {
-        var result = _ILoginServices.GetUserAsync(userName);
-        return Ok(result.Result);
+        var result = await _ILoginServices.GetUserAsync(userName, password);
+        return Ok(result);
       }
 
-      catch (WareHouseExceptions ex) {
+      catch (WareHouseExceptions ex)
+      {
         return BadRequest(ex.Message);
       }
       catch (Exception ex)

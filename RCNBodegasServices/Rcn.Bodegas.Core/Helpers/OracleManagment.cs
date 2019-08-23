@@ -50,12 +50,12 @@ namespace Rcn.Bodegas.Core.Helpers
           {
             while (reader.Read())
             {
-              yield return (IDataRecord)reader;
+              yield return reader;
             }
-          }         
+          }
         }
       }
-    }
+    }    
 
     public string GetOracleConnectionParameters()
     {

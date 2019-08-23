@@ -53,12 +53,12 @@ namespace Rcn.Bodegas.Api.Controllers
       }
     }
 
-    [HttpGet("/Inventory/GetListTypeElement/")]
-    public async Task<IActionResult> GetListTypeElementAsync()
+    [HttpGet("/Inventory/GetListTypeElement/{warehouseid}")]
+    public async Task<IActionResult> GetListTypeElementAsync(string warehouseid)
     {
       try
       {
-        var result = await _IInventroy.GetListTipoElemento();
+        var result = await _IInventroy.GetListTipoElemento(warehouseid);
         return Ok(result);
       }
 
@@ -79,6 +79,26 @@ namespace Rcn.Bodegas.Api.Controllers
       try
       {
         var result = await _IInventroy.GetMaterialByBarCode(barcode);
+        return Ok(result);
+      }
+
+      catch (WareHouseExceptions ex)
+      {
+        return BadRequest(ex.Message);
+      }
+      catch (Exception ex)
+      {
+
+        return BadRequest(ex.Message);
+      }
+    }
+
+    [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}")]
+    public async Task<IActionResult> GetMaterialByBarcodeAsync(string wareHouseType ,string production, int responsible)
+    {
+      try
+      {
+        var result = await _IInventroy.GetMaterialsForProduction(wareHouseType,production,responsible);
         return Ok(result);
       }
 
