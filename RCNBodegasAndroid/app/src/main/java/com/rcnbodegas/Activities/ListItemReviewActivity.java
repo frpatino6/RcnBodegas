@@ -18,22 +18,24 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.rcnbodegas.Global.AddedElementListAdapter;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ReviewListAdapter;
 import com.rcnbodegas.Global.WareHouseAdapter;
 import com.rcnbodegas.Global.onRecyclerWarehouseListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
 
-public class ListItemReviewActivity extends AppCompatActivity   implements SearchView.OnQueryTextListener{
+public class ListItemReviewActivity extends AppCompatActivity  {
     private RecyclerView recyclerView;
     private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<MaterialViewModel> listMaterialByReview;
-
+    private ArrayList<MaterialViewModel> sortEmpList;
     private ReviewListAdapter adapter;
     private View mIncidenciasFormView;
     private View mProgressView;
@@ -91,79 +93,72 @@ public class ListItemReviewActivity extends AppCompatActivity   implements Searc
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_review, menu);
+        try {
+            getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
 
-        /*MenuItem searchItem = menu.findItem(R.id.action_search);
-        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            MenuItem search_item = menu.findItem(R.id.search_warehouse);
 
-        if (searchView != null) {
-            searchView.setIconified(false);
-
-
-            if (!searchView.getQuery().toString().equals(""))
-                searchView.setIconified(false);
-            else
-                searchView.setIconified(true);
-
-
+            SearchView searchView = (SearchView) search_item.getActionView();
+            searchView.setFocusable(false);
+            searchView.setQueryHint(getString(R.string.search_hint));
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
                 @Override
                 public boolean onQueryTextSubmit(String s) {
-                    // BuildQuery(s);
-                    return true;
+
+                    //clear the previous data in search arraylist if exist
+
+                    return false;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String s) {
-
+                    FilterListView(s);
                     return true;
                 }
             });
- // Associate searchable configuration with the SearchView
-    SearchManager searchManager =
-           (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-    SearchView searchView =
-            (SearchView) menu.findItem(R.id.search).getActionView();
-    searchView.setSearchableInfo(
-            searchManager.getSearchableInfo(getComponentName()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    return true;
-
-            View closeButton = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
-            if (closeButton != null) {
-                closeButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        searchView.setQuery("", false);
-                        searchView.requestFocus();
-                    }
-                });
-            }
-            searchView.clearFocus(); // close the keyboard on load
-        }*/
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
 
         return true;
-
     }
 
+    private void FilterListView(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<MaterialViewModel, String> filter = new Filter<MaterialViewModel, String>() {
+                public boolean isMatched(MaterialViewModel object, String text) {
+
+                    boolean result1 = false;
+                    boolean result2 = false;
+                    boolean result3 = false;
 
 
-    @Override
-    public boolean onQueryTextSubmit(String s) {
-        return false;
-    }
+                    result1 = object.getMaterialName().toString().toLowerCase().contains(String.valueOf(text));
+                    result2 = object.getBarCode().toString().toLowerCase().contains(String.valueOf(text));
+                    result3 = object.getMarca().toString().toLowerCase().contains(String.valueOf(text));
 
-    @Override
-    public boolean onQueryTextChange(String s) {
-        return false;
+
+                    if (result1 || result2 || result3)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+
+            sortEmpList = (ArrayList<MaterialViewModel>) new FilterList().filterList(listMaterialByReview, filter, query);
+
+            adapter = new ReviewListAdapter(sortEmpList);
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

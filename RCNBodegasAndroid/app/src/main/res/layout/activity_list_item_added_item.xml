@@ -26,7 +26,7 @@
                 android:textColor="@color/primaryDarkColor"
                 android:background="@color/cardViewHeaderColor"
                 android:padding="10dp"
-                android:textSize="@dimen/abc_text_view_text_size_header_cardview"
+                android:textSize="@dimen/abc_text_view_text_size"
                 android:textStyle="bold"
                 android:id="@+id/txtMaterial"
                 android:text=""
@@ -80,7 +80,23 @@
                 android:text="Precio"
                 android:textColor="#333"
                 android:layout_alignParentRight="true" />
-
+            <ImageButton
+                android:layout_margin="8dp"
+                android:id="@+id/btnPhoto"
+                android:background="@android:color/transparent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/ic_camera_cardview" />
+            <ImageButton
+                android:layout_margin="8dp"
+                android:background="@android:color/transparent"
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/btnPhoto"
+                android:src="@drawable/ic_delete" />
 
 
         </RelativeLayout>

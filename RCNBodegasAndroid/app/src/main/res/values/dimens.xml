@@ -7,12 +7,14 @@
     <dimen name="abc_action_bar_cardElevation">8dp</dimen>
     <dimen name="abc_text_view_hint_size">13dp</dimen>
     <dimen name="abc_text_view_title_resumen_size">18dp</dimen>
-    <dimen name="abc_text_view_text_size">15dp</dimen>
+    <dimen name="abc_text_view_text_size">14dp</dimen>
+    <dimen name="abc_text_view_text_size_header_cardview">12dp</dimen>
     <dimen name="abc_text_view_text_size_item_recycler">15dp</dimen>
+    <dimen name="abc_text_view_text_size_item_recycler_title">18dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="abc_action_bar_cardElevation_detail">2dp</dimen>
     <dimen name="margin_list_incidencias">15dp</dimen>
-    <dimen name="activity_vertical_margin_normal">8dp</dimen>
+    <dimen name="activity_vertical_margin_normal">3dp</dimen>
     <dimen name="abc_action_bar_cardElevation_2dp">2dp</dimen>
     <dimen name="padding_button_menu">45dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
