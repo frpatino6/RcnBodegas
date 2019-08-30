@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.2",
-    "signature": "56e78f458a51526b16c2480c1c77d2d3b4832512"
+    "signature": "aaa5e32f682f7d59131a1a6b1ecd25f9636c454b"
   },
   "compilationOptions": {},
   "targets": {
@@ -11,10 +11,27 @@
           "Oracle.ManagedDataAccess.Core": "2.19.3",
           "System.DirectoryServices": "4.5.0",
           "System.DirectoryServices.AccountManagement": "4.5.0",
+          "System.Drawing.Common": "4.5.1",
           "Microsoft.Extensions.Configuration.Abstractions": "2.2.0.0"
         },
         "runtime": {
           "Rcn.Bodegas.Core.dll": {}
+        }
+      },
+      "Microsoft.Win32.SystemEvents/4.5.0": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.6.26515.6"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/netcoreapp2.0/Microsoft.Win32.SystemEvents.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.6.26515.6"
+          }
         }
       },
       "Oracle.ManagedDataAccess.Core/2.19.3": {
@@ -101,6 +118,31 @@
           }
         }
       },
+      "System.Drawing.Common/4.5.1": {
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "4.5.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/System.Drawing.Common.dll": {
+            "assemblyVersion": "4.0.0.1",
+            "fileVersion": "4.6.26919.2"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/unix/lib/netcoreapp2.0/System.Drawing.Common.dll": {
+            "rid": "unix",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.0.1",
+            "fileVersion": "4.6.26919.2"
+          },
+          "runtimes/win/lib/netcoreapp2.0/System.Drawing.Common.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "4.0.0.1",
+            "fileVersion": "4.6.26919.2"
+          }
+        }
+      },
       "System.IO.FileSystem.AccessControl/4.5.0": {
         "dependencies": {
           "System.Security.AccessControl": "4.5.0",
@@ -179,6 +221,13 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Microsoft.Win32.SystemEvents/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LuI1oG+24TUj1ZRQQjM5Ew73BKnZE5NZ/7eAdh1o8ST5dPhUnJvIkiIn2re3MwnkRy6ELRnvEbBxHP8uALKhJw==",
+      "path": "microsoft.win32.systemevents/4.5.0",
+      "hashPath": "microsoft.win32.systemevents.4.5.0.nupkg.sha512"
+    },
     "Oracle.ManagedDataAccess.Core/2.19.3": {
       "type": "package",
       "serviceable": true,
@@ -213,6 +262,13 @@
       "sha512": "sha512-6zbQ8XGbbxl80AsSIItNlltnIuG1szX2o67QmXhcIeH8hLOC+hYTBwcHPJ9nevtYp02EwOVTz+gCxuYcmSBU7Q==",
       "path": "system.directoryservices.protocols/4.5.0",
       "hashPath": "system.directoryservices.protocols.4.5.0.nupkg.sha512"
+    },
+    "System.Drawing.Common/4.5.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GiyeGi/v4xYDz1vCNFwFvhz9k1XddOG7VD3jxRqzRBCbTHji+s3HxxbxtoymuK4OadEpgotI8zQ5+GEEH9sUEQ==",
+      "path": "system.drawing.common/4.5.1",
+      "hashPath": "system.drawing.common.4.5.1.nupkg.sha512"
     },
     "System.IO.FileSystem.AccessControl/4.5.0": {
       "type": "package",

@@ -93,12 +93,12 @@ namespace Rcn.Bodegas.Api.Controllers
       }
     }
 
-    [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}")]
-    public async Task<IActionResult> GetMaterialByBarcodeAsync(string wareHouseType ,string production, int responsible)
+    [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}")]
+    public async Task<IActionResult> GetMaterialByBarcodeAsync(string wareHouseType ,string production, int responsible, int type_element)
     {
       try
       {
-        var result = await _IInventroy.GetMaterialsForProduction(wareHouseType,production,responsible);
+        var result = await _IInventroy.GetMaterialsForProduction(wareHouseType,production,responsible, type_element);
         return Ok(result);
       }
 
