@@ -14,7 +14,7 @@ import com.rcnbodegas.ViewModels.MaterialViewModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.MyViewHolder> {
+public class AddedElementListAdapter extends RecyclerView.Adapter<AddedElementListAdapter.MyViewHolder> {
     private ArrayList<MaterialViewModel> dataSet;
     private onRecyclerWarehouseListItemClick _event;
     private int row_index;
@@ -40,7 +40,7 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
         }
     }
 
-    public ReviewListAdapter(ArrayList<MaterialViewModel> data) {
+    public AddedElementListAdapter(ArrayList<MaterialViewModel> data) {
         this.dataSet = data;
 
 
@@ -56,7 +56,7 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
         try {
 
             _view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.activity_list_item_review_item, parent, false);
+                    .inflate(R.layout.activity_list_item_added_item, parent, false);
             myViewHolder = new MyViewHolder(_view);
 
 

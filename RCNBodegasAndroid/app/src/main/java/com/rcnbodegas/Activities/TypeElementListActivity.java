@@ -158,9 +158,9 @@ public class TypeElementListActivity extends AppCompatActivity {
     }
 
     private void asyncListResponsibles() {
+        String wareHouse=globalVariable.getQueryByInventory()? globalVariable.getIdSelectedWareHouseInventory(): globalVariable.getIdSelectedWareHouseWarehouse();
 
-
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListTypeElement/";
+        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListTypeElement/"  + wareHouse;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

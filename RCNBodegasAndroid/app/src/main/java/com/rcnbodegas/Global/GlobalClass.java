@@ -14,7 +14,8 @@ public class GlobalClass extends Application {
     private int idSelectedTypeElementWarehouse;
     private String userName;
     //private String urlServices = "http://172.20.0.154:8083/";
-    private String urlServices = "http://192.168.0.10/bodegas/";
+
+    private String urlServices = "http://192.168.0.7/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
@@ -55,6 +56,8 @@ public class GlobalClass extends Application {
     }
 
     public ArrayList<MaterialViewModel> getDataMaterial() {
+
+        if(dataMaterial==null) dataMaterial= new ArrayList<>();
         return dataMaterial;
     }
 

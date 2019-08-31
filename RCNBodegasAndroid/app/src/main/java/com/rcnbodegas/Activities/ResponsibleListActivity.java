@@ -25,12 +25,9 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ProductionAdapter;
 import com.rcnbodegas.Global.ResponsibleAdapter;
-import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
-import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
@@ -147,21 +144,26 @@ public class ResponsibleListActivity extends AppCompatActivity {
         }
     }
 
-    private void shwoMessage(String res) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ResponsibleListActivity.this);
+    private void showMessage(String res) {
+        try {
+            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ResponsibleListActivity.this);
 
-        dlgAlert.setMessage(res);
-        dlgAlert.setTitle(getString(R.string.app_name));
-        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
-        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // if this button is clicked, close
-                // current activity
+            dlgAlert.setMessage(res);
+            dlgAlert.setTitle(getString(R.string.app_name));
+            //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+            dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // if this button is clicked, close
+                    // current activity
 
-            }
-        });
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
+                }
+            });
+            dlgAlert.setCancelable(true);
+            dlgAlert.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
     }
 
     private void asyncListResponsibles() {
@@ -209,7 +211,7 @@ public class ResponsibleListActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        shwoMessage(res);
+                        showMessage(res);
 
                     }
 

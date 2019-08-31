@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+
     android:padding="1dp">
 
     <ScrollView
@@ -12,7 +13,7 @@
         android:fillViewport="true">
 
         <LinearLayout
-
+            android:id="@+id/layout_header"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -22,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
 
                 <android.support.design.widget.TextInputLayout
@@ -111,12 +112,12 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/warehouse_element"
+                android:visibility="visible"
+                android:id="@+id/warehouse_element_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#eee"
-                android:orientation="vertical"
-                android:visibility="visible">
+                android:orientation="vertical">
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -128,7 +129,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Código de Barras"
-                        android:text=""
+                        android:text="73218337"
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
 
@@ -143,7 +144,7 @@
                         android:layout_height="wrap_content"
                         android:hint="Descripción"
                         android:singleLine="true"
-                        android:text=""
+                        android:text="Prueba"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
@@ -175,7 +176,7 @@
                         android:layout_height="wrap_content"
                         android:hint="Marca"
                         android:singleLine="true"
-                        android:text=""
+                        android:text="prueba"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
@@ -192,7 +193,7 @@
                         android:hint="Precio"
                         android:inputType="number"
                         android:singleLine="true"
-                        android:text=""
+                        android:text="5000"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
@@ -209,7 +210,7 @@
                         android:hint="Valor materia"
                         android:inputType="number"
                         android:singleLine="true"
-                        android:text=""
+                        android:text="5"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
