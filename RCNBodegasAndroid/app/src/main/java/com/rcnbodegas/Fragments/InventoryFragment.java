@@ -76,6 +76,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_PRODUCTION = 1;
     private static final int REQUEST_RESPONSIBLE = 2;
     private static final int REQUEST_TYPE_ELEMENT = 3;
+    private static final int REQUEST_TYPE_ELEMENT_HEADER = 5;
     private static final int REQUEST_WAREHOUSE = 4;
     // TODO: Rename and change types of parameter
     private ImageButton btnSearch;
@@ -90,6 +91,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private GlobalClass globalVariable;
     private EditText inventory_warehouse_option;
     private EditText inventory_program_option;
+    private EditText inventory_type_element_option;
     private EditText inventory_date_option;
     private EditText inventory_responsible_option;
     private EditText inventory_element_type_edit;
@@ -201,7 +203,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 globalVariable.setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
             }
         }
-    }
+        if (requestCode == REQUEST_TYPE_ELEMENT_HEADER) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("typeElementName");
+                globalVariable.setIdSelectedTypeElementHeader(Integer.valueOf(data.getStringExtra("typeElementId")));
+                this.inventory_type_element_option.setText(result);
+            }
+        }    }
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -306,6 +314,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_data = v.findViewById(R.id.inventory_data);
         inventory_warehouse_option = v.findViewById(R.id.inventory_warehouse_option);
         inventory_program_option = v.findViewById(R.id.inventory_program_option);
+        inventory_type_element_option= v.findViewById(R.id.inventory_type_element_option);
         inventory_date_option = v.findViewById(R.id.inventory_date_option);
         inventory_responsible_option = v.findViewById(R.id.inventory_responsible_option);
         inventory_element_type_edit = v.findViewById(R.id.inventory_element_type_edit);
@@ -364,6 +373,15 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 Intent intent = null;
                 intent = new Intent(getActivity(), ProductionListActivity.class);
                 startActivityForResult(intent, REQUEST_PRODUCTION);
+            }
+        });
+
+        inventory_type_element_option.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = null;
+                intent = new Intent(getActivity(), TypeElementListActivity.class);
+                startActivityForResult(intent, REQUEST_TYPE_ELEMENT_HEADER);
             }
         });
 
@@ -539,11 +557,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             focusView = inventory_date_option;
             cancel = true;
         }
-        if (TextUtils.isEmpty(inventory_responsible_option.getText().toString())) {
-            inventory_responsible_option.setError(getString(R.string.error_responsible_empty));
-            focusView = inventory_responsible_option;
-            cancel = true;
-        }
         if (cancel) {
             focusView.requestFocus();
             return false;
@@ -631,8 +644,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         hideKeyboard(getActivity());
 
     }
-
-    @Override
     public void DataRecived(String BarcodeData) {
         final String _barcodeData = BarcodeData;
         getActivity().runOnUiThread(new Runnable() {
@@ -740,7 +751,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void asyncListMaterialsByProduction() {
 
 
-        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory();
+        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory() + "/" + globalVariable.getIdSelectedTypeElementHeader();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -789,6 +800,4 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 }
         );
     }
-
-
 }

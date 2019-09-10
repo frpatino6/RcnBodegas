@@ -8,14 +8,15 @@ import java.util.ArrayList;
 
 public class GlobalClass extends Application {
 
-    private int idSelectedResponsibleInventory;
-    private int idSelectedTypeElementInventory;
-    private int idSelectedResponsibleWarehouse;
-    private int idSelectedTypeElementWarehouse;
+    private int idSelectedResponsibleInventory=-1;
+    private int idSelectedTypeElementInventory=-1;
+    private int idSelectedResponsibleWarehouse=-1;
+    private int idSelectedTypeElementWarehouse=-1;
+    private int idSelectedTypeElementHeader=-1;
     private String userName;
-    //private String urlServices = "http://172.20.0.154:8083/";
+    private String urlServices = "http://172.20.0.154:8083/";
 
-    private String urlServices = "http://192.168.0.7/bodegas/";
+    //private String urlServices = "http://192.168.0.12/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
@@ -241,5 +242,13 @@ public class GlobalClass extends Application {
 
     public void setNameSelectedWareHouseInventory(String nameSelectedWareHouseInventory) {
         this.nameSelectedWareHouseInventory = nameSelectedWareHouseInventory;
+    }
+
+    public int getIdSelectedTypeElementHeader() {
+        return idSelectedTypeElementHeader;
+    }
+
+    public void setIdSelectedTypeElementHeader(int idSelectedTypeElementHeader) {
+        this.idSelectedTypeElementHeader = idSelectedTypeElementHeader;
     }
 }
