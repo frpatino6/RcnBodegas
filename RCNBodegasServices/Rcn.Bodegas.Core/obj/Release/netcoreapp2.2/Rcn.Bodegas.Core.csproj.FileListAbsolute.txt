@@ -10,3 +10,15 @@ D:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn
 D:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.dll
 D:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.pdb
 D:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.csprojAssemblyReference.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Release\netcoreapp2.2\Rcn.Bodegas.Core.deps.json
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Release\netcoreapp2.2\Rcn.Bodegas.Core.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Release\netcoreapp2.2\Rcn.Bodegas.Core.pdb
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Release\netcoreapp2.2\Microsoft.Extensions.Configuration.Abstractions.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Release\netcoreapp2.2\Microsoft.Extensions.Configuration.Abstractions.xml
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.csprojAssemblyReference.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.csproj.CoreCompileInputs.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.AssemblyInfoInputs.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.AssemblyInfo.cs
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.csproj.CopyComplete
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.pdb

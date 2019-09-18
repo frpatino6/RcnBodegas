@@ -1,6 +1,7 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Rcn.Bodegas.Core.Services
 {
   public class InventroyService : IInventroyService
   {
+
     private const string WAREHOUSE_TYPE_V = "V";
     private readonly IOracleManagment _IOracleManagment;
 
@@ -258,8 +260,9 @@ namespace Rcn.Bodegas.Core.Services
     /// <param name="warehouseType"></param>
     /// <param name="idProdction"></param>
     /// <param name="idResponsible"></param>
+    /// <param name="type_element"></param>
     /// <returns></returns>
-    public async Task<List<MaterialViewModel>> GetMaterialsForProduction(string warehouseType, string idProdction, int idResponsible, int type_element)
+    public async Task<List<MaterialViewModel>> GetMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element)
     {
       string marca = string.Empty;
       string materialName = string.Empty;
@@ -267,7 +270,7 @@ namespace Rcn.Bodegas.Core.Services
       string barCode = string.Empty;
       string where = " WHERE CODIGO_TIPO_BODEGA=:COD_TIPO_BODEGA AND CODIGO_PRODUCCION=:COD_PRODUCCION  ";
       string orderby = " ORDER BY MARCA";
-
+      int barcode =0;
       decimal unitPrice = 0;
 
       List<MaterialViewModel> result = new List<MaterialViewModel>();
@@ -275,15 +278,16 @@ namespace Rcn.Bodegas.Core.Services
       var query = @"select * from V_MATERIALES ";
 
       if (idResponsible != -1)
-        where += "AND CODIGO_RESPONSABLE=:COD_RESPONSIBLE";
+        where += " AND CODIGO_RESPONSABLE=:COD_RESPONSIBLE";
 
-      if (type_element != -1) {
-        where += "AND TIPO_ELEMENTO=:TIPO_ELEMENTO_HEADER";
+      if (type_element != -1)
+      {
+        where += " AND TIPO_ELEMENTO=:TIPO_ELEMENTO_HEADER";
       }
       query = query + where + orderby;
 
       OracleParameter OpCodProduction = new OracleParameter();
-      OpCodProduction.DbType = DbType.String;
+      OpCodProduction.DbType = DbType.Int32;
       OpCodProduction.Value = idProdction;
       OpCodProduction.ParameterName = "COD_PRODUCCION";
       parameters.Add(OpCodProduction);
@@ -301,11 +305,11 @@ namespace Rcn.Bodegas.Core.Services
       parameters.Add(OpCodResponsible);
 
       OracleParameter OpCodTypeElement = new OracleParameter();
-      OpCodTypeElement.DbType = DbType.Int32;
+      OpCodTypeElement.DbType = DbType.String;
       OpCodTypeElement.Value = type_element;
       OpCodTypeElement.ParameterName = "TIPO_ELEMENTO_HEADER";
       parameters.Add(OpCodTypeElement);
-      
+
 
       var records = _IOracleManagment.GetData(parameters, query);
 
@@ -327,17 +331,47 @@ namespace Rcn.Bodegas.Core.Services
         if (!rec.IsDBNull(rec.GetOrdinal("PRECIO_UNITARIO")))
           unitPrice = rec.GetDecimal(rec.GetOrdinal("PRECIO_UNITARIO"));
 
+        if (!rec.IsDBNull(rec.GetOrdinal("CODIGO")))
+          barcode = rec.GetInt32(rec.GetOrdinal("CODIGO"));
+
         result.Add(new MaterialViewModel
         {
           materialName = materialName,
           typeElementName = typeElement,
           marca = marca,
           barCode = barCode,
-          unitPrice = unitPrice
+          unitPrice = unitPrice,
+          ListaImagenesStr=getImagesByMaterial(barcode)
 
         });
       }
 
+      return result;
+    }
+
+    /// <summary>
+    /// Carga las imagenes de cada elemento desde la base de datos
+    /// </summary>
+    /// <param name="idMaterial"></param>
+    private List<string> getImagesByMaterial(int idMaterial)
+    {
+      List<string> result = new List<string>();
+      List<OracleParameter> parameters = new List<OracleParameter>();
+      string query = "SELECT FOTO,FOTO_JAVA,BD_MATERIAL_CODIGO FROM BD_IMAGENES  WHERE BD_MATERIAL_CODIGO=:BD_MATERIAL_CODIGO ";
+
+      OracleParameter OraMaterialCodigo = new OracleParameter(":BD_MATERIAL_CODIGO", OracleDbType.Int32, 2000, ParameterDirection.Input);
+      OraMaterialCodigo.Value = idMaterial;
+      parameters.Add(OraMaterialCodigo);
+
+      var records = _IOracleManagment.GetData(parameters, query);
+
+      foreach (IDataRecord rec in records)
+      {
+        byte[] image = (byte[])rec["FOTO"];
+        int imageLength = image.Length;
+        string base64image = Convert.ToBase64String(image, 0, imageLength);
+        result.Add(base64image);
+      }
       return result;
     }
   }

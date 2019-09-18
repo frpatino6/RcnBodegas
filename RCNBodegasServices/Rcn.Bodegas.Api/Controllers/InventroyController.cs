@@ -94,7 +94,7 @@ namespace Rcn.Bodegas.Api.Controllers
     }
 
     [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}")]
-    public async Task<IActionResult> GetMaterialByBarcodeAsync(string wareHouseType ,string production, int responsible, int type_element)
+    public async Task<IActionResult> GetMaterialByBarcodeAsync(string wareHouseType ,int production, int responsible, int type_element)
     {
       try
       {

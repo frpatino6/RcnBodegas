@@ -10,13 +10,14 @@ namespace Rcn.Bodegas.Core.ViewModel
 
     public string WareHouseName { get; set; }
 
-    public int Type{ get; set; }
+    public int Type { get; set; }
 
     public int Class { get; set; }
 
-    public string  Location { get; set; }
+    public string Location { get; set; }
 
-  
+    public List<string> Images { get; set; }
+
     /// <summary>
     /// Responsable warehouse
     /// </summary>
