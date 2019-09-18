@@ -5,6 +5,7 @@ import android.app.Application;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GlobalClass extends Application {
 
@@ -14,9 +15,9 @@ public class GlobalClass extends Application {
     private int idSelectedTypeElementWarehouse=-1;
     private int idSelectedTypeElementHeader=-1;
     private String userName;
-    private String urlServices = "http://172.20.0.154:8083/";
+//    private String urlServices = "http://172.20.0.154:8083/";
 
-    //private String urlServices = "http://192.168.0.12/bodegas/";
+    private String urlServices = "http://192.168.0.12/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
@@ -27,14 +28,14 @@ public class GlobalClass extends Application {
     private String idSelectedWareHouseWarehouse;
     private String idSelectedProductionWarehouse;
     private ArrayList<MaterialViewModel> dataMaterial;
-    private ArrayList<MaterialViewModel> dataMaterialInventory;
+    private List<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
     private String nameSelectedWareHouseWarehouse = "";
     private String nameSelectedWareHouseInventory = "";
     private String userRole;
     private String mCurrentPhotoPath;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private ArrayList<MaterialViewModel> listMaterialBYProduction;
+    private List<MaterialViewModel> listMaterialBYProduction;
     private ArrayList<MaterialViewModel> listMaterialForAdd;
 
     public ArrayList<MaterialViewModel> getDataReviewMaterial() {
@@ -47,12 +48,12 @@ public class GlobalClass extends Application {
         this.dataReviewMaterial = dataReviewMaterial;
     }
 
-    public ArrayList<MaterialViewModel> getDataMaterialInventory() {
+    public List<MaterialViewModel> getDataMaterialInventory() {
         if (dataMaterialInventory == null) dataMaterialInventory = new ArrayList<>();
         return dataMaterialInventory;
     }
 
-    public void setDataMaterialInventory(ArrayList<MaterialViewModel> dataMaterialInventory) {
+    public void setDataMaterialInventory(List<MaterialViewModel> dataMaterialInventory) {
         this.dataMaterialInventory = dataMaterialInventory;
     }
 
@@ -219,11 +220,11 @@ public class GlobalClass extends Application {
         this.responsable = responsable;
     }
 
-    public ArrayList<MaterialViewModel> getListMaterialBYProduction() {
+    public List<MaterialViewModel> getListMaterialBYProduction() {
         return listMaterialBYProduction;
     }
 
-    public void setListMaterialBYProduction(ArrayList<MaterialViewModel> listMaterialBYProduction) {
+    public void setListMaterialBYProduction(List<MaterialViewModel> listMaterialBYProduction) {
         this.listMaterialBYProduction = listMaterialBYProduction;
     }
 
