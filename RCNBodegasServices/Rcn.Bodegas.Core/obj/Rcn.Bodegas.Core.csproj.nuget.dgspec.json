@@ -1,0 +1,78 @@
+{
+  "format": 1,
+  "restore": {
+    "E:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj": {}
+  },
+  "projects": {
+    "E:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj",
+        "projectName": "Rcn.Bodegas.Core",
+        "projectPath": "E:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\Rcn.Bodegas.Core.csproj",
+        "packagesPath": "C:\\Users\\fernando\\.nuget\\packages\\",
+        "outputPath": "E:\\Rcn\\Bodegas\\RCNBodegasServices\\Rcn.Bodegas.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\",
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\fernando\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.2"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.2": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.2": {
+          "dependencies": {
+            "Microsoft.NETCore.App": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.2.0, )",
+              "autoReferenced": true
+            },
+            "Oracle.ManagedDataAccess.Core": {
+              "target": "Package",
+              "version": "[2.19.3, )"
+            },
+            "System.DirectoryServices": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "System.DirectoryServices.AccountManagement": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[4.5.1, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,8 @@ namespace Rcn.Bodegas.Api.Controllers
   [Produces("application/json")]
   public class WareHouseController : Controller
   {
+    private const string NUM_DOCUMENT_ELEMENT = "Número de documento generado: ";
+
     private readonly IWareHouseServices _IWareHouseServices;
     public WareHouseController(IWareHouseServices wareHouseServices)
     {
@@ -60,8 +62,8 @@ namespace Rcn.Bodegas.Api.Controllers
     {
       try
       {
-        var result = _IWareHouseServices.CreateMaterialWarehouse(materialViewModel, warehouseid);
-        return Ok(result.Result);
+        var result = await _IWareHouseServices.CreateMaterialWarehouse(materialViewModel, warehouseid);
+        return Ok(NUM_DOCUMENT_ELEMENT + result.ToString());
       }
 
       catch (WareHouseExceptions ex)
