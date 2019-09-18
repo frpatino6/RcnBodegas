@@ -11,12 +11,17 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +41,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.Base64;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Activities.CustomActivity;
@@ -47,15 +53,19 @@ import com.rcnbodegas.Activities.WareHouseListActivity;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.IObserver;
+import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.TScanner;
+import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.barcode.BarcodeManager;
 import com.symbol.emdk.barcode.Scanner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -76,6 +86,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_PRODUCTION = 1;
     private static final int REQUEST_RESPONSIBLE = 2;
     private static final int REQUEST_TYPE_ELEMENT = 3;
+    private static final int REQUEST_TYPE_ELEMENT_HEADER = 5;
     private static final int REQUEST_WAREHOUSE = 4;
     // TODO: Rename and change types of parameter
     private ImageButton btnSearch;
@@ -90,6 +101,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private GlobalClass globalVariable;
     private EditText inventory_warehouse_option;
     private EditText inventory_program_option;
+    private EditText inventory_type_element_option;
     private EditText inventory_date_option;
     private EditText inventory_responsible_option;
     private EditText inventory_element_type_edit;
@@ -98,6 +110,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private EditText inventory_element_brand_edit;
     private EditText inventory_element_price_edit;
     private EditText inventory_element_value_edit;
+    private ArrayList<Bitmap> ListaImagenes;
+    private ArrayList<String> listaNombresImagenes;
+    private PhotosAdapter adapter;
+    private RecyclerView photos_recycler_view;
+    private LinearLayoutManager layoutManager;
     private DatePickerDialog datePickerDialog = null;
     private DateTimeUtilities dateTimeUtilities;
     private View mIncidenciasFormView;
@@ -199,6 +216,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 this.inventory_warehouse_option.setText(result);
                 globalVariable.setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
                 globalVariable.setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
+            }
+        }
+        if (requestCode == REQUEST_TYPE_ELEMENT_HEADER) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("typeElementName");
+                globalVariable.setIdSelectedTypeElementHeader(Integer.valueOf(data.getStringExtra("typeElementId")));
+                this.inventory_type_element_option.setText(result);
             }
         }
     }
@@ -306,6 +330,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_data = v.findViewById(R.id.inventory_data);
         inventory_warehouse_option = v.findViewById(R.id.inventory_warehouse_option);
         inventory_program_option = v.findViewById(R.id.inventory_program_option);
+        inventory_type_element_option = v.findViewById(R.id.inventory_type_element_option);
         inventory_date_option = v.findViewById(R.id.inventory_date_option);
         inventory_responsible_option = v.findViewById(R.id.inventory_responsible_option);
         inventory_element_type_edit = v.findViewById(R.id.inventory_element_type_edit);
@@ -322,6 +347,12 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
         mIncidenciasFormView = v.findViewById(R.id.inventory_element);
         mProgressView = v.findViewById(R.id.inventroy_progress);
+
+        photos_recycler_view = (RecyclerView) v.findViewById(R.id.photos_recycler_view);
+        photos_recycler_view.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(getActivity());
+        photos_recycler_view.setLayoutManager(layoutManager);
+        photos_recycler_view.setItemAnimator(new DefaultItemAnimator());
     }
 
     private void InitializeEvents() {
@@ -364,6 +395,15 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 Intent intent = null;
                 intent = new Intent(getActivity(), ProductionListActivity.class);
                 startActivityForResult(intent, REQUEST_PRODUCTION);
+            }
+        });
+
+        inventory_type_element_option.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = null;
+                intent = new Intent(getActivity(), TypeElementListActivity.class);
+                startActivityForResult(intent, REQUEST_TYPE_ELEMENT_HEADER);
             }
         });
 
@@ -539,11 +579,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             focusView = inventory_date_option;
             cancel = true;
         }
-        if (TextUtils.isEmpty(inventory_responsible_option.getText().toString())) {
-            inventory_responsible_option.setError(getString(R.string.error_responsible_empty));
-            focusView = inventory_responsible_option;
-            cancel = true;
-        }
         if (cancel) {
             focusView.requestFocus();
             return false;
@@ -629,10 +664,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_element_brand_edit.setText(data.getMarca().toString());
         inventory_element_price_edit.setText(data.getUnitPrice().toString());
         hideKeyboard(getActivity());
+        createBitMapFromString(data);
+        setListImagesAdapter();
 
     }
 
-    @Override
     public void DataRecived(String BarcodeData) {
         final String _barcodeData = BarcodeData;
         getActivity().runOnUiThread(new Runnable() {
@@ -740,7 +776,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void asyncListMaterialsByProduction() {
 
 
-        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory();
+        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory() + "/" + globalVariable.getIdSelectedTypeElementHeader();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -751,11 +787,12 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                         // called when response HTTP status is "200 OK"
                         try {
 
+
                             TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
                             };
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
-                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
+                            List<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
                             globalVariable.setDataMaterialInventory(dataMaterial);
 
                             if (dataMaterial != null)
@@ -767,6 +804,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             mnuReview.setVisible(true);
                             mnuSave.setVisible(true);
                             globalVariable.setCurrentInventoryActiveProcess(true);
+
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
@@ -790,5 +828,31 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         );
     }
 
+    private void createBitMapFromString(MaterialViewModel itemMaterialAdded) {
 
+        if(ListaImagenes==null) ListaImagenes= new ArrayList<>();
+        else
+            ListaImagenes.clear();
+
+        for (String encodedString : itemMaterialAdded.getListaImagenesStr()) {
+            try {
+                byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+                ListaImagenes.add(bitmap);
+
+            } catch (Exception e) {
+                e.getMessage();
+            }
+        }
+
+    }
+    private void setListImagesAdapter() {
+        adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
+            @Override
+            public void onClick(ProductionViewModel wareHouseViewModel) {
+
+            }
+        });
+        photos_recycler_view.setAdapter(adapter);
+    }
 }

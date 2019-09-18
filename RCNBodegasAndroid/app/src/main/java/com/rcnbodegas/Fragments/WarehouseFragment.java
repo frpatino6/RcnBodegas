@@ -46,8 +46,10 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Activities.CustomActivity;
 import com.rcnbodegas.Activities.ListItemAddedActivity;
 import com.rcnbodegas.Activities.ProductionListActivity;
@@ -134,6 +136,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private MenuItem menuReview;
     private MenuItem menuSave;
     private MenuItem iconScanMenu;
+    private String lastCreatedNUmberDocument = "";
     private boolean isOk;
 
     public WarehouseFragment() {
@@ -1004,16 +1007,20 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         } catch (UnsupportedEncodingException ex) {
 
         }
-        client.post(getActivity().getApplicationContext(), url, entity, tipo, new AsyncHttpResponseHandler() {
+        client.post(getActivity().getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
 
             @SuppressLint("RestrictedApi")
             @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
                 isOk = true;
+                Gson gson = new GsonBuilder().create();
+                // Define Response class to correspond to the JSON response returned
+                lastCreatedNUmberDocument= gson.fromJson(responseString, String.class);
+
             }
 
             @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+            public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
                 showProgress(false);
                 showMessageDialog(error.getMessage());
                 isOk = false;
@@ -1044,6 +1051,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                             ListFotos.clear();
                             ListaImagenes.clear();
                             showProgress(false);
+                            showMessageDialog(lastCreatedNUmberDocument);
                         }
                     }
                 });

@@ -19,8 +19,8 @@ public class MaterialViewModel {
     private String materialName;
     private Double unitPrice;
     private Double purchaseValue;
-    private ArrayList<Bitmap> ListaImagenesBmp;
-    private ArrayList<String> ListaImagenesStr;
+    private ArrayList<Bitmap> listaImagenesBmp;
+    private ArrayList<String> listaImagenesStr;
 
     private boolean isReview;
 
@@ -36,6 +36,7 @@ public class MaterialViewModel {
         this.marca = marca;
         this.barCode = barCode;
         this.materialName = materialName;
+
     }
 
     public Double getPurchaseValue() {
@@ -48,23 +49,23 @@ public class MaterialViewModel {
 
     public ArrayList<String> getListaImagenesStr() {
 
-        if(ListaImagenesStr==null) ListaImagenesStr= new ArrayList<>();
-        return ListaImagenesStr;
+        if(listaImagenesStr ==null) listaImagenesStr = new ArrayList<>();
+        return listaImagenesStr;
     }
 
     public void setListaImagenesStr(ArrayList<String> listaImagenesStr) {
-        ListaImagenesStr = listaImagenesStr;
+        this.listaImagenesStr = listaImagenesStr;
     }
 
     public ArrayList<Bitmap> getListaImagenesBmp() {
-        if (ListaImagenesBmp == null)
-             ListaImagenesBmp = new ArrayList<Bitmap>();
+        if (listaImagenesBmp == null)
+             listaImagenesBmp = new ArrayList<Bitmap>();
 
-        return ListaImagenesBmp;
+        return listaImagenesBmp;
     }
 
     public void setListaImagenesBmp(ArrayList<Bitmap> listaImagenesBmp) {
-        ListaImagenesBmp = listaImagenesBmp;
+        this.listaImagenesBmp = listaImagenesBmp;
     }
 
     public MaterialViewModel() {

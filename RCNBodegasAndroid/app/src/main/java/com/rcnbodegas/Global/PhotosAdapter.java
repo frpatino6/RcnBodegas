@@ -77,7 +77,8 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.MyViewHold
 
         iv.setImageBitmap(dataSet.get(listPosition));
 
-        tvNombreFichero.setText(listaNombresImagenes.get(listPosition));
+        if (listaNombresImagenes != null)
+            tvNombreFichero.setText(listaNombresImagenes.get(listPosition));
 
     }
 
