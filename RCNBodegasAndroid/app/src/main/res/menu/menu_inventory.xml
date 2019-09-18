@@ -10,4 +10,12 @@
         android:icon="@android:drawable/ic_menu_save"
         android:title="Cerrar inventario"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/mnu_cancel"
+        android:icon="@mipmap/ic_menu_cancel"
+        android:title="CAncelar inventario"
+        app:showAsAction="always" />
+
+
 </menu>

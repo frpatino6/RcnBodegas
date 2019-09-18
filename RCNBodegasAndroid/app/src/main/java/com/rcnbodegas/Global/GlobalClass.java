@@ -15,9 +15,9 @@ public class GlobalClass extends Application {
     private int idSelectedTypeElementWarehouse=-1;
     private int idSelectedTypeElementHeader=-1;
     private String userName;
-//    private String urlServices = "http://172.20.0.154:8083/";
+    private String urlServices = "http://172.20.0.154:8083/";
 
-    private String urlServices = "http://192.168.0.12/bodegas/";
+    //private String urlServices = "http://192.168.0.12/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
