@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -74,6 +75,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -1014,6 +1016,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         photos_recycler_view.setAdapter(adapter);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void asyncListMaterialsByProduction() {
 
         showProgress(true);
@@ -1025,15 +1028,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         String tipo = "application/json";
 
         StringEntity entity = null;
-        try {
-            Gson json = new Gson();
+        Gson json = new Gson();
 
-            String resultJson = json.toJson(globalVariable.getDataMaterial());
-            entity = new StringEntity(resultJson);
+        String resultJson = json.toJson(globalVariable.getDataMaterial());
 
-        } catch (UnsupportedEncodingException ex) {
+        entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
 
-        }
         client.post(getActivity().getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
 
             @SuppressLint("RestrictedApi")

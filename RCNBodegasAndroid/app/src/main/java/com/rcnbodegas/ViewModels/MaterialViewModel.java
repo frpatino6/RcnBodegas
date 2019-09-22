@@ -24,6 +24,7 @@ public class MaterialViewModel {
 
     private boolean isReview;
 
+
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
         this.wareHouseName = wareHouseName;
@@ -70,6 +71,8 @@ public class MaterialViewModel {
 
     public MaterialViewModel() {
         this.isReview = false;
+        listaImagenesBmp=new ArrayList<>();
+        listaImagenesStr= new ArrayList<>();
     }
 
     public Double getUnitPrice() {
