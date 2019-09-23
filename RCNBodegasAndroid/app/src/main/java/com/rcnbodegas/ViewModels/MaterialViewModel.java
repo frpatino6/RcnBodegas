@@ -3,9 +3,11 @@ package com.rcnbodegas.ViewModels;
 import android.graphics.Bitmap;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MaterialViewModel {
 
+    private String saleDate;
     private String wareHouseId;
     private String wareHouseName;
     private Integer productionId;
@@ -14,6 +16,7 @@ public class MaterialViewModel {
     private String responsibleName;
     private String typeElementId;
     private String typeElementName;
+    private String legalizedBy;
     private String marca;
     private String barCode;
     private String materialName;
@@ -38,6 +41,22 @@ public class MaterialViewModel {
         this.barCode = barCode;
         this.materialName = materialName;
 
+    }
+
+    public String getSaleDate() {
+        return saleDate;
+    }
+
+    public void setSaleDate(String saleDate) {
+        this.saleDate = saleDate;
+    }
+
+    public String getLegalizedBy() {
+        return legalizedBy;
+    }
+
+    public void setLegalizedBy(String legalizedBy) {
+        this.legalizedBy = legalizedBy;
     }
 
     public Double getPurchaseValue() {

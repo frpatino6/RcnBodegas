@@ -139,6 +139,9 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private String lastCreatedNUmberDocument = "";
     private boolean isOk;
     private MenuItem mnuCancel;
+    private int mYear;
+    private int mMonth;
+    private int mDay;
 
     public WarehouseFragment() {
         // Required empty public constructor
@@ -356,6 +359,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @SuppressLint("RestrictedApi")
     private void InitializaNewAddElement() {
 
@@ -516,10 +520,31 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             @Override
             public void onClick(View v) {
                 DialogFragment newFragment = new InventoryFragment.DatePickerFragment();
-                ((DatePickerFragment) newFragment).txtDate = warehouse_date_option;
+                /*((DatePickerFragment) newFragment).txtDate = warehouse_date_option;
                 ((DatePickerFragment) newFragment).dateTimeUtilities = dateTimeUtilities;
 
-                newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+                newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");*/
+                final Calendar c = Calendar.getInstance();
+                mYear = c.get(Calendar.YEAR);
+                mMonth = c.get(Calendar.MONTH);
+                mDay = c.get(Calendar.DAY_OF_MONTH);
+
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(),
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+
+                                warehouse_date_option.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                                mYear=year;
+                                mMonth=(monthOfYear + 1);
+                                mDay=dayOfMonth;
+
+                            }
+                        }, mYear, mMonth, mDay);
+                datePickerDialog.show();
             }
         });
 
@@ -658,9 +683,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         newElement.setResponsibleId(globalVariable.getIdSelectedResponsibleWarehouse());
         newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
         newElement.setMarca(warehouse_element_edit.getText().toString());
+        newElement.setLegalizedBy(String.valueOf(globalVariable.getIdSelectedResponsibleWarehouse()));
         newElement.setUnitPrice(warehouse_element_price_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_price_edit.getText().toString()));
         newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElementWarehouse()));
         newElement.setTypeElementName(warehouse_element_type_edit.getText().toString());
+        newElement.setPurchaseValue(warehouse_element_value_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_value_edit.getText().toString()));
+        newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear,mMonth-1,mDay));
 
         if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
 
@@ -702,6 +730,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         builder.setMessage("Está seguro de guardar los elementos agregados?");
         builder.setPositiveButton(getString(R.string.btn_confirm),
                 new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         InitializaNewAddElement();
@@ -1049,7 +1078,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
                 showProgress(false);
-                showMessageDialog(error.getMessage());
+                showMessageDialog(responseBody);
                 isOk = false;
             }
 
