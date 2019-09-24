@@ -22,5 +22,7 @@ namespace Rcn.Bodegas.Core.ViewModel
     public string userCreated { get; set; }
     public bool isReview { get; set; }
     public List<string> ListaImagenesStr { get; set; }
+    public string legalizedBy { get; set; }
+    public System.DateTime saleDate { get; set; }
   }
 }

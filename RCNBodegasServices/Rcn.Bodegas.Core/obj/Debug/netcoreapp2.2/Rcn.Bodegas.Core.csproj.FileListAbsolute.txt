@@ -24,7 +24,6 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Rcn.B
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Core.pdb
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Microsoft.Extensions.Configuration.Abstractions.dll
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\bin\Debug\netcoreapp2.2\Microsoft.Extensions.Configuration.Abstractions.xml
-E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.csprojAssemblyReference.cache
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.csproj.CoreCompileInputs.cache
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.AssemblyInfoInputs.cache
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Core.AssemblyInfo.cs

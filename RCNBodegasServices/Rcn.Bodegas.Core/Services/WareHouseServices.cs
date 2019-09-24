@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rcn.Bodegas.Core.Services
@@ -34,6 +33,7 @@ namespace Rcn.Bodegas.Core.Services
     private int InsertMaterial(List<MaterialViewModel> listNewMaterial, string warehouseid)
     {
       string query;
+      string dateLegalization;
       int rowCount = 0;
       int numeroRecepcion = 0;
       OracleParameter OraBarCode = new OracleParameter(":CODIGO_BARRAS", OracleDbType.Varchar2, 20, ParameterDirection.Input);
@@ -46,24 +46,29 @@ namespace Rcn.Bodegas.Core.Services
       OracleParameter OraUsuarioCreacion = new OracleParameter(":USU_CREACION", OracleDbType.Varchar2, 20, ParameterDirection.Input);
       OracleParameter OraTerceroActual = new OracleParameter(":PA_TERCERO_ACTUAL", OracleDbType.Int64, ParameterDirection.Input);
       OracleParameter OraValorCompra = new OracleParameter(":VALOR_COMPRA", OracleDbType.Decimal, ParameterDirection.Input);
+      OracleParameter OraValorMateria = new OracleParameter(":VALOR_MATERIA", OracleDbType.Decimal, ParameterDirection.Input);
       OracleParameter OraElementType = new OracleParameter(":TIPO_ELEMENTO", OracleDbType.Int32, ParameterDirection.Input);
       OracleParameter OraPrendaType = new OracleParameter(":TIPO_PRENDA", OracleDbType.Int32, ParameterDirection.Input);
-      //OracleParameter OraNumRecepcion = new OracleParameter(":NUMERO_DOC_RECEPCION", OracleDbType.Int32,  ParameterDirection.Input);
+      OracleParameter OraMarca = new OracleParameter(":MARCA", OracleDbType.Varchar2, 48, ParameterDirection.Input);
+      OracleParameter OraUbicacionRecibido = new OracleParameter(":BD_UBICACION_RECIBIDO", OracleDbType.Varchar2, 48, ParameterDirection.Input);
+      OracleParameter OraTerceroRecibido = new OracleParameter(":PA_TERCERO_RECIBIDO", OracleDbType.Int32, ParameterDirection.Input);
+      OracleParameter OraFechaCompra = new OracleParameter(":FECHA_COMPRA", OracleDbType.Date, ParameterDirection.Input);
+
 
       OracleParameter OraCodigoElemento = new OracleParameter("new_id", OracleDbType.Int32);
       OraCodigoElemento.Direction = ParameterDirection.Output;
 
       numeroRecepcion = getDocumentNumber(warehouseid);
-
+      dateLegalization = listNewMaterial[0].saleDate.ToString("yyyy-MM-dd");
       if (warehouseid.Equals("V"))
       {
-        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,PA_TERCERO_ACTUAL,TIPO_PRENDA,NUMERO_DOC_RECEPCION)
-                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, 42877557,:TIPO_ELEMENTO," + numeroRecepcion + ") returning CODIGO into :new_id";
+        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,PA_TERCERO_ACTUAL,TIPO_PRENDA,MARCA,VALOR_RETENCION,ASIGNACION_BARRAS,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,INDICADOR_SALIDA,NUMERO_DOC_RECEPCION)
+                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,42877557,:TIPO_ELEMENTO,:MARCA,0,'S',:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss'),'X'," + numeroRecepcion + ") returning CODIGO into :new_id";
       }
       else
       {
-        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,PA_TERCERO_ACTUAL,TIPO_ELEMENTO,NUMERO_DOC_RECEPCION)
-                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, 42877557,:TIPO_ELEMENTO," + numeroRecepcion + ") returning CODIGO into :new_id";
+        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,PA_TERCERO_ACTUAL,TIPO_ELEMENTO,MARCA,VALOR_RETENCION,ASIGNACION_BARRAS,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,INDICADOR_SALIDA,NUMERO_DOC_RECEPCION)
+                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,42877557,:TIPO_ELEMENTO,:MARCA,0,'S',:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss'),'X'," + numeroRecepcion + ") returning CODIGO into :new_id";
       }
 
       using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
@@ -77,7 +82,7 @@ namespace Rcn.Bodegas.Core.Services
             try
             {
               //Busca el numero de documento con el cual se creo el material en la base de datos
-            
+
 
               oraUpdate.CommandText = query;
               oraUpdate.Parameters.Clear();
@@ -90,9 +95,13 @@ namespace Rcn.Bodegas.Core.Services
               oraUpdate.Parameters.Add(OraUbicacionCodigo);
               oraUpdate.Parameters.Add(OraUsuarioCreacion);
               oraUpdate.Parameters.Add(OraValorCompra);
+              oraUpdate.Parameters.Add(OraValorMateria);
               oraUpdate.Parameters.Add(OraElementType);
+              oraUpdate.Parameters.Add(OraMarca);
+              oraUpdate.Parameters.Add(OraUbicacionRecibido);
+              oraUpdate.Parameters.Add(OraTerceroRecibido);
               oraUpdate.Parameters.Add(OraCodigoElemento);
-              //oraUpdate.Parameters.Add(OraNumRecepcion);
+             // oraUpdate.Parameters.Add(OraFechaCompra);              
 
               if (numeroRecepcion > 0)
                 foreach (var newMaterial in listNewMaterial)
@@ -105,10 +114,14 @@ namespace Rcn.Bodegas.Core.Services
                   OraEmpresaCodigo.Value = 1;
                   OraUbicacionCodigo.Value = 1;
                   OraUsuarioCreacion.Value = "BODEGAS";
-                  OraTerceroActual.Value = "42877557"; //TODO: CEDULA DEL USUARIO LOGEADO
+                  // OraTerceroActual.Value = "42877557"; //TODO: CEDULA DEL USUARIO LOGEADO
                   OraValorCompra.Value = newMaterial.unitPrice;
+                  OraValorMateria.Value = newMaterial.purchaseValue;
                   OraElementType.Value = newMaterial.typeElementId;
-                  //OraNumRecepcion.Value = numeroRecepcion;
+                  OraMarca.Value = newMaterial.marca;
+                  OraUbicacionRecibido.Value = newMaterial.productionId;
+                  OraTerceroRecibido.Value = newMaterial.legalizedBy;
+                  //OraFechaCompra.Value = newMaterial.saleDate.ToShortDateString();
                   rowCount = oraUpdate.ExecuteNonQuery();
 
                   if (newMaterial.ListaImagenesStr != null && newMaterial.ListaImagenesStr.Count > 0)
