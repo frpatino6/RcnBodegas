@@ -56,6 +56,7 @@ import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
 import com.rcnbodegas.Activities.TypeElementListActivity;
 import com.rcnbodegas.Activities.WareHouseListActivity;
+import com.rcnbodegas.Activities.WarehouseUserActivity;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.IObserver;
@@ -93,6 +94,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_RESPONSIBLE = 2;
     private static final int REQUEST_TYPE_ELEMENT = 3;
     private static final int REQUEST_WAREHOUSE = 4;
+    private static final int REQUEST_USER_WAREHOUSE = 5;
     private static final int CAMERA_REQUEST = 1888;
     private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1900;
 
@@ -112,6 +114,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private EditText warehouse_element_edit;
     private EditText warehouse_element_price_edit;
     private EditText warehouse_element_value_edit;
+    private EditText warehouse_user_option;
 
     private LinearLayout warehouse_element_layout;
     private LinearLayout warehouse_data;
@@ -193,7 +196,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                warehouse_element_barcode_edit.setText(BarcodeData);
+                if (!globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+                    warehouse_element_barcode_edit.setText(BarcodeData);
+                else {
+                    showMessageDialog("El elemento es administrativo, lo cual no se asignará codigo de barras");
+                    warehouse_element_barcode_edit.setText("");
+                }
             }
         });
 
@@ -259,8 +267,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             if (resultCode == -1) {
                 String result = data.getStringExtra("typeElementName");
                 globalVariable.setIdSelectedTypeElementWarehouse(Integer.valueOf(data.getStringExtra("typeElementId")));
-
                 this.warehouse_element_type_edit.setText(result);
+
+                if (globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+                    this.warehouse_element_barcode_edit.setText("");
 
             }
         }
@@ -272,6 +282,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 globalVariable.setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
             }
         }
+        if (requestCode == REQUEST_USER_WAREHOUSE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("responsibleWarehouseName");
+                globalVariable.setIdSelectedUserWarehouse(Integer.valueOf(data.getStringExtra("responsibleWarehouseId")));
+                this.warehouse_user_option.setText(result);
+            }
+        }
+
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -443,6 +461,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     private void InitializeControls(View v) {
 
+        final Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH) + 1;
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+
         warehouse_btn_ok = v.findViewById(R.id.warehouse_btn_ok);
         warehouse_btn_camera = v.findViewById(R.id.warehouse_btn_camera);
         warehouse_btn_new_element = v.findViewById(R.id.warehouse_btn_new_element);
@@ -458,6 +481,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_edit = v.findViewById(R.id.warehouse_element_edit);
         warehouse_element_price_edit = v.findViewById(R.id.warehouse_element_price_edit);
         warehouse_element_value_edit = v.findViewById(R.id.warehouse_element_value_edit);
+        warehouse_user_option = v.findViewById(R.id.warehouse_user_option);
         warehouse_data = v.findViewById(R.id.warehouse_data);
 
         warehouse_date_option.setText(dateTimeUtilities.parseDateTurno());
@@ -501,6 +525,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 OpenListWareHouse();
             }
         });
+
         warehouse_btn_new_element.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -514,6 +539,20 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 Intent intent = null;
                 intent = new Intent(getActivity(), ProductionListActivity.class);
                 startActivityForResult(intent, REQUEST_PRODUCTION);
+            }
+        });
+        warehouse_user_option.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = null;
+
+                if (warehouse_option.getText().toString().equals("")) {
+                    warehouse_option.setError(getString(R.string.error_warehouse_empty));
+                    return;
+                }
+                warehouse_option.setError(null);
+                intent = new Intent(getActivity(), WarehouseUserActivity.class);
+                startActivityForResult(intent, REQUEST_USER_WAREHOUSE);
             }
         });
         warehouse_date_option.setOnClickListener(new View.OnClickListener() {
@@ -538,9 +577,9 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                                                   int monthOfYear, int dayOfMonth) {
 
                                 warehouse_date_option.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-                                mYear=year;
-                                mMonth=(monthOfYear + 1);
-                                mDay=dayOfMonth;
+                                mYear = year;
+                                mMonth = (monthOfYear + 1);
+                                mDay = dayOfMonth;
 
                             }
                         }, mYear, mMonth, mDay);
@@ -633,11 +672,13 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         boolean cancel = false;
         View focusView = null;
 
-        if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
-            warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
-            focusView = warehouse_element_barcode_edit;
-            cancel = true;
-        }
+        if (!globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+            if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
+                warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
+                focusView = warehouse_element_barcode_edit;
+                cancel = true;
+            }
+
         if (TextUtils.isEmpty(warehouse_element_desc_edit.getText().toString())) {
             warehouse_element_desc_edit.setError(getString(R.string.error_program_empty));
             focusView = warehouse_element_desc_edit;
@@ -688,7 +729,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElementWarehouse()));
         newElement.setTypeElementName(warehouse_element_type_edit.getText().toString());
         newElement.setPurchaseValue(warehouse_element_value_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_value_edit.getText().toString()));
-        newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear,mMonth-1,mDay));
+        newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear, mMonth - 1, mDay));
+        newElement.setTerceroActual(globalVariable.getIdSelectedUserWarehouse());
 
         if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
 
@@ -778,6 +820,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_edit.setText("");
         warehouse_element_price_edit.setText("");
         warehouse_element_value_edit.setText("");
+        globalVariable.setIdSelectedTypeElementWarehouse(-1);
 
         if (ListaImagenes != null) {
             ListaImagenes.clear();

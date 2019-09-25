@@ -1,15 +1,20 @@
 package com.rcnbodegas.ViewModels;
 
 public class UserViewModel {
-    public int id ;
+    private int id ;
+    private String name ;
+    private String userName ;
+    private int roleId ;
+    private String roleName ;
+    private String adminTypeElementId;
 
-    public String name ;
+    public String getAdminTypeElementId() {
+        return adminTypeElementId;
+    }
 
-    public String userName ;
-
-    public int roleId ;
-
-    public String roleName ;
+    public void setAdminTypeElementId(String adminTypeElementId) {
+        adminTypeElementId = adminTypeElementId;
+    }
 
     public UserViewModel() {
     }

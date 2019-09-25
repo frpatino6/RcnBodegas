@@ -12,10 +12,12 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_logo"
         android:largeHeap="true"
+        android:roundIcon="@mipmap/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Activities.WarehouseUserActivity"></activity>
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.rcnbodegas.fileprovider"
@@ -26,7 +28,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <uses-library android:name="com.symbol.emdk" android:required="false" />
+        <uses-library
+            android:name="com.symbol.emdk"
+            android:required="false" />
 
         <activity android:name=".Activities.ScanActivity" />
         <activity android:name=".Activities.ListItemReviewActivity">
@@ -52,7 +56,6 @@
         <activity android:name=".Activities.ResponsibleListActivity" />
         <activity android:name=".Activities.TypeElementListActivity" />
         <activity android:name=".Activities.ListItemAddedActivity" />
-
         <activity android:name=".Activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

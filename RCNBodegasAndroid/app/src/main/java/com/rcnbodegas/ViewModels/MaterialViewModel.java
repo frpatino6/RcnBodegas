@@ -13,6 +13,7 @@ public class MaterialViewModel {
     private Integer productionId;
     private String productionName;
     private Integer responsibleId;
+    private Integer terceroActual;
     private String responsibleName;
     private String typeElementId;
     private String typeElementName;
@@ -41,6 +42,14 @@ public class MaterialViewModel {
         this.barCode = barCode;
         this.materialName = materialName;
 
+    }
+
+    public Integer getTerceroActual() {
+        return terceroActual;
+    }
+
+    public void setTerceroActual(Integer terceroActual) {
+        this.terceroActual = terceroActual;
     }
 
     public String getSaleDate() {
