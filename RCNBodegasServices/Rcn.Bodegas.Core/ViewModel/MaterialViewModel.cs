@@ -24,5 +24,7 @@ namespace Rcn.Bodegas.Core.ViewModel
     public List<string> ListaImagenesStr { get; set; }
     public string legalizedBy { get; set; }
     public System.DateTime saleDate { get; set; }
+
+    public string terceroActual { get; set; }
   }
 }

@@ -33,12 +33,33 @@ namespace Rcn.Bodegas.Api.Controllers
         return BadRequest(ex.Message);
       }
     }
+
     [HttpGet("/Inventory/GetListResponsable/{warehouse=''}/{production=''}")]
     public async Task<IActionResult> GetListResponsableAsync(string warehouse, string production)
     {
       try
       {
         var result = await _IInventroy.GetListResponsible(warehouse,production);
+        return Ok(result);
+      }
+
+      catch (WareHouseExceptions ex)
+      {
+        return BadRequest(ex.Message);
+      }
+      catch (Exception ex)
+      {
+
+        return BadRequest(ex.Message);
+      }
+    }
+
+    [HttpGet("/Inventory/GetListWarehouseUser/{tipoBodega=''}")]
+    public async Task<IActionResult> GetListWarehouseUserAsync(string tipoBodega)
+    {
+      try
+      {
+        var result = await _IInventroy.GetListWarehouseUserAsync(tipoBodega);
         return Ok(result);
       }
 

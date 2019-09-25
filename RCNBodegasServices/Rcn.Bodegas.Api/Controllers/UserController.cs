@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Rcn.Bodegas.Core.Exceptions;
 using Rcn.Bodegas.Core.Interfaces;
 using System;
@@ -10,9 +11,12 @@ namespace Rcn.Bodegas.Api.Controllers
   public class UserController : Controller
   {
     private readonly ILoginServices _ILoginServices;
-    public UserController(ILoginServices loginServices)
+    private readonly IConfiguration _IConfiguration;
+
+    public UserController(ILoginServices loginServices, IConfiguration configuration)
     {
       _ILoginServices = loginServices;
+      _IConfiguration = configuration;
     }
 
 
@@ -22,6 +26,7 @@ namespace Rcn.Bodegas.Api.Controllers
       try
       {
         var result = await _ILoginServices.GetUserAsync(userName, pws);
+        result.AdminTypeElementId = _IConfiguration.GetSection("AppParameters").GetSection("codigo_tipo_elemento_administrativo").Value;
         return Ok(result);
       }
 

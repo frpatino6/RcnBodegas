@@ -207,6 +207,40 @@ namespace Rcn.Bodegas.Core.Services
       return result;
     }
 
+    public async Task<List<ResponsibleViewModel>> GetListWarehouseUserAsync(string tipoBodega)
+    {
+      List<ResponsibleViewModel> result = new List<ResponsibleViewModel>();
+      List<OracleParameter> parameters = new List<OracleParameter>();
+      var query = @"select unique codigo_responsable codigo_responsable,nombre_responsable
+                  from V_RESPONSABLE
+                  where codigo_produccion in (1,2)  and DECODE(codigo_produccion,1,'V','A') = :TIPO_BODEGA
+                  ORDER BY NOMBRE_RESPONSABLE";
+
+      OracleParameter opTipoBodega = new OracleParameter();
+      opTipoBodega.DbType = DbType.String;
+      opTipoBodega.Value = tipoBodega;
+      opTipoBodega.ParameterName = "TIPO_BODEGA";
+      parameters.Add(opTipoBodega);
+
+
+      var records = _IOracleManagment.GetData(parameters, query);
+
+      foreach (IDataRecord rec in records)
+      {
+
+        int id = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
+        string name = rec.GetString(rec.GetOrdinal("NOMBRE_RESPONSABLE"));
+
+        result.Add(new ResponsibleViewModel
+        {
+          Id = id,
+          Name = name
+        });
+      }
+
+      return result;
+    }
+
     /// <summary>
     /// Get list material by barcode
     /// </summary>
