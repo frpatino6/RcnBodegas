@@ -47,6 +47,22 @@
                     android:layout_marginTop="2dp">
 
                     <EditText
+                        android:id="@+id/warehouse_user_option"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:focusable="false"
+                        android:hint="Usuario bodega"
+                        android:text=""
+                        android:textColor="#333"
+                        android:textSize="@dimen/abc_text_view_text_size" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp">
+
+                    <EditText
                         android:id="@+id/warehouse_program_option"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -73,6 +89,7 @@
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
 
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -93,6 +110,7 @@
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
+
 
                 <View
                     android:layout_width="match_parent"

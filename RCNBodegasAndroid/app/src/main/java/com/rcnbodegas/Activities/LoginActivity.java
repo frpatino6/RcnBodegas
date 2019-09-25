@@ -182,7 +182,9 @@ public class LoginActivity extends AppCompatActivity {
                             data = gson.fromJson(res, token.getType());
 
                             globalVariable.setUserName(input_email.getText().toString());
-                            globalVariable.setUserRole(data.roleName);
+                            globalVariable.setUserRole(data.getRoleName());
+                            globalVariable.setAdminTypeElementId(data.getAdminTypeElementId());
+
                             Intent intent = null;
                             intent = new Intent(LoginActivity.this,  MainActivity.class);
                             startActivity(intent);

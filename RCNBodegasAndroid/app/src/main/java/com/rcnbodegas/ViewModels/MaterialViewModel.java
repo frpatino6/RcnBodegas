@@ -3,17 +3,21 @@ package com.rcnbodegas.ViewModels;
 import android.graphics.Bitmap;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MaterialViewModel {
 
+    private String saleDate;
     private String wareHouseId;
     private String wareHouseName;
     private Integer productionId;
     private String productionName;
     private Integer responsibleId;
+    private Integer terceroActual;
     private String responsibleName;
     private String typeElementId;
     private String typeElementName;
+    private String legalizedBy;
     private String marca;
     private String barCode;
     private String materialName;
@@ -23,6 +27,7 @@ public class MaterialViewModel {
     private ArrayList<String> listaImagenesStr;
 
     private boolean isReview;
+
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
@@ -37,6 +42,30 @@ public class MaterialViewModel {
         this.barCode = barCode;
         this.materialName = materialName;
 
+    }
+
+    public Integer getTerceroActual() {
+        return terceroActual;
+    }
+
+    public void setTerceroActual(Integer terceroActual) {
+        this.terceroActual = terceroActual;
+    }
+
+    public String getSaleDate() {
+        return saleDate;
+    }
+
+    public void setSaleDate(String saleDate) {
+        this.saleDate = saleDate;
+    }
+
+    public String getLegalizedBy() {
+        return legalizedBy;
+    }
+
+    public void setLegalizedBy(String legalizedBy) {
+        this.legalizedBy = legalizedBy;
     }
 
     public Double getPurchaseValue() {
@@ -70,6 +99,8 @@ public class MaterialViewModel {
 
     public MaterialViewModel() {
         this.isReview = false;
+        listaImagenesBmp=new ArrayList<>();
+        listaImagenesStr= new ArrayList<>();
     }
 
     public Double getUnitPrice() {

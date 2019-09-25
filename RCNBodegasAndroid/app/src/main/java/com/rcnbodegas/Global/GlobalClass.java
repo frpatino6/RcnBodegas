@@ -12,12 +12,15 @@ public class GlobalClass extends Application {
     private int idSelectedResponsibleInventory=-1;
     private int idSelectedTypeElementInventory=-1;
     private int idSelectedResponsibleWarehouse=-1;
-    private int idSelectedTypeElementWarehouse=-1;
+    private int idSelectedUserWarehouse=-1;
+    private Integer idSelectedTypeElementWarehouse=-1;
     private int idSelectedTypeElementHeader=-1;
     private String userName;
-//    private String urlServices = "http://172.20.0.154:8083/";
+    private String AdminTypeElementId;
+    private String urlServices = "http://172.20.0.154:8083/";
 
-    private String urlServices = "http://192.168.0.12/bodegas/";
+    //private String urlServices = "http://192.168.0.12/bodegas/";
+    //private String urlServices = "http://172.20.48.100/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
@@ -37,6 +40,22 @@ public class GlobalClass extends Application {
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
     private List<MaterialViewModel> listMaterialBYProduction;
     private ArrayList<MaterialViewModel> listMaterialForAdd;
+
+    public String getAdminTypeElementId() {
+        return AdminTypeElementId;
+    }
+
+    public void setAdminTypeElementId(String adminTypeElementId) {
+        AdminTypeElementId = adminTypeElementId;
+    }
+
+    public int getIdSelectedUserWarehouse() {
+        return idSelectedUserWarehouse;
+    }
+
+    public void setIdSelectedUserWarehouse(int idSelectedUserWarehouse) {
+        this.idSelectedUserWarehouse = idSelectedUserWarehouse;
+    }
 
     public ArrayList<MaterialViewModel> getDataReviewMaterial() {
 
@@ -196,11 +215,11 @@ public class GlobalClass extends Application {
         this.idSelectedResponsibleWarehouse = idSelectedResponsibleWarehouse;
     }
 
-    public int getIdSelectedTypeElementWarehouse() {
+    public Integer getIdSelectedTypeElementWarehouse() {
         return idSelectedTypeElementWarehouse;
     }
 
-    public void setIdSelectedTypeElementWarehouse(int idSelectedTypeElementWarehouse) {
+    public void setIdSelectedTypeElementWarehouse(Integer idSelectedTypeElementWarehouse) {
         this.idSelectedTypeElementWarehouse = idSelectedTypeElementWarehouse;
     }
 

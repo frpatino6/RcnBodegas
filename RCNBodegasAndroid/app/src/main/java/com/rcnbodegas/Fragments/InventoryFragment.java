@@ -3,6 +3,7 @@ package com.rcnbodegas.Fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -65,7 +66,6 @@ import com.symbol.emdk.barcode.BarcodeManager;
 import com.symbol.emdk.barcode.Scanner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -126,6 +126,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private TScanner Scanner_manager = null;
     private MenuItem mnuReview;
     private MenuItem mnuSave;
+    private MenuItem mnuCancel;
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -237,13 +238,16 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         super.onPrepareOptionsMenu(menu);
         mnuReview = menu.findItem(R.id.mnu_review);
         mnuSave = menu.findItem(R.id.mnu_save);
+        mnuCancel = menu.findItem(R.id.mnu_cancel);
 
         if (validateInventoryProcess()) {
             mnuReview.setVisible(true);
             mnuSave.setVisible(true);
+            mnuCancel.setVisible(true);
         } else {
             mnuReview.setVisible(false);
             mnuSave.setVisible(false);
+            mnuCancel.setVisible(false);
         }
     }
 
@@ -267,7 +271,10 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 startActivity(intent);
                 return true;
             case R.id.mnu_save:
-                confirmCancelEntrega();
+                confirmInventory();
+                return true;
+            case R.id.mnu_cancel:
+                confirmCancelInventory();
                 return true;
         }
 
@@ -306,6 +313,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         return globalVariable.getCurrentInventoryActiveProcess();
     }
 
+    @SuppressLint("RestrictedApi")
     private void InitializeNewInventroyProcess() {
         globalVariable.setCurrentInventoryActiveProcess(false);
         inventory_element.setVisibility(View.GONE);
@@ -315,10 +323,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         globalVariable.setIdSelectedTypeElementInventory(-1);
         inventory_program_option.setText("");
         inventory_responsible_option.setText("");
+        inventory_btn_new_element.setVisibility(View.GONE);
         globalVariable.setDataMaterialInventory(new ArrayList<MaterialViewModel>());
         globalVariable.setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
         mnuReview.setVisible(false);
         mnuSave.setVisible(false);
+        mnuCancel.setVisible(false);
+        ListaImagenes.clear();
     }
 
     private void InitializeControls(View v) {
@@ -474,7 +485,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         hideKeyboard(getActivity());
     }
 
-    private void confirmCancelEntrega() {
+    private void confirmInventory() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true);
         builder.setTitle(getString(R.string.app_name));
@@ -488,6 +499,29 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             InitializeNewInventroyProcess();
                         else
                             showMessageDialog(getString(R.string.message_not_elements_inventory));
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void confirmCancelInventory() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(getString(R.string.message_confirm_cancel));
+        builder.setPositiveButton(getString(R.string.btn_confirm),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                            InitializeNewInventroyProcess();
                     }
                 });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -778,10 +812,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
         String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory() + "/" + globalVariable.getIdSelectedTypeElementHeader();
         AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
+        client.setTimeout(120000);
         RequestParams params = new RequestParams();
         showProgress(true);
         client.get(url, new TextHttpResponseHandler() {
+                    @SuppressLint("RestrictedApi")
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, String res) {
                         // called when response HTTP status is "200 OK"
@@ -803,7 +838,9 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             showProgress(false);
                             mnuReview.setVisible(true);
                             mnuSave.setVisible(true);
+                            mnuCancel.setVisible(true);
                             globalVariable.setCurrentInventoryActiveProcess(true);
+                            inventory_btn_new_element.setVisibility(View.VISIBLE);
 
 
                         } catch (JsonSyntaxException e) {
@@ -830,7 +867,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private void createBitMapFromString(MaterialViewModel itemMaterialAdded) {
 
-        if(ListaImagenes==null) ListaImagenes= new ArrayList<>();
+        if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
         else
             ListaImagenes.clear();
 
@@ -846,6 +883,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         }
 
     }
+
     private void setListImagesAdapter() {
         adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
             @Override

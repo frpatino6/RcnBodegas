@@ -10,5 +10,10 @@
         android:id="@+id/mnu_save"
         android:title="Envuar"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/mnu_cancel"
+        android:icon="@mipmap/ic_menu_cancel"
+        android:title="CAncelar inventario"
+        app:showAsAction="always" />
 
 </menu>

@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -48,7 +49,6 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Activities.CustomActivity;
 import com.rcnbodegas.Activities.ListItemAddedActivity;
@@ -56,13 +56,13 @@ import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
 import com.rcnbodegas.Activities.TypeElementListActivity;
 import com.rcnbodegas.Activities.WareHouseListActivity;
+import com.rcnbodegas.Activities.WarehouseUserActivity;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.IObserver;
 import com.rcnbodegas.Global.PhotoListAdapter;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
-import com.rcnbodegas.Global.StringArraySerializer;
 import com.rcnbodegas.Global.TScanner;
 import com.rcnbodegas.Global.Utils;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
@@ -76,6 +76,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -93,6 +94,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_RESPONSIBLE = 2;
     private static final int REQUEST_TYPE_ELEMENT = 3;
     private static final int REQUEST_WAREHOUSE = 4;
+    private static final int REQUEST_USER_WAREHOUSE = 5;
     private static final int CAMERA_REQUEST = 1888;
     private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1900;
 
@@ -112,6 +114,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private EditText warehouse_element_edit;
     private EditText warehouse_element_price_edit;
     private EditText warehouse_element_value_edit;
+    private EditText warehouse_user_option;
 
     private LinearLayout warehouse_element_layout;
     private LinearLayout warehouse_data;
@@ -138,6 +141,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private MenuItem iconScanMenu;
     private String lastCreatedNUmberDocument = "";
     private boolean isOk;
+    private MenuItem mnuCancel;
+    private int mYear;
+    private int mMonth;
+    private int mDay;
 
     public WarehouseFragment() {
         // Required empty public constructor
@@ -189,7 +196,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                warehouse_element_barcode_edit.setText(BarcodeData);
+                if (!globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+                    warehouse_element_barcode_edit.setText(BarcodeData);
+                else {
+                    showMessageDialog("El elemento es administrativo, lo cual no se asignará codigo de barras");
+                    warehouse_element_barcode_edit.setText("");
+                }
             }
         });
 
@@ -255,8 +267,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             if (resultCode == -1) {
                 String result = data.getStringExtra("typeElementName");
                 globalVariable.setIdSelectedTypeElementWarehouse(Integer.valueOf(data.getStringExtra("typeElementId")));
-
                 this.warehouse_element_type_edit.setText(result);
+
+                if (globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+                    this.warehouse_element_barcode_edit.setText("");
 
             }
         }
@@ -268,6 +282,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 globalVariable.setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
             }
         }
+        if (requestCode == REQUEST_USER_WAREHOUSE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("responsibleWarehouseName");
+                globalVariable.setIdSelectedUserWarehouse(Integer.valueOf(data.getStringExtra("responsibleWarehouseId")));
+                this.warehouse_user_option.setText(result);
+            }
+        }
+
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -278,11 +300,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         super.onPrepareOptionsMenu(menu);
         menuReview = menu.findItem(R.id.menu_review);
         menuSave = menu.findItem(R.id.mnu_save);
-
+        mnuCancel = menu.findItem(R.id.mnu_cancel);
 
         if (!validateInventoryProcess()) {
             menuReview.setVisible(false);
             menuSave.setVisible(false);
+            mnuCancel.setVisible(false);
             warehouse_btn_camera.setVisibility(View.GONE);
             warehouse_btn_new_element.setVisibility(View.GONE);
 
@@ -290,6 +313,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         } else {
             menuReview.setVisible(true);
             menuSave.setVisible(true);
+            mnuCancel.setVisible(true);
             warehouse_btn_camera.setVisibility(View.VISIBLE);
             warehouse_btn_new_element.setVisibility(View.VISIBLE);
         }
@@ -321,9 +345,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 startActivity(intent);
                 return true;
             case R.id.mnu_save:
-                confirmCancelEntrega();
+                confirmAddNewELement();
                 return true;
-
+            case R.id.mnu_cancel:
+                confirmCancelProcess();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -351,6 +377,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @SuppressLint("RestrictedApi")
     private void InitializaNewAddElement() {
 
@@ -434,6 +461,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     private void InitializeControls(View v) {
 
+        final Calendar c = Calendar.getInstance();
+        mYear = c.get(Calendar.YEAR);
+        mMonth = c.get(Calendar.MONTH) + 1;
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+
         warehouse_btn_ok = v.findViewById(R.id.warehouse_btn_ok);
         warehouse_btn_camera = v.findViewById(R.id.warehouse_btn_camera);
         warehouse_btn_new_element = v.findViewById(R.id.warehouse_btn_new_element);
@@ -449,6 +481,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_edit = v.findViewById(R.id.warehouse_element_edit);
         warehouse_element_price_edit = v.findViewById(R.id.warehouse_element_price_edit);
         warehouse_element_value_edit = v.findViewById(R.id.warehouse_element_value_edit);
+        warehouse_user_option = v.findViewById(R.id.warehouse_user_option);
         warehouse_data = v.findViewById(R.id.warehouse_data);
 
         warehouse_date_option.setText(dateTimeUtilities.parseDateTurno());
@@ -492,6 +525,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 OpenListWareHouse();
             }
         });
+
         warehouse_btn_new_element.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -507,14 +541,49 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 startActivityForResult(intent, REQUEST_PRODUCTION);
             }
         });
+        warehouse_user_option.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = null;
+
+                if (warehouse_option.getText().toString().equals("")) {
+                    warehouse_option.setError(getString(R.string.error_warehouse_empty));
+                    return;
+                }
+                warehouse_option.setError(null);
+                intent = new Intent(getActivity(), WarehouseUserActivity.class);
+                startActivityForResult(intent, REQUEST_USER_WAREHOUSE);
+            }
+        });
         warehouse_date_option.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DialogFragment newFragment = new InventoryFragment.DatePickerFragment();
-                ((DatePickerFragment) newFragment).txtDate = warehouse_date_option;
+                /*((DatePickerFragment) newFragment).txtDate = warehouse_date_option;
                 ((DatePickerFragment) newFragment).dateTimeUtilities = dateTimeUtilities;
 
-                newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+                newFragment.show(getActivity().getSupportFragmentManager(), "datePicker");*/
+                final Calendar c = Calendar.getInstance();
+                mYear = c.get(Calendar.YEAR);
+                mMonth = c.get(Calendar.MONTH);
+                mDay = c.get(Calendar.DAY_OF_MONTH);
+
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(),
+                        new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker view, int year,
+                                                  int monthOfYear, int dayOfMonth) {
+
+                                warehouse_date_option.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                                mYear = year;
+                                mMonth = (monthOfYear + 1);
+                                mDay = dayOfMonth;
+
+                            }
+                        }, mYear, mMonth, mDay);
+                datePickerDialog.show();
             }
         });
 
@@ -585,6 +654,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             warehouse_btn_new_element.setVisibility(View.VISIBLE);
             menuSave.setVisible(true);
             menuReview.setVisible(true);
+            mnuCancel.setVisible(true);
             LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
             Utils.setBadgeCount(getActivity(), icon, globalVariable.getDataMaterial().size());
         }
@@ -602,11 +672,13 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         boolean cancel = false;
         View focusView = null;
 
-        if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
-            warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
-            focusView = warehouse_element_barcode_edit;
-            cancel = true;
-        }
+        if (!globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+            if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
+                warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
+                focusView = warehouse_element_barcode_edit;
+                cancel = true;
+            }
+
         if (TextUtils.isEmpty(warehouse_element_desc_edit.getText().toString())) {
             warehouse_element_desc_edit.setError(getString(R.string.error_program_empty));
             focusView = warehouse_element_desc_edit;
@@ -652,9 +724,13 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         newElement.setResponsibleId(globalVariable.getIdSelectedResponsibleWarehouse());
         newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
         newElement.setMarca(warehouse_element_edit.getText().toString());
+        newElement.setLegalizedBy(String.valueOf(globalVariable.getIdSelectedResponsibleWarehouse()));
         newElement.setUnitPrice(warehouse_element_price_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_price_edit.getText().toString()));
         newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElementWarehouse()));
         newElement.setTypeElementName(warehouse_element_type_edit.getText().toString());
+        newElement.setPurchaseValue(warehouse_element_value_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_value_edit.getText().toString()));
+        newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear, mMonth - 1, mDay));
+        newElement.setTerceroActual(globalVariable.getIdSelectedUserWarehouse());
 
         if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
 
@@ -689,17 +765,41 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     }
 
 
-    private void confirmCancelEntrega() {
+    private void confirmAddNewELement() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true);
         builder.setTitle(getString(R.string.app_name));
         builder.setMessage("Está seguro de guardar los elementos agregados?");
         builder.setPositiveButton(getString(R.string.btn_confirm),
                 new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         InitializaNewAddElement();
                         dialog.dismiss();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void confirmCancelProcess() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(getString(R.string.message_confirm_cancel));
+        builder.setPositiveButton(getString(R.string.btn_confirm),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InitializeNewProcess();
                     }
                 });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -720,6 +820,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_edit.setText("");
         warehouse_element_price_edit.setText("");
         warehouse_element_value_edit.setText("");
+        globalVariable.setIdSelectedTypeElementWarehouse(-1);
 
         if (ListaImagenes != null) {
             ListaImagenes.clear();
@@ -987,6 +1088,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         photos_recycler_view.setAdapter(adapter);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void asyncListMaterialsByProduction() {
 
         showProgress(true);
@@ -998,15 +1100,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         String tipo = "application/json";
 
         StringEntity entity = null;
-        try {
-            Gson json = new Gson();
+        Gson json = new Gson();
 
-            String resultJson = json.toJson(globalVariable.getDataMaterial());
-            entity = new StringEntity(resultJson);
+        String resultJson = json.toJson(globalVariable.getDataMaterial());
 
-        } catch (UnsupportedEncodingException ex) {
+        entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
 
-        }
         client.post(getActivity().getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
 
             @SuppressLint("RestrictedApi")
@@ -1015,14 +1114,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 isOk = true;
                 Gson gson = new GsonBuilder().create();
                 // Define Response class to correspond to the JSON response returned
-                lastCreatedNUmberDocument= gson.fromJson(responseString, String.class);
+                lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
 
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
                 showProgress(false);
-                showMessageDialog(error.getMessage());
+                showMessageDialog(responseBody);
                 isOk = false;
             }
 
@@ -1034,22 +1133,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                     @Override
                     public void run() {
                         if (isOk == true) {
-                            globalVariable.setIdSelectedProductionWarehouse("");
-                            warehouse_program_option.setText("");
-                            globalVariable.setIdSelectedResponsibleWarehouse(-1);
-                            warehouse_legalizedBy_option.setText("");
-                            globalVariable.setIdSelectedTypeElementWarehouse(-1);
-                            warehouse_element_type_edit.setText("");
-                            globalVariable.setCurrentAddElementActiveProcess(false);
-                            warehouse_btn_camera.setVisibility(View.GONE);
-                            warehouse_btn_new_element.setVisibility(View.GONE);
-                            menuSave.setVisible(false);
-                            menuReview.setVisible(false);
-                            warehouse_element_layout.setVisibility(View.GONE);
-                            warehouse_data.setVisibility(View.VISIBLE);
-                            globalVariable.getDataMaterial().clear();
-                            ListFotos.clear();
-                            ListaImagenes.clear();
+                            InitializeNewProcess();
                             showProgress(false);
                             showMessageDialog(lastCreatedNUmberDocument);
                         }
@@ -1058,6 +1142,28 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
             }
         });
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void InitializeNewProcess() {
+        globalVariable.setIdSelectedProductionWarehouse("");
+        warehouse_program_option.setText("");
+        globalVariable.setIdSelectedResponsibleWarehouse(-1);
+        warehouse_legalizedBy_option.setText("");
+        globalVariable.setIdSelectedTypeElementWarehouse(-1);
+        warehouse_element_type_edit.setText("");
+        globalVariable.setCurrentAddElementActiveProcess(false);
+        warehouse_btn_camera.setVisibility(View.GONE);
+        warehouse_btn_new_element.setVisibility(View.GONE);
+        menuSave.setVisible(false);
+        menuReview.setVisible(false);
+        mnuCancel.setVisible(false);
+        warehouse_element_layout.setVisibility(View.GONE);
+        warehouse_data.setVisibility(View.VISIBLE);
+        globalVariable.getDataMaterial().clear();
+
+        if (ListFotos != null) ListFotos.clear();
+        if (ListaImagenes != null) ListaImagenes.clear();
     }
 
     public static class DatePickerFragment extends DialogFragment
