@@ -41,6 +41,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -101,6 +103,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     public PhotoListAdapter adapterPhotos;
 
     private Button warehouse_btn_ok;
+    private CheckBox chkIsAdmin;
     private FloatingActionButton warehouse_btn_camera;
     private FloatingActionButton warehouse_btn_new_element;
     private EditText warehouse_date_option;
@@ -196,7 +199,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (!globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+                if (!chkIsAdmin.isChecked())
                     warehouse_element_barcode_edit.setText(BarcodeData);
                 else {
                     showMessageDialog("El elemento es administrativo, lo cual no se asignará codigo de barras");
@@ -483,7 +486,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_value_edit = v.findViewById(R.id.warehouse_element_value_edit);
         warehouse_user_option = v.findViewById(R.id.warehouse_user_option);
         warehouse_data = v.findViewById(R.id.warehouse_data);
-
+        chkIsAdmin = v.findViewById(R.id.chkIsAdmin);
         warehouse_date_option.setText(dateTimeUtilities.parseDateTurno());
         warehouse_option.setText(globalVariable.getNameSelectedWareHouseWarehouse());
 
@@ -612,6 +615,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 startActivityForResult(intent, REQUEST_TYPE_ELEMENT);
             }
         });
+
+        chkIsAdmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                if (isChecked)
+                    warehouse_element_barcode_edit.setText("");
+            }
+        });
     }
 
     @SuppressLint("RestrictedApi")
@@ -672,7 +684,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         boolean cancel = false;
         View focusView = null;
 
-        if (!globalVariable.getIdSelectedTypeElementWarehouse().toString().equals(globalVariable.getAdminTypeElementId()))
+        if (!chkIsAdmin.isChecked())
             if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
                 warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
                 focusView = warehouse_element_barcode_edit;
@@ -700,7 +712,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             cancel = true;
         }
         if (TextUtils.isEmpty(warehouse_element_value_edit.getText().toString())) {
-            warehouse_element_value_edit.setError(getString(R.string.error_responsible_empty));
+            warehouse_element_value_edit.setError(getString(R.string.error_valor_materia_empty));
             focusView = warehouse_element_value_edit;
             cancel = true;
         }
@@ -731,6 +743,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         newElement.setPurchaseValue(warehouse_element_value_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_value_edit.getText().toString()));
         newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear, mMonth - 1, mDay));
         newElement.setTerceroActual(globalVariable.getIdSelectedUserWarehouse());
+        newElement.setAdmin(chkIsAdmin.isChecked());
+
 
         if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
 
@@ -820,6 +834,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_edit.setText("");
         warehouse_element_price_edit.setText("");
         warehouse_element_value_edit.setText("");
+        chkIsAdmin.setChecked(false);
         globalVariable.setIdSelectedTypeElementWarehouse(-1);
 
         if (ListaImagenes != null) {
@@ -1161,6 +1176,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_layout.setVisibility(View.GONE);
         warehouse_data.setVisibility(View.VISIBLE);
         globalVariable.getDataMaterial().clear();
+        chkIsAdmin.setChecked(false);
 
         if (ListFotos != null) ListFotos.clear();
         if (ListaImagenes != null) ListaImagenes.clear();
