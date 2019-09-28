@@ -76,7 +76,7 @@ namespace Rcn.Bodegas.Core.Services
 
                   SetParameters(OraBarCode, OraDescripcion, OraTipoBodega, OraUbicacionActua, OraEstado, OraEmpresaCodigo, OraUbicacionCodigo, OraUsuarioCreacion, OraValorCompra, OraValorMateria, OraTerceroActual, OraElementType, OraMarca, OraUbicacionRecibido, OraTerceroRecibido, OraCodigoElemento, oraUpdate);
 
-                  if (newMaterial.typeElementId.ToString().Equals(adminMaterialTypeId))
+                  if (newMaterial.isAdmin)
                   {
                     oraUpdate.Parameters.Remove(OraBarCode);
                     oraUpdate.Parameters.Remove(OraUbicacionActua);
@@ -105,7 +105,7 @@ namespace Rcn.Bodegas.Core.Services
                   rowCount = oraUpdate.ExecuteNonQuery();
 
                   if (newMaterial.ListaImagenesStr != null && newMaterial.ListaImagenesStr.Count > 0)
-                    InsertImagesByMaterial(OraCodigoElemento.Value.ToString(), newMaterial.ListaImagenesStr, con, transaction, isAdmin);
+                    InsertImagesByMaterial(OraCodigoElemento.Value.ToString(), newMaterial.ListaImagenesStr, con, transaction, newMaterial.isAdmin);
                 }
               transaction.Commit();
 
