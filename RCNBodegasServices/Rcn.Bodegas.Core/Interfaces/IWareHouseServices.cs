@@ -1,7 +1,6 @@
-﻿using Rcn.Bodegas.Core.ViewModel;
-using System;
+﻿using Oracle.ManagedDataAccess.Client;
+using Rcn.Bodegas.Core.ViewModel;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rcn.Bodegas.Core.Interfaces
@@ -10,6 +9,8 @@ namespace Rcn.Bodegas.Core.Interfaces
   {
     Task<List<WareHouseViewModel>> GetListWareHouseByUser(string userName, int companyId);
 
-    Task<string> CreateMaterialWarehouse(List<MaterialViewModel> newMaterial, string warehouseid);
+    Task<int> CreateMaterialWarehouse(List<MaterialViewModel> newMaterial, string warehouseid);
+
+    
   }
 }

@@ -10,6 +10,8 @@ namespace Rcn.Bodegas.Core.Interfaces
 
     Task<List<ResponsibleViewModel>> GetListResponsible(string wareHouse, string production);
 
+    Task<List<ResponsibleViewModel>> GetListWarehouseUserAsync(string tipoBodega);
+
     Task<List<TipoElementoViewModel>> GetListTipoElemento(string wareHouse);
 
     Task<MaterialViewModel> GetMaterialByBarCode(string barcode);

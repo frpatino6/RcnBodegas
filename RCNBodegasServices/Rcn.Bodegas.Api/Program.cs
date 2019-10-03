@@ -19,6 +19,8 @@ namespace Rcn.Bodegas.Api
 
     public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
         WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>();
+      // .UseKestrel()
+       .UseUrls("http://172.20.0.154:8083")
+       .UseStartup<Startup>();
   }
 }

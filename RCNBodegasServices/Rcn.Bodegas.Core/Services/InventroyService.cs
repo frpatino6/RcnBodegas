@@ -1,4 +1,5 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.ViewModel;
 using System;
@@ -13,10 +14,12 @@ namespace Rcn.Bodegas.Core.Services
 
     private const string WAREHOUSE_TYPE_V = "V";
     private readonly IOracleManagment _IOracleManagment;
-
-    public InventroyService(IOracleManagment oracleManagment)
+    private readonly IInventroyService _IInventroy;
+    private readonly ILogger<InventroyService> _logger;
+    public InventroyService(IOracleManagment oracleManagment, ILogger<InventroyService> logger)
     {
       _IOracleManagment = oracleManagment;
+      _logger = logger;
     }
 
     public Task<bool> CreateInconsistency(string warehouseType, string productionId, int responsibleId)
@@ -92,7 +95,7 @@ namespace Rcn.Bodegas.Core.Services
     {
       List<ProductionViewModel> result = new List<ProductionViewModel>();
       List<OracleParameter> parameters = new List<OracleParameter>();
-      var query = @"select * from V_PRODUCCION  ORDER BY PRODUCCION";
+      string query = @"select * from V_PRODUCCION  ORDER BY PRODUCCION";
 
       OracleParameter opwareHouse = new OracleParameter();
       opwareHouse.DbType = DbType.String;
@@ -101,27 +104,29 @@ namespace Rcn.Bodegas.Core.Services
       parameters.Add(opwareHouse);
 
 
-      var records = _IOracleManagment.GetData(parameters, query);
+      var records = _IOracleManagment.GetDataSet(parameters, query);
 
-      foreach (IDataRecord rec in records)
+
+      foreach (DataTable table in records.Tables)
       {
 
-        string id = rec.GetString(rec.GetOrdinal("CODIGO_TIPO_BODEGA"));
-        string name = rec.GetString(rec.GetOrdinal("NOMBRE_TIPO_BODEGA"));
-        int cod = rec.GetInt32(rec.GetOrdinal("CODIGO_PRODUCCION"));
-        string prod = rec.GetString(rec.GetOrdinal("PRODUCCION"));
-
-
-        result.Add(new ProductionViewModel
+        foreach (DataRow dr in table.Rows)
         {
-          Id = id,
-          InternalOrder = string.Empty,
-          NameWareHouseType = name,
-          ProductionCode = cod,
-          ProductionName = prod
-        });
-      }
+          string id = dr["CODIGO_TIPO_BODEGA"].ToString();
+          string name = dr["NOMBRE_TIPO_BODEGA"].ToString();
+          int cod = Convert.ToInt32(dr["CODIGO_PRODUCCION"].ToString());
+          string prod = dr["PRODUCCION"].ToString();
+          result.Add(new ProductionViewModel
+          {
+            Id = id,
+            InternalOrder = string.Empty,
+            NameWareHouseType = name,
+            ProductionCode = cod,
+            ProductionName = prod
+          });
 
+        }
+      }   
       return result;
     }
 
@@ -133,42 +138,67 @@ namespace Rcn.Bodegas.Core.Services
     /// <returns></returns>
     public async Task<List<ResponsibleViewModel>> GetListResponsible(string wareHouse, string production)
     {
+#if DEBUG
+      _logger.LogInformation("Debug mode... ");
+#else
+        _logger.LogInformation("release mode... ");
+#endif
+      _logger.LogInformation("Ejecutando servicio GetListResponsable ");
       List<ResponsibleViewModel> result = new List<ResponsibleViewModel>();
       List<OracleParameter> parameters = new List<OracleParameter>();
-      var query = @"select distinct CODIGO_RESPONSABLE ,NOMBRE_RESPONSABLE  
-                    from V_MATERIALES 
-                    WHERE CODIGO_PRODUCCION=:production AND CODIGO_TIPO_BODEGA=:warehouse
-                    ORDER BY NOMBRE_RESPONSABLE";
 
-      OracleParameter opwareHouse = new OracleParameter();
-      opwareHouse.DbType = DbType.String;
-      opwareHouse.Value = wareHouse;
-      opwareHouse.ParameterName = "warehouse";
+      string query = @"SELECT M.pa_tercero_codigo  Codigo_Responsable,
+                       (  Select Nombre 
+                          From GN_TERCERO
+                          Where codigo = M.pa_tercero_codigo) Nombre_Responsable,M.BD_Ubccion_Codigo Codigo_Produccion
+                          ,
+                       (
+                          Select NOMBRE 
+                          From BD_UBICACION 
+                          Where Codigo = M.bd_ubccion_codigo) Produccion 
+                    FROM bd_movimiento_material M
+                    WHERE M.BD_Ubccion_Codigo  =:production
+                    GROUP BY M.pa_tercero_codigo, M.BD_Ubccion_Codigo";
+
+      _logger.LogInformation("Query " + query);
+
+      OracleParameter opwareHouse = new OracleParameter
+      {
+        DbType = DbType.String,
+        Value = wareHouse,
+        ParameterName = "warehouse"
+      };
       parameters.Add(opwareHouse);
 
-      OracleParameter opProduccion = new OracleParameter();
-      opProduccion.DbType = DbType.String;
-      opProduccion.Value = production;
-      opProduccion.ParameterName = "production";
+      OracleParameter opProduccion = new OracleParameter
+      {
+        DbType = DbType.String,
+        Value = production,
+        ParameterName = "production"
+      };
+
       parameters.Add(opProduccion);
 
-      var records = _IOracleManagment.GetData(parameters, query);
-
-      foreach (IDataRecord rec in records)
+      var records = _IOracleManagment.GetDataSet(parameters, query);
+     
+      foreach (DataTable table in records.Tables)
       {
-
-        int id = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
-        string name = rec.GetString(rec.GetOrdinal("NOMBRE_RESPONSABLE"));
-
-
-
-        result.Add(new ResponsibleViewModel
+        _logger.LogInformation("Iterando registros");
+        foreach (DataRow dr in table.Rows)
         {
-          Id = id,
-          Name = name
-        });
-      }
+          int id = Convert.ToInt32(dr["CODIGO_RESPONSABLE"].ToString());
+          string name = dr["NOMBRE_RESPONSABLE"].ToString();
+                            
+          result.Add(new ResponsibleViewModel
+          {
+            Id = id,
+            Name = name
+          });
 
+        }
+      }      
+
+      _logger.LogInformation("Registros retornados " + result.Count.ToString());
       return result;
     }
 
@@ -203,6 +233,44 @@ namespace Rcn.Bodegas.Core.Services
           Name = name
         });
       }
+
+      return result;
+    }
+
+    public async Task<List<ResponsibleViewModel>> GetListWarehouseUserAsync(string tipoBodega)
+    {
+      List<ResponsibleViewModel> result = new List<ResponsibleViewModel>();
+      List<OracleParameter> parameters = new List<OracleParameter>();
+      var query = @"select unique codigo_responsable codigo_responsable,nombre_responsable
+                  from V_RESPONSABLE
+                  where codigo_produccion in (1,2)  and DECODE(codigo_produccion,1,'V','A') = :TIPO_BODEGA
+                  ORDER BY NOMBRE_RESPONSABLE";
+
+      OracleParameter opTipoBodega = new OracleParameter();
+      opTipoBodega.DbType = DbType.String;
+      opTipoBodega.Value = tipoBodega;
+      opTipoBodega.ParameterName = "TIPO_BODEGA";
+      parameters.Add(opTipoBodega);
+
+
+      var records = _IOracleManagment.GetDataSet(parameters, query);
+
+      foreach (DataTable table in records.Tables)
+      {
+        _logger.LogInformation("Iterando registros");
+        foreach (DataRow dr in table.Rows)
+        {
+          int id = Convert.ToInt32(dr["CODIGO_RESPONSABLE"].ToString());
+          string name = dr["NOMBRE_RESPONSABLE"].ToString();
+
+          result.Add(new ResponsibleViewModel
+          {
+            Id = id,
+            Name = name
+          });
+
+        }
+      }    
 
       return result;
     }
@@ -270,7 +338,7 @@ namespace Rcn.Bodegas.Core.Services
       string barCode = string.Empty;
       string where = " WHERE CODIGO_TIPO_BODEGA=:COD_TIPO_BODEGA AND CODIGO_PRODUCCION=:COD_PRODUCCION  ";
       string orderby = " ORDER BY MARCA";
-      int barcode =0;
+      int barcode = 0;
       decimal unitPrice = 0;
 
       List<MaterialViewModel> result = new List<MaterialViewModel>();
@@ -341,7 +409,7 @@ namespace Rcn.Bodegas.Core.Services
           marca = marca,
           barCode = barCode,
           unitPrice = unitPrice,
-          ListaImagenesStr=getImagesByMaterial(barcode)
+          ListaImagenesStr = getImagesByMaterial(barcode)
 
         });
       }

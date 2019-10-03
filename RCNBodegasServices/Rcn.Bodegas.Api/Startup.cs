@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Rcn.Bodegas.Core.Helpers;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.Services;
+using Serilog;
 
 namespace Rcn.Bodegas.Api
 {
@@ -21,6 +22,7 @@ namespace Rcn.Bodegas.Api
     public Startup(IConfiguration configuration)
     {
       Configuration = configuration;
+      Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
     }
 
     public IConfiguration Configuration { get; }
@@ -37,8 +39,9 @@ namespace Rcn.Bodegas.Api
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+    public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory   )
     {
+      loggerFactory.AddSerilog();
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();

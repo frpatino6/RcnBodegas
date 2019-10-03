@@ -21,6 +21,11 @@ namespace Rcn.Bodegas.Core.ViewModel
     public decimal purchaseValue { get; set; }
     public string userCreated { get; set; }
     public bool isReview { get; set; }
+    public bool isAdmin { get; set; }
     public List<string> ListaImagenesStr { get; set; }
+    public string legalizedBy { get; set; }
+    public System.DateTime saleDate { get; set; }
+
+    public string terceroActual { get; set; }
   }
 }

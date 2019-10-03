@@ -15,5 +15,7 @@ namespace Rcn.Bodegas.Core.ViewModel
     public int RoleId { get; set; }
 
     public string RoleName { get; set; }
+
+    public string AdminTypeElementId { get; set; }
   }
 }
