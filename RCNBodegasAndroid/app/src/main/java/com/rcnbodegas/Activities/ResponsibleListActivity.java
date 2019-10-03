@@ -174,7 +174,7 @@ public class ResponsibleListActivity extends AppCompatActivity {
 
         String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListResponsable/" + wareHouse+ "/" + production;
         AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
+        client.setTimeout(120000);
         RequestParams params = new RequestParams();
         showProgress(true);
         client.get(urlIncidencias, new TextHttpResponseHandler() {

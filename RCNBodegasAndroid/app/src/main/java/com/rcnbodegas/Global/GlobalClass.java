@@ -9,18 +9,17 @@ import java.util.List;
 
 public class GlobalClass extends Application {
 
-    private int idSelectedResponsibleInventory=-1;
-    private int idSelectedTypeElementInventory=-1;
-    private int idSelectedResponsibleWarehouse=-1;
-    private int idSelectedUserWarehouse=-1;
-    private Integer idSelectedTypeElementWarehouse=-1;
-    private int idSelectedTypeElementHeader=-1;
+    private int idSelectedResponsibleInventory = -1;
+    private int idSelectedTypeElementInventory = -1;
+    private int idSelectedResponsibleWarehouse = -1;
+    private int idSelectedUserWarehouse = -1;
+    private Integer idSelectedTypeElementWarehouse = -1;
+    private int idSelectedTypeElementHeader = -1;
     private String userName;
     private String AdminTypeElementId;
-    //private String urlServices = "http://172.20.0.154:8083/";
-
-    private String urlServices = "http://192.168.0.12/bodegas/";
-    //private String urlServices = "http://172.20.48.100/bodegas/";
+    private String urlServices = "http://172.20.0.154:8083/";
+    //private String urlServices = "http://192.168.0.6/bodegas/";
+    //private String urlServices = "http://172.20.17.88/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
@@ -78,7 +77,7 @@ public class GlobalClass extends Application {
 
     public ArrayList<MaterialViewModel> getDataMaterial() {
 
-        if(dataMaterial==null) dataMaterial= new ArrayList<>();
+        if (dataMaterial == null) dataMaterial = new ArrayList<>();
         return dataMaterial;
     }
 

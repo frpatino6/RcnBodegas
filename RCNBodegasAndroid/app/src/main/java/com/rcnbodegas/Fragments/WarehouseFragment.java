@@ -62,6 +62,7 @@ import com.rcnbodegas.Activities.WarehouseUserActivity;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.IObserver;
+import com.rcnbodegas.Global.NumberTextWatcher;
 import com.rcnbodegas.Global.PhotoListAdapter;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
@@ -79,11 +80,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -493,6 +496,9 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         photos_recycler_view = (RecyclerView) v.findViewById(R.id.photos_recycler_view);
         photos_recycler_view.setHasFixedSize(true);
 
+        warehouse_element_price_edit.addTextChangedListener(new NumberTextWatcher(warehouse_element_price_edit, "#,###"));
+        warehouse_element_value_edit.addTextChangedListener(new NumberTextWatcher(warehouse_element_value_edit, "#,###"));
+
         mIncidenciasFormView = v.findViewById(R.id.layout_header);
         mProgressView = v.findViewById(R.id.warehouse_progress);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -728,43 +734,65 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     @SuppressLint("RestrictedApi")
     private void addElement() {
-        showProgress(true);
-        MaterialViewModel newElement = new MaterialViewModel();
-        newElement.setBarCode(warehouse_element_barcode_edit.getText().toString());
-        newElement.setWareHouseId(globalVariable.getIdSelectedWareHouseWarehouse());
-        newElement.setProductionId(Integer.valueOf(globalVariable.getIdSelectedProductionWarehouse()));
-        newElement.setResponsibleId(globalVariable.getIdSelectedResponsibleWarehouse());
-        newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
-        newElement.setMarca(warehouse_element_edit.getText().toString());
-        newElement.setLegalizedBy(String.valueOf(globalVariable.getIdSelectedResponsibleWarehouse()));
-        newElement.setUnitPrice(warehouse_element_price_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_price_edit.getText().toString()));
-        newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElementWarehouse()));
-        newElement.setTypeElementName(warehouse_element_type_edit.getText().toString());
-        newElement.setPurchaseValue(warehouse_element_value_edit.getText().toString().equals("") ? 0 : Double.valueOf(warehouse_element_value_edit.getText().toString()));
-        newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear, mMonth - 1, mDay));
-        newElement.setTerceroActual(globalVariable.getIdSelectedUserWarehouse());
-        newElement.setAdmin(chkIsAdmin.isChecked());
+        try {
+            DecimalFormat precision = new DecimalFormat("0.00");
+
+            showProgress(true);
+            MaterialViewModel newElement = new MaterialViewModel();
+            newElement.setBarCode(warehouse_element_barcode_edit.getText().toString());
+            newElement.setWareHouseId(globalVariable.getIdSelectedWareHouseWarehouse());
+            newElement.setProductionId(Integer.valueOf(globalVariable.getIdSelectedProductionWarehouse()));
+            newElement.setResponsibleId(globalVariable.getIdSelectedResponsibleWarehouse());
+            newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
+            newElement.setMarca(warehouse_element_edit.getText().toString());
+            newElement.setLegalizedBy(String.valueOf(globalVariable.getIdSelectedResponsibleWarehouse()));
 
 
-        if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
+            String currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
+                    .replace(",", "")
+                    .replace(".", ".")
+                    .replaceAll("[^\\d.-]", "");
 
-        if (ListFotos != null)
-            for (String photo : ListFotos) {
-                newElement.getListaImagenesStr().add(parseImage(photo));
-            }
+            String currencyPurchaseString = warehouse_element_value_edit.getText().toString()
+                    .replace(",", "")
+                    .replace(".", ".")
+                    .replaceAll("[^\\d.-]", "");
 
-        if (globalVariable.getDataMaterial() == null)
-            globalVariable.setDataMaterial(new ArrayList<MaterialViewModel>());
+            newElement.setUnitPrice(Double.valueOf(currencyUnitPriceString));
+            newElement.setTypeElementId(String.valueOf(globalVariable.getIdSelectedTypeElementWarehouse()));
+            newElement.setTypeElementName(warehouse_element_type_edit.getText().toString());
+            newElement.setPurchaseValue(Double.valueOf(currencyPurchaseString));
+            newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear, mMonth - 1, mDay));
+            newElement.setTerceroActual(globalVariable.getIdSelectedUserWarehouse());
+            newElement.setAdmin(chkIsAdmin.isChecked());
 
-        menuReview.setVisible(true);
-        menuSave.setVisible(true);
+
+            if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
+
+            if (ListFotos != null)
+                for (String photo : ListFotos) {
+                    newElement.getListaImagenesStr().add(parseImage(photo));
+                }
+
+            if (globalVariable.getDataMaterial() == null)
+                globalVariable.setDataMaterial(new ArrayList<MaterialViewModel>());
+
+            menuReview.setVisible(true);
+            menuSave.setVisible(true);
 
 
-        globalVariable.getDataMaterial().add(newElement);
-        clearFields();
+            globalVariable.getDataMaterial().add(newElement);
+            clearFields();
 
-        LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
-        Utils.setBadgeCount(getActivity(), icon, globalVariable.getDataMaterial().size());
+            LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
+            Utils.setBadgeCount(getActivity(), icon, globalVariable.getDataMaterial().size());
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            showMessageDialog(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            showMessageDialog(e.getMessage());
+        }
         showProgress(false);
 
     }
@@ -852,10 +880,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private void showCamera() {
         try {
 
-            if (warehouse_element_barcode_edit.getText().toString().equals("")) {
-                showMessageDialog(getString(R.string.message_not_barcode));
-                return;
-            }
+            if (!chkIsAdmin.isChecked())
+                if (warehouse_element_barcode_edit.getText().toString().equals("")) {
+                    showMessageDialog(getString(R.string.message_not_barcode));
+                    return;
+                }
 
             List<String> listPermissionsNeeded = new ArrayList<>();
             int camera = ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.CAMERA);

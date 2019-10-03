@@ -81,6 +81,7 @@
                 android:textColor="#333"
                 android:layout_alignParentRight="true" />
             <ImageButton
+                android:visibility="gone"
                 android:layout_margin="8dp"
                 android:id="@+id/btnPhoto"
                 android:background="@android:color/transparent"
@@ -90,6 +91,7 @@
                 android:layout_alignParentTop="true"
                 android:src="@drawable/ic_camera_cardview" />
             <ImageButton
+                android:visibility="gone"
                 android:layout_margin="8dp"
                 android:background="@android:color/transparent"
                 android:id="@+id/btnDelete"

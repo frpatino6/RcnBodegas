@@ -248,8 +248,8 @@ public class WarehouseUserActivity extends AppCompatActivity {
                 @Override
                 public void onClick(ResponsibleViewModel result) {
                     final Intent _data = new Intent();
-                    _data.putExtra("responsibleName", result.getName());
-                    _data.putExtra("responsibleId", result.getId().toString());
+                    _data.putExtra("responsibleWarehouseName", result.getName());
+                    _data.putExtra("responsibleWarehouseId", result.getId().toString());
 
                     setResult(RESULT_OK, _data);
 
