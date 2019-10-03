@@ -104,27 +104,29 @@ namespace Rcn.Bodegas.Core.Services
       parameters.Add(opwareHouse);
 
 
-      var records = _IOracleManagment.GetData(parameters, query);
+      var records = _IOracleManagment.GetDataSet(parameters, query);
 
-      foreach (IDataRecord rec in records)
+
+      foreach (DataTable table in records.Tables)
       {
 
-        string id = rec.GetString(rec.GetOrdinal("CODIGO_TIPO_BODEGA"));
-        string name = rec.GetString(rec.GetOrdinal("NOMBRE_TIPO_BODEGA"));
-        int cod = rec.GetInt32(rec.GetOrdinal("CODIGO_PRODUCCION"));
-        string prod = rec.GetString(rec.GetOrdinal("PRODUCCION"));
-
-
-        result.Add(new ProductionViewModel
+        foreach (DataRow dr in table.Rows)
         {
-          Id = id,
-          InternalOrder = string.Empty,
-          NameWareHouseType = name,
-          ProductionCode = cod,
-          ProductionName = prod
-        });
-      }
+          string id = dr["CODIGO_TIPO_BODEGA"].ToString();
+          string name = dr["NOMBRE_TIPO_BODEGA"].ToString();
+          int cod = Convert.ToInt32(dr["CODIGO_PRODUCCION"].ToString());
+          string prod = dr["PRODUCCION"].ToString();
+          result.Add(new ProductionViewModel
+          {
+            Id = id,
+            InternalOrder = string.Empty,
+            NameWareHouseType = name,
+            ProductionCode = cod,
+            ProductionName = prod
+          });
 
+        }
+      }   
       return result;
     }
 
@@ -145,10 +147,18 @@ namespace Rcn.Bodegas.Core.Services
       List<ResponsibleViewModel> result = new List<ResponsibleViewModel>();
       List<OracleParameter> parameters = new List<OracleParameter>();
 
-      string query = @"select distinct CODIGO_RESPONSABLE ,NOMBRE_RESPONSABLE  
-                    from V_MATERIALES 
-                    WHERE CODIGO_PRODUCCION=:production AND CODIGO_TIPO_BODEGA=:warehouse
-                    ORDER BY NOMBRE_RESPONSABLE";
+      string query = @"SELECT M.pa_tercero_codigo  Codigo_Responsable,
+                       (  Select Nombre 
+                          From GN_TERCERO
+                          Where codigo = M.pa_tercero_codigo) Nombre_Responsable,M.BD_Ubccion_Codigo Codigo_Produccion
+                          ,
+                       (
+                          Select NOMBRE 
+                          From BD_UBICACION 
+                          Where Codigo = M.bd_ubccion_codigo) Produccion 
+                    FROM bd_movimiento_material M
+                    WHERE M.BD_Ubccion_Codigo  =:production
+                    GROUP BY M.pa_tercero_codigo, M.BD_Ubccion_Codigo";
 
       _logger.LogInformation("Query " + query);
 
@@ -166,52 +176,27 @@ namespace Rcn.Bodegas.Core.Services
         Value = production,
         ParameterName = "production"
       };
+
       parameters.Add(opProduccion);
 
-
-      using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
+      var records = _IOracleManagment.GetDataSet(parameters, query);
+     
+      foreach (DataTable table in records.Tables)
       {
-        _logger.LogInformation("Abriendo conexión a oracle ");
-        con.Open();
-
-        using (OracleCommand cmd = con.CreateCommand())
-        {                 
-          cmd.BindByName = true;
-
-          ///Carga los parametros de la consulta
-          _logger.LogInformation("Cargando parametros de la consulta");
-          if (parameters != null)
-            foreach (var item in parameters)
-            {
-              cmd.Parameters.Add(item);
-            }
-          //Configura la instrucción sql
-          _logger.LogInformation("Configurando la instrucción sql");
-          cmd.CommandText = query;
-
-          //Ejectua la consulta
-          _logger.LogInformation("Ejecutando instrucción sql");
-          using (OracleDataReader rec = cmd.ExecuteReader())
+        _logger.LogInformation("Iterando registros");
+        foreach (DataRow dr in table.Rows)
+        {
+          int id = Convert.ToInt32(dr["CODIGO_RESPONSABLE"].ToString());
+          string name = dr["NOMBRE_RESPONSABLE"].ToString();
+                            
+          result.Add(new ResponsibleViewModel
           {
-            while (rec.Read())
-            {
-              _logger.LogInformation("Enviando resultado a la capa de servicios");
-              int id = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
-              string name = rec.GetString(rec.GetOrdinal("NOMBRE_RESPONSABLE"));
-              _logger.LogInformation("Iterando registros");
+            Id = id,
+            Name = name
+          });
 
-              result.Add(new ResponsibleViewModel
-              {
-                Id = id,
-                Name = name
-              });
-            }
-            rec.Close();
-          }
         }
-        con.Close();
-        con.Dispose();
-      }
+      }      
 
       _logger.LogInformation("Registros retornados " + result.Count.ToString());
       return result;
@@ -268,20 +253,24 @@ namespace Rcn.Bodegas.Core.Services
       parameters.Add(opTipoBodega);
 
 
-      var records = _IOracleManagment.GetData(parameters, query);
+      var records = _IOracleManagment.GetDataSet(parameters, query);
 
-      foreach (IDataRecord rec in records)
+      foreach (DataTable table in records.Tables)
       {
-
-        int id = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
-        string name = rec.GetString(rec.GetOrdinal("NOMBRE_RESPONSABLE"));
-
-        result.Add(new ResponsibleViewModel
+        _logger.LogInformation("Iterando registros");
+        foreach (DataRow dr in table.Rows)
         {
-          Id = id,
-          Name = name
-        });
-      }
+          int id = Convert.ToInt32(dr["CODIGO_RESPONSABLE"].ToString());
+          string name = dr["NOMBRE_RESPONSABLE"].ToString();
+
+          result.Add(new ResponsibleViewModel
+          {
+            Id = id,
+            Name = name
+          });
+
+        }
+      }    
 
       return result;
     }

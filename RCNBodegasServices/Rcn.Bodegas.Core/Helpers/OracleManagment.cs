@@ -12,6 +12,7 @@ namespace Rcn.Bodegas.Core.Helpers
     private readonly ILogger<OracleManagment> _logger;
     private readonly IConfiguration _IConfiguration;
 
+
     public OracleManagment(IConfiguration configuration, ILogger<OracleManagment> logger)
     {
       this._IConfiguration = configuration;
@@ -63,6 +64,48 @@ namespace Rcn.Bodegas.Core.Helpers
           }
         }
       }
+    }
+
+    public DataSet GetDataSet(List<OracleParameter> parameters, string query)
+    {
+      DataSet resultDataSet;
+      
+      using (OracleConnection con = new OracleConnection(GetOracleConnectionParameters()))
+      {
+        using (OracleCommand cmd = con.CreateCommand())
+        {
+
+          _logger.LogInformation("Abriendo conexión a oracle ");
+          con.Open();
+          cmd.BindByName = true;
+
+          ///Carga los parametros de la consulta
+          _logger.LogInformation("Cargando parametros de la consulta");
+          if (parameters != null)
+            foreach (var item in parameters)
+            {
+              cmd.Parameters.Add(item);
+            }
+          //Configura la instrucción sql
+          _logger.LogInformation("Configurando la instrucción sql");
+          cmd.CommandText = query;
+
+          //Ejectua la consulta
+          _logger.LogInformation("Ejecutando instrucción sql");
+          //using (OracleDataReader reader = cmd.ExecuteReader())
+          //{
+          //  while (reader.Read())
+          //  {
+          //    _logger.LogInformation("Enviando resultado a la capa de servicios");
+          //    yield return reader;
+          //  }
+          //}
+          OracleDataAdapter adapter = new OracleDataAdapter(cmd);
+          resultDataSet = new DataSet("resultDataSet");
+          adapter.Fill(resultDataSet, "result");
+        }
+      }
+      return resultDataSet;
     }
 
     public string GetOracleConnectionParameters()

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Rcn.Bodegas.Core.Exceptions;
 using Rcn.Bodegas.Core.Interfaces;
@@ -12,10 +13,22 @@ namespace Rcn.Bodegas.Api.Controllers
   {
     private readonly ILogger<InventroyController> _logger;
     private readonly IInventroyService _IInventroy;
-    public InventroyController(IInventroyService inventroy, ILogger<InventroyController> logger)
+    private readonly IHostingEnvironment _hostingEnvironment;
+    public InventroyController(IInventroyService inventroy, ILogger<InventroyController> logger, IHostingEnvironment hostingEnvironment)
     {
       _IInventroy = inventroy;
       _logger = logger;
+      _hostingEnvironment = hostingEnvironment;
+
+        if (_hostingEnvironment.IsProduction())
+      {
+        _logger.LogInformation("Producción");
+      }
+      else
+      {
+        _logger.LogInformation("Desarrollo");
+      }
+
     }
 
     [HttpGet("/Inventory/GetListProduction/{warehouseid=0}")]

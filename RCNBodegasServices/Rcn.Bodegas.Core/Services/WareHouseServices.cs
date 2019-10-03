@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.ViewModel;
@@ -15,12 +16,13 @@ namespace Rcn.Bodegas.Core.Services
   {
     private readonly IOracleManagment _IOracleManagment;
     private readonly IConfiguration _IConfiguration;
-
+    private readonly ILogger<WareHouseServices> _logger;
     #region Public Methods
-    public WareHouseServices(IOracleManagment oracleManagment, IConfiguration configuration)
+    public WareHouseServices(IOracleManagment oracleManagment, IConfiguration configuration, ILogger<WareHouseServices> logger)
     {
       _IOracleManagment = oracleManagment;
       _IConfiguration = configuration;
+      _logger = logger;
     }
 
     public async Task<int> CreateMaterialWarehouse(List<MaterialViewModel> listNewMaterial, string warehouseid)
@@ -259,18 +261,26 @@ namespace Rcn.Bodegas.Core.Services
     {
       List<WareHouseViewModel> result = new List<WareHouseViewModel>();
       var query = @"select * from V_TIPO_BODEGA";
-      var records = _IOracleManagment.GetData(null, query);
+      _logger.LogInformation("Query " + query);
 
-      foreach (IDataRecord rec in records)
+      var records = _IOracleManagment.GetDataSet(null, query);
+
+      foreach (DataTable table in records.Tables)
       {
-        string tipo_bodega = rec.GetString(rec.GetOrdinal("TIPO_BODEGA"));
-        string id = rec.GetString(rec.GetOrdinal("CODIGO"));
-        result.Add(new WareHouseViewModel
+        _logger.LogInformation("Iterando registros");
+        foreach (DataRow dr in table.Rows)
         {
-          Id = id,
-          WareHouseName = tipo_bodega
-        });
-      }
+          string id = dr["CODIGO"].ToString();
+          string tipo_bodega = dr["TIPO_BODEGA"].ToString();
+
+          result.Add(new WareHouseViewModel
+          {
+            Id = id,
+            WareHouseName = tipo_bodega
+          });
+
+        }
+      }      
 
       return result;
 
