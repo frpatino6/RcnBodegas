@@ -1,4 +1,5 @@
-﻿using Oracle.ManagedDataAccess.Client;
+﻿using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.ViewModel;
 using System;
@@ -13,10 +14,12 @@ namespace Rcn.Bodegas.Core.Services
 
     private const string WAREHOUSE_TYPE_V = "V";
     private readonly IOracleManagment _IOracleManagment;
-
-    public InventroyService(IOracleManagment oracleManagment)
+    private readonly IInventroyService _IInventroy;
+    private readonly ILogger<InventroyService> _logger;
+    public InventroyService(IOracleManagment oracleManagment, ILogger<InventroyService> logger)
     {
       _IOracleManagment = oracleManagment;
+      _logger = logger;
     }
 
     public Task<bool> CreateInconsistency(string warehouseType, string productionId, int responsibleId)
@@ -92,7 +95,7 @@ namespace Rcn.Bodegas.Core.Services
     {
       List<ProductionViewModel> result = new List<ProductionViewModel>();
       List<OracleParameter> parameters = new List<OracleParameter>();
-      var query = @"select * from V_PRODUCCION  ORDER BY PRODUCCION";
+      string query = @"select * from V_PRODUCCION  ORDER BY PRODUCCION";
 
       OracleParameter opwareHouse = new OracleParameter();
       opwareHouse.DbType = DbType.String;
@@ -133,42 +136,84 @@ namespace Rcn.Bodegas.Core.Services
     /// <returns></returns>
     public async Task<List<ResponsibleViewModel>> GetListResponsible(string wareHouse, string production)
     {
+#if DEBUG
+      _logger.LogInformation("Debug mode... ");
+#else
+        _logger.LogInformation("release mode... ");
+#endif
+      _logger.LogInformation("Ejecutando servicio GetListResponsable ");
       List<ResponsibleViewModel> result = new List<ResponsibleViewModel>();
       List<OracleParameter> parameters = new List<OracleParameter>();
-      var query = @"select distinct CODIGO_RESPONSABLE ,NOMBRE_RESPONSABLE  
+
+      string query = @"select distinct CODIGO_RESPONSABLE ,NOMBRE_RESPONSABLE  
                     from V_MATERIALES 
                     WHERE CODIGO_PRODUCCION=:production AND CODIGO_TIPO_BODEGA=:warehouse
                     ORDER BY NOMBRE_RESPONSABLE";
 
-      OracleParameter opwareHouse = new OracleParameter();
-      opwareHouse.DbType = DbType.String;
-      opwareHouse.Value = wareHouse;
-      opwareHouse.ParameterName = "warehouse";
+      _logger.LogInformation("Query " + query);
+
+      OracleParameter opwareHouse = new OracleParameter
+      {
+        DbType = DbType.String,
+        Value = wareHouse,
+        ParameterName = "warehouse"
+      };
       parameters.Add(opwareHouse);
 
-      OracleParameter opProduccion = new OracleParameter();
-      opProduccion.DbType = DbType.String;
-      opProduccion.Value = production;
-      opProduccion.ParameterName = "production";
+      OracleParameter opProduccion = new OracleParameter
+      {
+        DbType = DbType.String,
+        Value = production,
+        ParameterName = "production"
+      };
       parameters.Add(opProduccion);
 
-      var records = _IOracleManagment.GetData(parameters, query);
 
-      foreach (IDataRecord rec in records)
+      using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
       {
+        _logger.LogInformation("Abriendo conexión a oracle ");
+        con.Open();
 
-        int id = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
-        string name = rec.GetString(rec.GetOrdinal("NOMBRE_RESPONSABLE"));
+        using (OracleCommand cmd = con.CreateCommand())
+        {                 
+          cmd.BindByName = true;
 
+          ///Carga los parametros de la consulta
+          _logger.LogInformation("Cargando parametros de la consulta");
+          if (parameters != null)
+            foreach (var item in parameters)
+            {
+              cmd.Parameters.Add(item);
+            }
+          //Configura la instrucción sql
+          _logger.LogInformation("Configurando la instrucción sql");
+          cmd.CommandText = query;
 
+          //Ejectua la consulta
+          _logger.LogInformation("Ejecutando instrucción sql");
+          using (OracleDataReader rec = cmd.ExecuteReader())
+          {
+            while (rec.Read())
+            {
+              _logger.LogInformation("Enviando resultado a la capa de servicios");
+              int id = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
+              string name = rec.GetString(rec.GetOrdinal("NOMBRE_RESPONSABLE"));
+              _logger.LogInformation("Iterando registros");
 
-        result.Add(new ResponsibleViewModel
-        {
-          Id = id,
-          Name = name
-        });
+              result.Add(new ResponsibleViewModel
+              {
+                Id = id,
+                Name = name
+              });
+            }
+            rec.Close();
+          }
+        }
+        con.Close();
+        con.Dispose();
       }
 
+      _logger.LogInformation("Registros retornados " + result.Count.ToString());
       return result;
     }
 
@@ -304,7 +349,7 @@ namespace Rcn.Bodegas.Core.Services
       string barCode = string.Empty;
       string where = " WHERE CODIGO_TIPO_BODEGA=:COD_TIPO_BODEGA AND CODIGO_PRODUCCION=:COD_PRODUCCION  ";
       string orderby = " ORDER BY MARCA";
-      int barcode =0;
+      int barcode = 0;
       decimal unitPrice = 0;
 
       List<MaterialViewModel> result = new List<MaterialViewModel>();
@@ -375,7 +420,7 @@ namespace Rcn.Bodegas.Core.Services
           marca = marca,
           barCode = barCode,
           unitPrice = unitPrice,
-          ListaImagenesStr=getImagesByMaterial(barcode)
+          ListaImagenesStr = getImagesByMaterial(barcode)
 
         });
       }

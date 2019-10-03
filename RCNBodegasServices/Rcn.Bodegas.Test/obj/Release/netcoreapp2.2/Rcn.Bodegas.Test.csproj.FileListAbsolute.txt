@@ -1,0 +1,14 @@
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\xunit.runner.reporters.netcoreapp10.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\xunit.runner.utility.netcoreapp10.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\Rcn.Bodegas.Test.deps.json
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\Rcn.Bodegas.Test.runtimeconfig.json
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\Rcn.Bodegas.Test.runtimeconfig.dev.json
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\Rcn.Bodegas.Test.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\bin\Release\netcoreapp2.2\Rcn.Bodegas.Test.pdb
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Release\netcoreapp2.2\Rcn.Bodegas.Test.csprojAssemblyReference.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Release\netcoreapp2.2\Rcn.Bodegas.Test.AssemblyInfoInputs.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Release\netcoreapp2.2\Rcn.Bodegas.Test.AssemblyInfo.cs
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Release\netcoreapp2.2\Rcn.Bodegas.Test.dll
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Release\netcoreapp2.2\Rcn.Bodegas.Test.pdb
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Release\netcoreapp2.2\Rcn.Bodegas.Test.csproj.CoreCompileInputs.cache

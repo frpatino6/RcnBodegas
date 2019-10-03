@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Rcn.Bodegas.Core.Exceptions;
 using Rcn.Bodegas.Core.Interfaces;
 using System;
@@ -9,10 +10,12 @@ namespace Rcn.Bodegas.Api.Controllers
   [Produces("application/json")]
   public class InventroyController : Controller
   {
+    private readonly ILogger<InventroyController> _logger;
     private readonly IInventroyService _IInventroy;
-    public InventroyController(IInventroyService inventroy)
+    public InventroyController(IInventroyService inventroy, ILogger<InventroyController> logger)
     {
       _IInventroy = inventroy;
+      _logger = logger;
     }
 
     [HttpGet("/Inventory/GetListProduction/{warehouseid=0}")]
@@ -39,6 +42,7 @@ namespace Rcn.Bodegas.Api.Controllers
     {
       try
       {
+        _logger.LogInformation("Iniciando Get GetListResponsable {warehouse}{production} ");
         var result = await _IInventroy.GetListResponsible(warehouse,production);
         return Ok(result);
       }

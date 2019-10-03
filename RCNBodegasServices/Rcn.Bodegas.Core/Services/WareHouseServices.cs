@@ -66,14 +66,10 @@ namespace Rcn.Bodegas.Core.Services
             oraUpdate.Transaction = transaction;
             try
             {
-
-
               if (numeroRecepcion > 0)
                 foreach (var newMaterial in listNewMaterial)
                 {
-
                   oraUpdate.Parameters.Clear();
-
                   SetParameters(OraBarCode, OraDescripcion, OraTipoBodega, OraUbicacionActua, OraEstado, OraEmpresaCodigo, OraUbicacionCodigo, OraUsuarioCreacion, OraValorCompra, OraValorMateria, OraTerceroActual, OraElementType, OraMarca, OraUbicacionRecibido, OraTerceroRecibido, OraCodigoElemento, oraUpdate);
 
                   if (newMaterial.isAdmin)
@@ -223,12 +219,12 @@ namespace Rcn.Bodegas.Core.Services
       string query;
       if (warehouseid.Equals("V"))
       {
-        query = $@"Insert into BD_MATERIAL (CODIGO,DESCRIPCION,TIPO_BODEGA,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,TIPO_PRENDA,MARCA,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,NUMERO_DOC_RECEPCION)
-                 VALUES((SELECT NVL(MAX(codigo),0) + 1 FROM BD_MATERIAL_ADMIN),  :DESCRIPCION, :TIPO_BODEGA,  SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:TIPO_ELEMENTO,:MARCA,:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss'),'X'," + numeroRecepcion + ") returning CODIGO into :new_id";
+        query = $@"Insert into BD_MATERIAL_ADMIN (CODIGO,DESCRIPCION,TIPO_BODEGA,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,TIPO_PRENDA,MARCA,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,NUMERO_DOC_RECEPCION)
+                 VALUES((SELECT NVL(MAX(codigo),0) + 1 FROM BD_MATERIAL_ADMIN),  :DESCRIPCION, :TIPO_BODEGA, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:TIPO_ELEMENTO,:MARCA,:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss')," + numeroRecepcion + ") returning CODIGO into :new_id";
       }
       else
       {
-        query = $@"Insert into BD_MATERIAL_ADMIN  (CODIGO,DESCRIPCION,TIPO_BODEGA,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,TIPO_ELEMENTO,MARCA,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,NUMERO_DOC_RECEPCION)
+        query = $@"Insert into BD_MATERIAL_ADMIN (CODIGO,DESCRIPCION,TIPO_BODEGA,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,TIPO_ELEMENTO,MARCA,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,NUMERO_DOC_RECEPCION)
                  VALUES((SELECT NVL(MAX(codigo),0) + 1 FROM BD_MATERIAL_ADMIN),  :DESCRIPCION, :TIPO_BODEGA, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:TIPO_ELEMENTO,:MARCA,:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss')," + numeroRecepcion + ") returning CODIGO into :new_id";
       }
 

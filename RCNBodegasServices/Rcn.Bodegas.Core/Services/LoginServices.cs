@@ -29,7 +29,7 @@ namespace Rcn.Bodegas.Core.Services
 
     public async Task<UserViewModel> GetUserAsync(string userName, string password)
     {
-      using (var ctx = new PrincipalContext(ContextType.Domain, sDomain, userName, password))
+      using (var ctx = new PrincipalContext(ContextType.Domain, sDomain, userNameAdmin, passwordAdmin))
       {
         var result = ctx.ValidateCredentials(userName, password);//Valida el usuario y pws
 
