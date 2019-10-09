@@ -1,33 +1,29 @@
 package com.rcnbodegas.Activities;
 
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.AddedElementListAdapter;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ProductionAdapter;
-import com.rcnbodegas.Global.ReviewListAdapter;
-import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
+import com.rcnbodegas.Global.onRecyclerReviewListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
-import com.rcnbodegas.ViewModels.ProductionViewModel;
+import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
 
-public class ListItemAddedActivity extends AppCompatActivity  {
+public class ListItemAddedActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
@@ -46,6 +42,7 @@ public class ListItemAddedActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_list_item_review);
         globalVariable = (GlobalClass) getApplicationContext();
         InitializeControls();
+        InitializeEvents();
         filterListByNotReview();
         setRecyclerViewData();
 
@@ -61,11 +58,29 @@ public class ListItemAddedActivity extends AppCompatActivity  {
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
         recyclerView.setHasFixedSize(true);
 
+
         globalVariable = (GlobalClass) getApplicationContext();
 
         layoutManager = new LinearLayoutManager(ListItemAddedActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    private void InitializeEvents() {
+
+    }
+
+    private void OpenEditDialog(MaterialViewModel wareHouseViewModel){
+        try {
+            FragmentManager fm = getSupportFragmentManager();
+            DialogFragment warehouseFragment =  WarehouseFragment.newInstance(wareHouseViewModel,"");
+            warehouseFragment.show(fm,"Editar");
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void filterListByNotReview() {
@@ -78,14 +93,20 @@ public class ListItemAddedActivity extends AppCompatActivity  {
                 listMaterialByReview.add(materialViewModel);
         }
 
-        txtResumen.setText(getString(R.string.message_resume_review_list) +listMaterialByReview.size()) ;
+        txtResumen.setText(getString(R.string.message_resume_review_list) + listMaterialByReview.size());
 
     }
 
     private void setRecyclerViewData() {
-        adapter = new AddedElementListAdapter(listMaterialByReview);
+        adapter = new AddedElementListAdapter(listMaterialByReview, new onRecyclerReviewListItemClick() {
+            @Override
+            public void onClick(MaterialViewModel wareHouseViewModel) {
+                OpenEditDialog(wareHouseViewModel);
+            }
+        });
         recyclerView.setAdapter(adapter);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         try {
@@ -120,7 +141,6 @@ public class ListItemAddedActivity extends AppCompatActivity  {
     }
 
 
-
     private void FilterListView(String query) {
 
         //mStatusView.setText("Query = " + query + " : submitted");
@@ -148,7 +168,12 @@ public class ListItemAddedActivity extends AppCompatActivity  {
 
             sortEmpList = (ArrayList<MaterialViewModel>) new FilterList().filterList(listMaterialByReview, filter, query);
 
-            adapter = new AddedElementListAdapter(sortEmpList);
+            adapter = new AddedElementListAdapter(sortEmpList, new onRecyclerReviewListItemClick() {
+                @Override
+                public void onClick(MaterialViewModel wareHouseViewModel) {
+                    OpenEditDialog(wareHouseViewModel);
+                }
+            });
             recyclerView.setAdapter(adapter);
 
         } catch (Exception e) {

@@ -23,6 +23,7 @@ public class MaterialViewModel {
     private String marca;
     private String barCode;
     private String materialName;
+    private Integer numero_doc_recepcion;
     private Double unitPrice;
     private Double purchaseValue;
     private ArrayList<Bitmap> listaImagenesBmp;
@@ -43,7 +44,16 @@ public class MaterialViewModel {
         this.marca = marca;
         this.barCode = barCode;
         this.materialName = materialName;
+        this.numero_doc_recepcion=0;
 
+    }
+
+    public Integer getNumero_doc_recepcion() {
+        return numero_doc_recepcion;
+    }
+
+    public void setNumero_doc_recepcion(Integer numero_doc_recepcion) {
+        this.numero_doc_recepcion = numero_doc_recepcion;
     }
 
     public Boolean getAdmin() {

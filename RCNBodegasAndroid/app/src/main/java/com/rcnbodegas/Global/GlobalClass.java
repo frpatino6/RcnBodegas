@@ -18,7 +18,7 @@ public class GlobalClass extends Application {
     private String userName;
     private String AdminTypeElementId;
     private String urlServices = "http://172.20.0.154:8083/";
-    //private String urlServices = "http://192.168.0.6/bodegas/";
+   //select  private String urlServices = "http://192.168.0.6/bodegas/";
     //private String urlServices = "http://172.20.17.88/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;

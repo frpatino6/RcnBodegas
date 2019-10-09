@@ -7,10 +7,11 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
-public class CustomActivity extends Fragment
+public class CustomActivity extends  DialogFragment
 {
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,7 +46,7 @@ public class CustomActivity extends Fragment
         if (!connected)
         {
             //Toast.makeText(getApplicationContext(), "Desconectado", Toast.LENGTH_LONG).show();
-            pausingDialog.show();
+           // pausingDialog.show();
             pausingDialog.setCancelable(false);
         }
         else

@@ -102,6 +102,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_USER_WAREHOUSE = 5;
     private static final int CAMERA_REQUEST = 1888;
     private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1900;
+    private static MaterialViewModel _MaterialViewModel;
 
     public PhotoListAdapter adapterPhotos;
 
@@ -135,7 +136,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private View mProgressView;
     private Scanner scanner = null;
     private TScanner Scanner_manager = null;
-
     public String mCurrentPhotoPath;
     private GlobalClass globalVariable;
     private Uri file;
@@ -157,13 +157,80 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     }
 
     // TODO: Rename and change types and number of parameters
-    public static WarehouseFragment newInstance(String param1, String param2) {
+    public static WarehouseFragment newInstance(MaterialViewModel param1, String param2) {
         WarehouseFragment fragment = new WarehouseFragment();
         Bundle args = new Bundle();
-
+        _MaterialViewModel = param1;
         fragment.setArguments(args);
         return fragment;
     }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        View layout = getActivity().getLayoutInflater().inflate(R.layout.activity_warehouse, null, false);
+        assert layout != null;
+        AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+        b.setView(layout);
+
+        InitializeControls(layout);
+        InitializeEvents();
+
+
+        if (!validateInventoryProcess()) {
+            warehouse_element_layout.setVisibility(View.GONE);
+            warehouse_data.setVisibility(View.VISIBLE);
+        } else {
+            warehouse_element_layout.setVisibility(View.VISIBLE);
+            warehouse_data.setVisibility(View.GONE);
+
+        }
+
+        String title = getArguments().getString("title");
+        b.setTitle(title);
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                _MaterialViewModel.setBarCode(warehouse_element_barcode_edit.getText().toString());
+                _MaterialViewModel.setMaterialName(warehouse_element_desc_edit.getText().toString());
+                _MaterialViewModel.setTypeElementName(warehouse_element_type_edit.getText().toString());
+                _MaterialViewModel.setMarca(warehouse_element_edit.getText().toString());
+                String currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
+                        .replace(",", "")
+                        .replace(".", ".")
+                        .replaceAll("[^\\d.-]", "");
+
+                String currencyPurchaseString = warehouse_element_value_edit.getText().toString()
+                        .replace(",", "")
+                        .replace(".", ".")
+                        .replaceAll("[^\\d.-]", "");
+
+                _MaterialViewModel.setUnitPrice(Double.valueOf(currencyUnitPriceString));
+                _MaterialViewModel.setPurchaseValue(Double.valueOf(currencyPurchaseString));
+
+                if (ListFotos != null) {
+                    for (String photo : ListFotos) {
+                        _MaterialViewModel.getListaImagenesStr().add(parseImage(photo));
+
+                    }
+                }
+
+
+            }
+        });
+        b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        loadEditData();
+        this.ListaImagenes = _MaterialViewModel.getListaImagenesBmp();
+        setListImagesAdapter();
+        warehouse_btn_new_element.setVisibility(View.GONE);
+        return b.create();
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -180,6 +247,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = null;
+        if (_MaterialViewModel == null) {
+            view = SetDialogConfig(inflater, container);
+
+        }
+        return view;
+    }
+
+    private View SetDialogConfig(LayoutInflater inflater, ViewGroup container) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.activity_warehouse, container, false);
         InitializeControls(view);
@@ -307,22 +383,22 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         menuReview = menu.findItem(R.id.menu_review);
         menuSave = menu.findItem(R.id.mnu_save);
         mnuCancel = menu.findItem(R.id.mnu_cancel);
+        if (_MaterialViewModel == null)
+            if (!validateInventoryProcess()) {
+                menuReview.setVisible(false);
+                menuSave.setVisible(false);
+                mnuCancel.setVisible(false);
+                warehouse_btn_camera.setVisibility(View.GONE);
+                warehouse_btn_new_element.setVisibility(View.GONE);
 
-        if (!validateInventoryProcess()) {
-            menuReview.setVisible(false);
-            menuSave.setVisible(false);
-            mnuCancel.setVisible(false);
-            warehouse_btn_camera.setVisibility(View.GONE);
-            warehouse_btn_new_element.setVisibility(View.GONE);
 
-
-        } else {
-            menuReview.setVisible(true);
-            menuSave.setVisible(true);
-            mnuCancel.setVisible(true);
-            warehouse_btn_camera.setVisibility(View.VISIBLE);
-            warehouse_btn_new_element.setVisibility(View.VISIBLE);
-        }
+            } else {
+                menuReview.setVisible(true);
+                menuSave.setVisible(true);
+                mnuCancel.setVisible(true);
+                warehouse_btn_camera.setVisibility(View.VISIBLE);
+                warehouse_btn_new_element.setVisibility(View.VISIBLE);
+            }
 
 
     }
@@ -438,8 +514,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             bmOptions.inPurgeable = true;
             bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
 
-            //f.delete();
-            String timeStamp = Long.toString(Calendar.getInstance().getTimeInMillis());
+
             String prefijo = warehouse_element_barcode_edit.getText().toString() + consecutive;
             prefijo = prefijo.replace(' ', '_');
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -449,12 +524,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             String srSignature = "";
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
             byte[] b = baos.toByteArray();
-
-
-            srSignature = Base64.encodeToString(b, Base64.DEFAULT);
-
+            int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
+            bitmap = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
 
             LoadPhoto(bitmap, nombreFichero);
 
@@ -632,6 +705,18 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         });
     }
 
+    private void loadEditData() {
+        int indexMaterilForEdit = globalVariable.getDataMaterial().indexOf(_MaterialViewModel);
+        this._MaterialViewModel = globalVariable.getDataMaterial().get(indexMaterilForEdit);
+        this.warehouse_element_barcode_edit.setText(this._MaterialViewModel.getBarCode());
+        this.warehouse_element_desc_edit.setText(this._MaterialViewModel.getMaterialName());
+        this.warehouse_element_type_edit.setText(this._MaterialViewModel.getTypeElementName());
+        this.warehouse_element_edit.setText(this._MaterialViewModel.getMarca());
+        this.warehouse_element_price_edit.setText(this._MaterialViewModel.getUnitPrice().toString());
+        this.warehouse_element_value_edit.setText(this._MaterialViewModel.getPurchaseValue().toString());
+
+    }
+
     @SuppressLint("RestrictedApi")
     private boolean validateFieldsHeader() {
         warehouse_option.setError(null);
@@ -722,6 +807,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             focusView = warehouse_element_value_edit;
             cancel = true;
         }
+        if (ListaImagenes == null || ListaImagenes.size() == 0) {
+            showMessageDialog("Debe ingresar al menos un imagen");
+            focusView = warehouse_element_value_edit;
+            cancel = true;
+        }
 
         if (cancel) {
             focusView.requestFocus();
@@ -769,10 +859,16 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
             if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
 
-            if (ListFotos != null)
+            for (Bitmap photo : ListaImagenes) {
+                newElement.getListaImagenesBmp().add(photo);
+            }
+
+            if (ListFotos != null) {
                 for (String photo : ListFotos) {
                     newElement.getListaImagenesStr().add(parseImage(photo));
+
                 }
+            }
 
             if (globalVariable.getDataMaterial() == null)
                 globalVariable.setDataMaterial(new ArrayList<MaterialViewModel>());
@@ -786,6 +882,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
             LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
             Utils.setBadgeCount(getActivity(), icon, globalVariable.getDataMaterial().size());
+
+            //loadTest(newElement);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             showMessageDialog(e.getMessage());
@@ -797,10 +895,16 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     }
 
+    private void loadTest(MaterialViewModel newElement) {
+        for (int i = 0; i < 300; i++) {
+            globalVariable.getDataMaterial().add(newElement);
+        }
+    }
+
     private String parseImage(String photo) {
         File folder = new File(Environment.getExternalStorageDirectory().toString() + "/bodegas_images");
         File f = new File(folder, photo);
-        byte[] b = readPhotoAndRezise(photo, 2);
+        byte[] b = readPhotoAndRezise(photo, 7);
         String srSignature = Base64.encodeToString(b, Base64.DEFAULT);
 
         return srSignature;
@@ -988,7 +1092,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         Bitmap bMap = BitmapFactory.decodeFile(f.toString(), options);
         if (ToScale > 1) bMap = scaleBitmap(bMap, ToScale);
         ByteArrayOutputStream baos = new ByteArrayOutputStream(bMap.getByteCount());
-        bMap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        bMap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
         bMap.recycle();
         byte[] b = baos.toByteArray();
         try {
@@ -1146,6 +1250,9 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         StringEntity entity = null;
         Gson json = new Gson();
 
+        for (MaterialViewModel materialViewModel : globalVariable.getDataMaterial()) {
+            materialViewModel.getListaImagenesBmp().clear();
+        }
         String resultJson = json.toJson(globalVariable.getDataMaterial());
 
         entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
