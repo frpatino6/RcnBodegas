@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Rcn.Bodegas.Core.Exceptions;
 using Rcn.Bodegas.Core.Interfaces;
 using Rcn.Bodegas.Core.ViewModel;
@@ -12,11 +14,12 @@ namespace Rcn.Bodegas.Api.Controllers
   public class WareHouseController : Controller
   {
     private const string NUM_DOCUMENT_ELEMENT = "Número de documento generado: ";
-
+    private readonly ILogger<WareHouseController> _logger;
     private readonly IWareHouseServices _IWareHouseServices;
-    public WareHouseController(IWareHouseServices wareHouseServices)
+    public WareHouseController(IWareHouseServices wareHouseServices, ILogger<WareHouseController> logger)
     {
       _IWareHouseServices = wareHouseServices;
+      _logger = logger;
     }
 
     [HttpGet("/WareHouse/GetLisWareHouse/{userName=0}/{companyId=0}")]
@@ -24,6 +27,7 @@ namespace Rcn.Bodegas.Api.Controllers
     {
       try
       {
+      
         var result = _IWareHouseServices.GetListWareHouseByUser(userName, companyId);
         return Ok(result.Result);
       }
@@ -43,6 +47,7 @@ namespace Rcn.Bodegas.Api.Controllers
     {
       try
       {
+
         var result = _IWareHouseServices.GetListWareHouseByUser(userName, companyId);
         return Ok(result.Result);
       }
@@ -62,6 +67,7 @@ namespace Rcn.Bodegas.Api.Controllers
     {
       try
       {
+        _logger.LogInformation("Principal.Post: " + JsonConvert.SerializeObject(materialViewModel));
         var result = await _IWareHouseServices.CreateMaterialWarehouse(materialViewModel, warehouseid);
         return Ok(NUM_DOCUMENT_ELEMENT + result.ToString());
       }
