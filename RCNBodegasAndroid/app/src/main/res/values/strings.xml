@@ -41,8 +41,10 @@
     <string name="message_not_elements_inventory">No hay elementos agregados para revisar</string>
     <string name="message_confirm_save">Está seguro de  finalizar el inventario y enviar el reporte de inconsistencias ?</string>
     <string name="message_confirm_cancel">Está seguro de  cancelar el proceso de inventario?</string>
+    <string name="message_confirm_cancel_legalization">Está seguro de  cancelar el proceso de legalización de elementos?</string>
     <string name="option1">Agregar foto</string>
     <string name="option2">Borrar elemento</string>
     <string name="error_valor_materia_empty">Valor materia es requerido</string>
+    <string name="name_of_your_app">Rcn bodegas</string>
 
 </resources>

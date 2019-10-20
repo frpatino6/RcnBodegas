@@ -1,33 +1,32 @@
 package com.rcnbodegas.Activities;
 
-import android.app.FragmentManager;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
-import com.rcnbodegas.Fragments.AddElementFragment;
 import com.rcnbodegas.Fragments.InventoryFragment;
 import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.GlobalClass;
+import com.rcnbodegas.Global.KeepLiveApp;
 import com.rcnbodegas.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private GlobalClass globalVariable;
     private TextView txtUser;
     private android.support.v4.app.FragmentManager fragmentManager;
 
@@ -47,11 +46,11 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        globalVariable = (GlobalClass) getApplicationContext();
         View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
         txtUser = headerView.findViewById(R.id.txtUserName);
-        txtUser.setText(globalVariable.getUserName());
+        txtUser.setText(GlobalClass.getInstance().getUserName());
         drawer.openDrawer(Gravity.LEFT);
+        startService(new Intent(MainActivity.this, KeepLiveApp.class));
     }
 
     @Override
@@ -60,10 +59,33 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            showConfirmDialog("Está seguro de salir del menú principal");
+
         }
     }
 
+    private void showConfirmDialog(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setCancelable(true);
+        builder.setTitle("Bodegas");
+        builder.setMessage(message);
+        builder.setPositiveButton("Aceptar",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                       finish();
+                    }
+                });
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return false;
@@ -108,4 +130,6 @@ public class MainActivity extends AppCompatActivity
         return true;
 
     }
+
+
 }

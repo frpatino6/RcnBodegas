@@ -98,7 +98,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private String mParam2;
     private LinearLayout inventory_element;
     private LinearLayout inventory_data;
-    private GlobalClass globalVariable;
     private EditText inventory_warehouse_option;
     private EditText inventory_program_option;
     private EditText inventory_type_element_option;
@@ -166,8 +165,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_data = view.findViewById(R.id.inventory_data);
         inventory_element.setVisibility(View.GONE);
 
-        globalVariable = (GlobalClass) getActivity().getApplicationContext();
-
         InitializeControls(view);
         InitializeEvents();
 
@@ -190,7 +187,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (requestCode == REQUEST_PRODUCTION) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("productionName");
-                globalVariable.setIdSelectedProductionInventory(data.getStringExtra("productionId"));
+                GlobalClass.getInstance().setIdSelectedProductionInventory(data.getStringExtra("productionId"));
                 this.inventory_program_option.setText(result);
 
             }
@@ -198,7 +195,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (requestCode == REQUEST_RESPONSIBLE) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("responsibleName");
-                globalVariable.setIdSelectedResponsibleInventory(Integer.valueOf(data.getStringExtra("responsibleId")));
+                GlobalClass.getInstance().setIdSelectedResponsibleInventory(Integer.valueOf(data.getStringExtra("responsibleId")));
                 this.inventory_responsible_option.setText(result);
 
             }
@@ -206,7 +203,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (requestCode == REQUEST_TYPE_ELEMENT) {
             if (resultCode == -1) {
                 String result = data.getStringExtra("typeElementName");
-                globalVariable.setIdSelectedTypeElementInventory(Integer.valueOf(data.getStringExtra("typeElementId")));
+                GlobalClass.getInstance().setIdSelectedTypeElementInventory(Integer.valueOf(data.getStringExtra("typeElementId")));
                 this.inventory_element_type_edit.setText(result);
 
             }
@@ -215,14 +212,14 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             if (resultCode == RESULT_OK) {
                 String result = data.getStringExtra("wareHouseName");
                 this.inventory_warehouse_option.setText(result);
-                globalVariable.setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
-                globalVariable.setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
+                GlobalClass.getInstance().setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
+                GlobalClass.getInstance().setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
             }
         }
         if (requestCode == REQUEST_TYPE_ELEMENT_HEADER) {
             if (resultCode == RESULT_OK) {
                 String result = data.getStringExtra("typeElementName");
-                globalVariable.setIdSelectedTypeElementHeader(Integer.valueOf(data.getStringExtra("typeElementId")));
+                GlobalClass.getInstance().setIdSelectedTypeElementHeader(Integer.valueOf(data.getStringExtra("typeElementId")));
                 this.inventory_type_element_option.setText(result);
             }
         }
@@ -310,22 +307,22 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     //Valida si hay un proceso de inventario en proceso
     private boolean validateInventoryProcess() {
 
-        return globalVariable.getCurrentInventoryActiveProcess();
+        return GlobalClass.getInstance().getCurrentInventoryActiveProcess();
     }
 
     @SuppressLint("RestrictedApi")
     private void InitializeNewInventroyProcess() {
-        globalVariable.setCurrentInventoryActiveProcess(false);
+        GlobalClass.getInstance().setCurrentInventoryActiveProcess(false);
         inventory_element.setVisibility(View.GONE);
         inventory_data.setVisibility(View.VISIBLE);
-        globalVariable.setIdSelectedProductionInventory("");
-        globalVariable.setIdSelectedResponsibleInventory(-1);
-        globalVariable.setIdSelectedTypeElementInventory(-1);
+        GlobalClass.getInstance().setIdSelectedProductionInventory("");
+        GlobalClass.getInstance().setIdSelectedResponsibleInventory(-1);
+        GlobalClass.getInstance().setIdSelectedTypeElementInventory(-1);
         inventory_program_option.setText("");
         inventory_responsible_option.setText("");
         inventory_btn_new_element.setVisibility(View.GONE);
-        globalVariable.setDataMaterialInventory(new ArrayList<MaterialViewModel>());
-        globalVariable.setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
+        GlobalClass.getInstance().setDataMaterialInventory(new ArrayList<MaterialViewModel>());
+        GlobalClass.getInstance().setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
         mnuReview.setVisible(false);
         mnuSave.setVisible(false);
         mnuCancel.setVisible(false);
@@ -354,7 +351,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_btn_ok = v.findViewById(R.id.inventory_btn_ok);
 
         inventory_date_option.setText(dateTimeUtilities.parseDateTurno());
-        inventory_warehouse_option.setText(globalVariable.getNameSelectedWareHouseInventory());
+        inventory_warehouse_option.setText(GlobalClass.getInstance().getNameSelectedWareHouseInventory());
 
         mIncidenciasFormView = v.findViewById(R.id.inventory_element);
         mProgressView = v.findViewById(R.id.inventroy_progress);
@@ -368,7 +365,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private void InitializeEvents() {
 
-        globalVariable.setQueryByInventory(true);
+        GlobalClass.getInstance().setQueryByInventory(true);
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -440,7 +437,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                     return;
                 } else
                     inventory_program_option.setError(null);
-                globalVariable.setResponsable(true);
+                GlobalClass.getInstance().setResponsable(true);
                 startActivityForResult(intent, REQUEST_RESPONSIBLE);
             }
         });
@@ -479,7 +476,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void AddElementToReview() {
 
 
-        globalVariable.getDataReviewMaterial().add(itemMaterialAdded);
+        GlobalClass.getInstance().getDataReviewMaterial().add(itemMaterialAdded);
         itemMaterialAdded.setReview(true);
 
         hideKeyboard(getActivity());
@@ -495,7 +492,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (globalVariable.getDataReviewMaterial().size() > 0)
+                        if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
                             InitializeNewInventroyProcess();
                         else
                             showMessageDialog(getString(R.string.message_not_elements_inventory));
@@ -625,8 +622,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private boolean validaIsAddeddElement(String barcode) {
 
-        if (globalVariable.getDataReviewMaterial() != null)
-            for (MaterialViewModel materialViewModel : globalVariable.getDataReviewMaterial()) {
+        if (GlobalClass.getInstance().getDataReviewMaterial() != null)
+            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataReviewMaterial()) {
                 if (materialViewModel.getBarCode().equals(barcode))
                     return true;
             }
@@ -685,7 +682,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private MaterialViewModel findElementByBarCode() {
 
-        for (MaterialViewModel materialViewModel : globalVariable.getDataMaterialInventory()) {
+        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterialInventory()) {
             if (materialViewModel.getBarCode().equals(inventory_element_barcode_edit.getText().toString()))
                 return materialViewModel;
         }
@@ -761,7 +758,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void asyncListMaterialsByBarCode() {
 
 
-        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -810,7 +807,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void asyncListMaterialsByProduction() {
 
 
-        String url = globalVariable.getUrlServices() + "Inventory/GetMaterialByProduction/" + globalVariable.getIdSelectedWareHouseInventory() + "/" + globalVariable.getIdSelectedProductionInventory() + "/" + globalVariable.getIdSelectedResponsibleInventory() + "/" + globalVariable.getIdSelectedTypeElementHeader();
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(120000);
         RequestParams params = new RequestParams();
@@ -828,10 +825,10 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
                             List<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
-                            globalVariable.setDataMaterialInventory(dataMaterial);
+                            GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
 
                             if (dataMaterial != null)
-                                globalVariable.setListMaterialBYProduction(dataMaterial);
+                                GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
                             else
                                 showMessageDialog("No se encontró elemento con el código de barras ingresado");
 
@@ -839,7 +836,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             mnuReview.setVisible(true);
                             mnuSave.setVisible(true);
                             mnuCancel.setVisible(true);
-                            globalVariable.setCurrentInventoryActiveProcess(true);
+                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
                             inventory_btn_new_element.setVisibility(View.VISIBLE);
 
 

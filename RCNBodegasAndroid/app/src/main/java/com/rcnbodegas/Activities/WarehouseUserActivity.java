@@ -41,7 +41,6 @@ public class WarehouseUserActivity extends AppCompatActivity {
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<ResponsibleViewModel> data;
     private ResponsibleAdapter adapter;
@@ -51,9 +50,9 @@ public class WarehouseUserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tercero_actual);
-        globalVariable = (GlobalClass) getApplicationContext();
 
-        if(globalVariable.isResponsable())
+
+        if(GlobalClass.getInstance().isResponsable())
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
         else
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_legalized_by));
@@ -168,9 +167,9 @@ public class WarehouseUserActivity extends AppCompatActivity {
 
     private void asyncListWarehouseUser() {
 
-        String tipoBodega = globalVariable.getQueryByInventory() ? globalVariable.getIdSelectedWareHouseInventory() : globalVariable.getIdSelectedWareHouseWarehouse();
+        String tipoBodega = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListWarehouseUser/" + tipoBodega;
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListWarehouseUser/" + tipoBodega;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

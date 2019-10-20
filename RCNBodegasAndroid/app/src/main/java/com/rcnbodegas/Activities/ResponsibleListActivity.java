@@ -41,7 +41,6 @@ public class ResponsibleListActivity extends AppCompatActivity {
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<ResponsibleViewModel> data;
     private ResponsibleAdapter adapter;
@@ -51,9 +50,8 @@ public class ResponsibleListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_responsible_list);
-        globalVariable = (GlobalClass) getApplicationContext();
-
-        if(globalVariable.isResponsable())
+      
+        if(GlobalClass.getInstance().isResponsable())
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
         else
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_legalized_by));
@@ -169,10 +167,10 @@ public class ResponsibleListActivity extends AppCompatActivity {
     private void asyncListResponsibles() {
 
 
-        String production=globalVariable.getQueryByInventory()? globalVariable.getIdSelectedProductionInventory(): globalVariable.getIdSelectedProductionWarehouse();
-        String wareHouse=globalVariable.getQueryByInventory()? globalVariable.getIdSelectedWareHouseInventory(): globalVariable.getIdSelectedWareHouseWarehouse();
+        String production=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedProductionInventory(): GlobalClass.getInstance().getIdSelectedProductionWarehouse();
+        String wareHouse=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedWareHouseInventory(): GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListResponsable/" + wareHouse+ "/" + production;
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListResponsable/" + wareHouse+ "/" + production;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(120000);
         RequestParams params = new RequestParams();

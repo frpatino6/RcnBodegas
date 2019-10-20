@@ -8,16 +8,17 @@
     <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
 
     <application
+
         android:name=".Global.GlobalClass"
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_logo"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_logo"
         android:supportsRtl="true"
-        android:hardwareAccelerated="false"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.WarehouseUserActivity"></activity>
+        <activity  android:screenOrientation="portrait" android:name=".Activities.WarehouseUserActivity"></activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -33,8 +34,12 @@
             android:name="com.symbol.emdk"
             android:required="false" />
 
-        <activity android:name=".Activities.ScanActivity" />
-        <activity android:name=".Activities.ListItemReviewActivity">
+        <activity
+            android:name=".Activities.ScanActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activities.ListItemReviewActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -43,7 +48,9 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".Activities.WareHouseListActivity">
+        <activity
+            android:name=".Activities.WareHouseListActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -56,8 +63,12 @@
         <activity android:name=".Activities.ProductionListActivity" />
         <activity android:name=".Activities.ResponsibleListActivity" />
         <activity android:name=".Activities.TypeElementListActivity" />
-        <activity android:name=".Activities.ListItemAddedActivity" />
-        <activity android:name=".Activities.LoginActivity">
+        <activity
+            android:name=".Activities.ListItemAddedActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activities.LoginActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -65,9 +76,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:screenOrientation="portrait"
             android:name=".Activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
+        <service android:name="com.rcnbodegas.Global.KeepLiveApp" />
     </application>
 
 </manifest>

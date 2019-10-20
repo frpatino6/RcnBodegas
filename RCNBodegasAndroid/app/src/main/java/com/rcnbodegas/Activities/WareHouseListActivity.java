@@ -47,7 +47,6 @@ public class WareHouseListActivity extends AppCompatActivity {
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<WareHouseViewModel> data;
     private WareHouseAdapter adapter;
@@ -114,8 +113,6 @@ public class WareHouseListActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.company_recycler_view);
         recyclerView.setHasFixedSize(true);
 
-        globalVariable = (GlobalClass) getApplicationContext();
-
         layoutManager = new LinearLayoutManager(WareHouseListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -174,7 +171,7 @@ public class WareHouseListActivity extends AppCompatActivity {
     private void asyncListWareHouse() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "WareHouse/GetLisWareHouse/" + globalVariable.getUserName() + "/" + globalVariable.getIdSelectedCompanyInventory();
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "WareHouse/GetLisWareHouse/" + GlobalClass.getInstance().getUserName() + "/" + GlobalClass.getInstance().getIdSelectedCompanyInventory();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -203,6 +200,7 @@ public class WareHouseListActivity extends AppCompatActivity {
                                 }
                             });
                             recyclerView.setAdapter(adapter);
+                            GlobalClass.getInstance().setListWareHouseGlobal(data);
                             showProgress(false);
 
                         } catch (JsonSyntaxException e) {
