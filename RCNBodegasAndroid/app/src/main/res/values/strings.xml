@@ -46,5 +46,6 @@
     <string name="option2">Borrar elemento</string>
     <string name="error_valor_materia_empty">Valor materia es requerido</string>
     <string name="name_of_your_app">Rcn bodegas</string>
+    <string name="no_internet_for_sync">No hay conexión a internet disponible para la sincronización.</string>
 
 </resources>

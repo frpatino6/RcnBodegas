@@ -824,7 +824,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             };
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
-                            List<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
+                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
                             GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
 
                             if (dataMaterial != null)

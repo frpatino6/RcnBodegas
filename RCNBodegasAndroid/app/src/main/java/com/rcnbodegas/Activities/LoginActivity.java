@@ -10,6 +10,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,10 +31,19 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
+import com.rcnbodegas.Global.ResponsibleAdapter;
+import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
+import com.rcnbodegas.ViewModels.ResponsibleViewModel;
+import com.rcnbodegas.ViewModels.TypeElementViewModel;
 import com.rcnbodegas.ViewModels.UserViewModel;
+import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -39,31 +51,37 @@ public class LoginActivity extends AppCompatActivity {
 
     private View mLoginFormView;
     private View mProgressView;
-
+    private ProgressDialog dialogo;
     private EditText input_email;
 
     private EditText input_password;
     private Button btn_login;
-    private ProgressDialog dialogo;
-    private UserViewModel data;
+
+    private ArrayList<WareHouseViewModel> dataWarehouse;
+    private ArrayList<ResponsibleViewModel> dataResponsable;
+
     private Context context;
+    private UserViewModel data;
+    private SharedPreferences pref;
+    private ArrayList<ProductionViewModel> dataProductions;
+    private ArrayList<TypeElementViewModel> dataTipoELemento;
+    private ArrayList<MaterialViewModel> dataMaterialELemento;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.action_sign_in));
-        context=this;
+        context = this;
         InitializaControls();
         InitializaEvents();
-
-
     }
 
-    private void InitializaControls(){
-        input_email=findViewById(R.id.input_email);
-        input_password=findViewById(R.id.input_password);
-        btn_login=findViewById(R.id.btn_login);
+    private void InitializaControls() {
+        input_email = findViewById(R.id.input_email);
+        input_password = findViewById(R.id.input_password);
+        btn_login = findViewById(R.id.btn_login);
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
@@ -71,8 +89,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void InitializaEvents()
-    {
+    private void InitializaEvents() {
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void attempLogin(){
+    private void attempLogin() {
         input_email.setError(null);
         input_password.setError(null);
 
@@ -172,7 +189,7 @@ public class LoginActivity extends AppCompatActivity {
         // Create URL
         final String username = input_email.getText().toString();
         String pws = input_password.getText().toString();
-        String urlCustomers = GlobalClass.getInstance().getUrlServices() + "User/LoginActiveDirectory/" + username + "/" + pws ;
+        String urlCustomers = GlobalClass.getInstance().getUrlServices() + "User/LoginActiveDirectory/" + username + "/" + pws;
 
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
@@ -195,8 +212,9 @@ public class LoginActivity extends AppCompatActivity {
                             GlobalClass.getInstance().setAdminTypeElementId(data.getAdminTypeElementId());
 
                             Intent intent = null;
-                            intent = new Intent(LoginActivity.this,  MainActivity.class);
+                            intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
+
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
@@ -223,11 +241,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onStop() {
         super.onStop();
 
     }
+
 
 }

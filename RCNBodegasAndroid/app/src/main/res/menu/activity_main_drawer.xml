@@ -22,4 +22,16 @@
                 android:title="Realizar Inventario" />
         </menu>
     </item>
+    <item android:title="Procesos">
+        <menu>
+            <item
+                android:id="@+id/navSyncLDataBasica"
+                android:icon="@drawable/baseline_local_play_24"
+                android:title="SIncronizar datos básicos " />
+            <item
+                android:id="@+id/navSyncLegalizacion"
+                android:icon="@drawable/ic_menu_send"
+                android:title="SIncronizar documentos pendientes " />
+        </menu>
+    </item>
 </menu>

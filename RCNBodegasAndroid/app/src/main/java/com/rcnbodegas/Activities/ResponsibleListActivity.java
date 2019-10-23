@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,9 +26,12 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
+import com.rcnbodegas.Global.ProductionAdapter;
 import com.rcnbodegas.Global.ResponsibleAdapter;
+import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
@@ -50,14 +54,53 @@ public class ResponsibleListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_responsible_list);
-      
-        if(GlobalClass.getInstance().isResponsable())
+
+        if (GlobalClass.getInstance().isResponsable())
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_responsible));
         else
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_legalized_by));
 
         InitializeControls();
-        asyncListResponsibles();
+        //asyncListResponsibles();
+        returnListOffLine();
+
+    }
+
+    private void returnListOffLine() {
+
+        try {
+            String production = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedProductionInventory() : GlobalClass.getInstance().getIdSelectedProductionWarehouse();
+            String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+            String res = pref.getString("key_list_responsables", "");
+
+            TypeToken<List<ResponsibleViewModel>> token = new TypeToken<List<ResponsibleViewModel>>() {
+            };
+            Gson gson = new GsonBuilder().create();
+            // Define Response class to correspond to the JSON response returned
+            data = gson.fromJson(res, token.getType());
+            FilterListByProduction(production);
+            adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
+                @Override
+                public void onClick(ResponsibleViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("responsibleName", result.getName());
+                    _data.putExtra("responsibleId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+            showProgress(false);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            showMessage(e.getMessage());
+        }
+
 
     }
 
@@ -101,7 +144,6 @@ public class ResponsibleListActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.responsible_progress);
         recyclerView = (RecyclerView) findViewById(R.id.responsible_recycler_view);
         recyclerView.setHasFixedSize(true);
-
 
 
         layoutManager = new LinearLayoutManager(ResponsibleListActivity.this);
@@ -167,10 +209,10 @@ public class ResponsibleListActivity extends AppCompatActivity {
     private void asyncListResponsibles() {
 
 
-        String production=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedProductionInventory(): GlobalClass.getInstance().getIdSelectedProductionWarehouse();
-        String wareHouse=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedWareHouseInventory(): GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+        String production = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedProductionInventory() : GlobalClass.getInstance().getIdSelectedProductionWarehouse();
+        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListResponsable/" + wareHouse+ "/" + production;
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListResponsable/" + wareHouse + "/" + production;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(120000);
         RequestParams params = new RequestParams();
@@ -245,6 +287,47 @@ public class ResponsibleListActivity extends AppCompatActivity {
             sortEmpList = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
 
             adapter = new ResponsibleAdapter(sortEmpList, new onRecyclerResponsibleListItemClick() {
+                @Override
+                public void onClick(ResponsibleViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("responsibleName", result.getName());
+                    _data.putExtra("responsibleId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void FilterListByProduction(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<ResponsibleViewModel, String> filter = new Filter<ResponsibleViewModel, String>() {
+                public boolean isMatched(ResponsibleViewModel object, String text) {
+
+                    boolean result = false;
+
+
+                    result = object.getCodigoProduccion().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            data = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
                 @Override
                 public void onClick(ResponsibleViewModel result) {
                     final Intent _data = new Intent();

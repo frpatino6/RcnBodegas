@@ -74,8 +74,8 @@ public class KeepLiveApp extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, nIntent, ID_NOTIFICACION_CREAR);
 
         Notification notiBuilder = new NotificationCompat.Builder(this)
-                .setContentTitle("Ixnet")
-                .setContentText("Gestpark Recepción calidad")
+                .setContentTitle("Rcn")
+                .setContentText("Bodegas se está ejecutando...")
                 .setSmallIcon(R.mipmap.ic_logo)
                 .setContentIntent(pendingIntent).build();
 
@@ -84,6 +84,9 @@ public class KeepLiveApp extends Service {
         notificationManager.notify(ID_NOTIFICACION_CREAR, notiBuilder);
     }
 
+    public void ClearNotifications(){
+        notificationManager.cancel(ID_NOTIFICACION_CREAR);
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();

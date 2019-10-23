@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -26,9 +27,12 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ProductionAdapter;
+import com.rcnbodegas.Global.ResponsibleAdapter;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
+import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
+import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +56,42 @@ public class ProductionListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_production_list);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_production));
         InitializeControls();
-        asyncListProductions();
+        //asyncListProductions();
+        returnListOffLine();
+
+    }
+
+    private void returnListOffLine() {
+
+        try {
+            String responsable = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+            String res = pref.getString("key_list_productions", "");
+            TypeToken<List<ProductionViewModel>> token = new TypeToken<List<ProductionViewModel>>() {
+            };
+            Gson gson = new GsonBuilder().create();
+            // Define Response class to correspond to the JSON response returned
+            data = gson.fromJson(res, token.getType());
+            adapter = new ProductionAdapter(data, new onRecyclerProductionListItemClick() {
+                @Override
+                public void onClick(ProductionViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("productionName", result.getProductionName());
+                    _data.putExtra("productionId", result.getProductionCode().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+            showProgress(false);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            showMessage(e.getMessage());
+        }
+
 
     }
 
@@ -96,7 +135,6 @@ public class ProductionListActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.production_progress);
         recyclerView = (RecyclerView) findViewById(R.id.production_recycler_view);
         recyclerView.setHasFixedSize(true);
-
 
 
         layoutManager = new LinearLayoutManager(ProductionListActivity.this);
@@ -156,7 +194,7 @@ public class ProductionListActivity extends AppCompatActivity {
 
     private void asyncListProductions() {
 
-        String responsable=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedWareHouseInventory(): GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+        String responsable = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
 
         String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListProduction/" + responsable;
@@ -253,5 +291,65 @@ public class ProductionListActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    private void FilterListByTipoBodega(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<ProductionViewModel, String> filter = new Filter<ProductionViewModel, String>() {
+                public boolean isMatched(ProductionViewModel object, String text) {
+                    boolean result = false;
+                    result = object.getProductionName().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            data = (ArrayList<ProductionViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ProductionAdapter(sortEmpList, new onRecyclerProductionListItemClick() {
+                @Override
+                public void onClick(ProductionViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("productionName", result.getProductionName());
+                    _data.putExtra("productionId", result.getProductionCode().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void showMessage(String res) {
+        try {
+            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ProductionListActivity.this);
+
+            dlgAlert.setMessage(res);
+            dlgAlert.setTitle(getString(R.string.app_name));
+            //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+            dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // if this button is clicked, close
+                    // current activity
+
+                }
+            });
+            dlgAlert.setCancelable(true);
+            dlgAlert.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
     }
 }
