@@ -7,6 +7,8 @@ import java.util.Date;
 
 public class MaterialViewModel {
 
+
+    private Boolean isAdmin;
     private String saleDate;
     private String wareHouseId;
     private String wareHouseName;
@@ -21,6 +23,7 @@ public class MaterialViewModel {
     private String marca;
     private String barCode;
     private String materialName;
+    private Integer numero_doc_recepcion;
     private Double unitPrice;
     private Double purchaseValue;
     private ArrayList<Bitmap> listaImagenesBmp;
@@ -41,7 +44,24 @@ public class MaterialViewModel {
         this.marca = marca;
         this.barCode = barCode;
         this.materialName = materialName;
+        this.numero_doc_recepcion=0;
 
+    }
+
+    public Integer getNumero_doc_recepcion() {
+        return numero_doc_recepcion;
+    }
+
+    public void setNumero_doc_recepcion(Integer numero_doc_recepcion) {
+        this.numero_doc_recepcion = numero_doc_recepcion;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 
     public Integer getTerceroActual() {
@@ -78,7 +98,7 @@ public class MaterialViewModel {
 
     public ArrayList<String> getListaImagenesStr() {
 
-        if(listaImagenesStr ==null) listaImagenesStr = new ArrayList<>();
+        if (listaImagenesStr == null) listaImagenesStr = new ArrayList<>();
         return listaImagenesStr;
     }
 
@@ -88,7 +108,7 @@ public class MaterialViewModel {
 
     public ArrayList<Bitmap> getListaImagenesBmp() {
         if (listaImagenesBmp == null)
-             listaImagenesBmp = new ArrayList<Bitmap>();
+            listaImagenesBmp = new ArrayList<Bitmap>();
 
         return listaImagenesBmp;
     }
@@ -99,8 +119,8 @@ public class MaterialViewModel {
 
     public MaterialViewModel() {
         this.isReview = false;
-        listaImagenesBmp=new ArrayList<>();
-        listaImagenesStr= new ArrayList<>();
+        listaImagenesBmp = new ArrayList<>();
+        listaImagenesStr = new ArrayList<>();
     }
 
     public Double getUnitPrice() {

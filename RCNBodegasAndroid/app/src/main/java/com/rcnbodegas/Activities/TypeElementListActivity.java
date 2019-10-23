@@ -44,7 +44,6 @@ public class TypeElementListActivity extends AppCompatActivity {
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<TypeElementViewModel> data;
     private TypeElementAdapter adapter;
@@ -65,8 +64,6 @@ public class TypeElementListActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.type_element_progress);
         recyclerView = (RecyclerView) findViewById(R.id.type_element_recycler_view);
         recyclerView.setHasFixedSize(true);
-
-        globalVariable = (GlobalClass) getApplicationContext();
 
         layoutManager = new LinearLayoutManager(TypeElementListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
@@ -158,9 +155,9 @@ public class TypeElementListActivity extends AppCompatActivity {
     }
 
     private void asyncListResponsibles() {
-        String wareHouse=globalVariable.getQueryByInventory()? globalVariable.getIdSelectedWareHouseInventory(): globalVariable.getIdSelectedWareHouseWarehouse();
+        String wareHouse=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedWareHouseInventory(): GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListTypeElement/"  + wareHouse;
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListTypeElement/"  + wareHouse;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

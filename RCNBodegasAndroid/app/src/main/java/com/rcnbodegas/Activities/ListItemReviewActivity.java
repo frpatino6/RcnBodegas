@@ -28,11 +28,12 @@ import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ListItemReviewActivity extends AppCompatActivity  {
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<MaterialViewModel> listMaterialByReview;
     private ArrayList<MaterialViewModel> sortEmpList;
@@ -40,13 +41,14 @@ public class ListItemReviewActivity extends AppCompatActivity  {
     private View mIncidenciasFormView;
     private View mProgressView;
     private TextView txtResumen;
+    private TextView txtTotal;
     private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_item_review);
-        globalVariable = (GlobalClass) getApplicationContext();
+        
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_review));
 
         InitializeControls();
@@ -62,8 +64,8 @@ public class ListItemReviewActivity extends AppCompatActivity  {
         mProgressView = findViewById(R.id.review_progress);
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
         recyclerView.setHasFixedSize(true);
-
-        globalVariable = (GlobalClass) getApplicationContext();
+        txtTotal=findViewById(R.id.txtTotal);
+        
 
         layoutManager = new LinearLayoutManager(ListItemReviewActivity.this);
         recyclerView.setLayoutManager(layoutManager);
@@ -78,15 +80,29 @@ public class ListItemReviewActivity extends AppCompatActivity  {
         if (listMaterialByReview == null)
             listMaterialByReview = new ArrayList<>();
 
-        for (MaterialViewModel materialViewModel : globalVariable.getListMaterialBYProduction()) {
+        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getListMaterialBYProduction()) {
             if (!materialViewModel.isReview())
                 listMaterialByReview.add(materialViewModel);
         }
 
         txtResumen.setText(getString(R.string.message_resume_review_list) +listMaterialByReview.size()) ;
 
+        SumPurchaseValue();
     }
 
+    private void SumPurchaseValue(){
+        Double result=0.0;
+        for (MaterialViewModel materialViewModel : listMaterialByReview) {
+            result+=materialViewModel.getUnitPrice();
+        }
+
+
+        NumberFormat format = NumberFormat.getCurrencyInstance(Locale.CANADA);
+        String currency = format.format(result);
+
+
+        txtTotal.setText("Total valor compra: " + currency);
+    }
     private void setRecyclerViewData() {
         adapter = new ReviewListAdapter(listMaterialByReview);
         recyclerView.setAdapter(adapter);

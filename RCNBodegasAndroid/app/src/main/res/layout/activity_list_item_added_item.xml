@@ -81,21 +81,23 @@
                 android:textColor="#333"
                 android:layout_alignParentRight="true" />
             <ImageButton
+                android:visibility="visible"
                 android:layout_margin="8dp"
-                android:id="@+id/btnPhoto"
+                android:id="@+id/btnEdit"
                 android:background="@android:color/transparent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:src="@drawable/ic_camera_cardview" />
+                android:src="@mipmap/ic_edit" />
             <ImageButton
+                android:visibility="visible"
                 android:layout_margin="8dp"
                 android:background="@android:color/transparent"
                 android:id="@+id/btnDelete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/btnPhoto"
+                android:layout_toLeftOf="@id/btnEdit"
                 android:src="@drawable/ic_delete" />
 
 

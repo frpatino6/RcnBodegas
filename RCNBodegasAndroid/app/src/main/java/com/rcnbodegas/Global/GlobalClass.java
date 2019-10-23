@@ -1,26 +1,40 @@
 package com.rcnbodegas.Global;
 
+import android.app.Activity;
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
+import android.arch.lifecycle.ProcessLifecycleOwner;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 
+import com.rcnbodegas.Activities.LoginActivity;
+import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
-public class GlobalClass extends Application {
+public class GlobalClass extends Application  implements LifecycleObserver {
 
-    private int idSelectedResponsibleInventory=-1;
-    private int idSelectedTypeElementInventory=-1;
-    private int idSelectedResponsibleWarehouse=-1;
-    private int idSelectedUserWarehouse=-1;
-    private Integer idSelectedTypeElementWarehouse=-1;
-    private int idSelectedTypeElementHeader=-1;
+    private int idSelectedResponsibleInventory = -1;
+    private int idSelectedTypeElementInventory = -1;
+    private int idSelectedResponsibleWarehouse = -1;
+    private int idSelectedUserWarehouse = -1;
+    private Integer idSelectedTypeElementWarehouse = -1;
+    private int idSelectedTypeElementHeader = -1;
     private String userName;
     private String AdminTypeElementId;
-    private String urlServices = "http://172.20.0.154:8083/";
-
-    //private String urlServices = "http://192.168.0.12/bodegas/";
-    //private String urlServices = "http://172.20.48.100/bodegas/";
+    //private String urlServices = "http://172.20.0.154:8083/";
+    private String urlServices = "http://192.168.0.6/bodegas/";
+    // private String urlServices = "http://172.20.17.88/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
     private String idSelectedProductionInventory;
@@ -40,6 +54,122 @@ public class GlobalClass extends Application {
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
     private List<MaterialViewModel> listMaterialBYProduction;
     private ArrayList<MaterialViewModel> listMaterialForAdd;
+    private ArrayList<WareHouseViewModel> listWareHouseGlobal;
+    private NotificationManager mNotifyMgr;
+    private static GlobalClass instance;
+
+    private Intent intent;
+    private Activity currentActivity;
+
+/*
+    public void onActivityPause(Class activity, Activity current) {
+        classActivity = activity;
+        currentActivity=current;
+        applyStatusBar("", 10);
+
+    }
+
+    public void onActivityResume() {
+
+        if (mNotifyMgr != null)
+            mNotifyMgr.cancelAll();
+    }
+
+    private void applyStatusBar(String iconTitle, int notificationId) {
+        mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_logo)
+                .setContentTitle(iconTitle);
+        Intent resultIntent = new Intent(this, classActivity);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+        Notification notification = mBuilder.build();
+        notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
+
+
+        mNotifyMgr.notify(notificationId, notification);
+
+    }
+
+    public static GlobalClass getInstance() {
+        return instance;
+    }
+
+    @Override
+    public void onTerminate() {
+
+        super.onTerminate();
+    }
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        instance = this;
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void onAppBackgrounded() {
+        applyStatusBar("", 10);
+        currentActivity.moveTaskToBack(true);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void onAppForegrounded() {
+        onActivityResume();
+    }*/
+
+
+    public static GlobalClass getInstance() {
+        return instance;
+    }
+
+    @Override
+    public void onTerminate() {
+
+        super.onTerminate();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        instance = this;
+
+        intent= new Intent(this, KeepLiveApp.class);
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void onAppBackgrounded() {
+        startService(intent);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void onAppForegrounded() {
+        stopService(intent);
+    }
+
+    public Activity getCurrentActivity(){
+        return currentActivity;
+    }
+
+    public void setCurrentActivity(Activity activity){
+        this.currentActivity=activity;
+    }
+
+
+    //<editor-fold desc="Custom object">
+    public ArrayList<WareHouseViewModel> getListWareHouseGlobal() {
+        return listWareHouseGlobal;
+    }
+
+    public void setListWareHouseGlobal(ArrayList<WareHouseViewModel> listWareHouseGlobal) {
+        this.listWareHouseGlobal = listWareHouseGlobal;
+    }
 
     public String getAdminTypeElementId() {
         return AdminTypeElementId;
@@ -78,7 +208,7 @@ public class GlobalClass extends Application {
 
     public ArrayList<MaterialViewModel> getDataMaterial() {
 
-        if(dataMaterial==null) dataMaterial= new ArrayList<>();
+        if (dataMaterial == null) dataMaterial = new ArrayList<>();
         return dataMaterial;
     }
 
@@ -271,4 +401,7 @@ public class GlobalClass extends Application {
     public void setIdSelectedTypeElementHeader(int idSelectedTypeElementHeader) {
         this.idSelectedTypeElementHeader = idSelectedTypeElementHeader;
     }
+    //</editor-fold>
+
+
 }

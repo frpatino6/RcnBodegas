@@ -37,7 +37,6 @@ public class CompanyListActivity extends AppCompatActivity {
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<CompanyViewModel> data;
     private CompanyAdapter adapter;
@@ -60,8 +59,6 @@ public class CompanyListActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.company_progress);
         recyclerView = (RecyclerView) findViewById(R.id.company_recycler_view);
         recyclerView.setHasFixedSize(true);
-
-        globalVariable = (GlobalClass) getApplicationContext();
 
         layoutManager = new LinearLayoutManager(CompanyListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
@@ -121,7 +118,7 @@ public class CompanyListActivity extends AppCompatActivity {
     private void asyncListFurgonetas() {
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Company/GetLisCompany/" + globalVariable.getUserName();
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Company/GetLisCompany/" + GlobalClass.getInstance().getUserName();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

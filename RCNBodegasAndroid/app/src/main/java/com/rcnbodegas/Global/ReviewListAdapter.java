@@ -11,8 +11,10 @@ import android.widget.TextView;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.MyViewHolder> {
     private ArrayList<MaterialViewModel> dataSet;
@@ -89,6 +91,16 @@ public class ReviewListAdapter extends RecyclerView.Adapter<ReviewListAdapter.My
                 notifyDataSetChanged();
             }
         });
+        Double result= null;
+        try {
+            result = Double.valueOf(holder.txtPrecion.getText().toString());
+        } catch (Exception e) {
+            result=0.0;
+            e.printStackTrace();
+        }
+        NumberFormat format = NumberFormat.getCurrencyInstance(Locale.CANADA);
+        String currency = format.format(result);
+        holder.txtPrecion.setText(currency);
 
     }
 

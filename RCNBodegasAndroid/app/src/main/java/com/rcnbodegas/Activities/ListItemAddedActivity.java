@@ -1,35 +1,37 @@
 package com.rcnbodegas.Activities;
 
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.AddedElementListAdapter;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ProductionAdapter;
-import com.rcnbodegas.Global.ReviewListAdapter;
-import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
+import com.rcnbodegas.Global.NumberTextWatcher;
+import com.rcnbodegas.Global.onRecyclerReviewListDeleteItemClick;
+import com.rcnbodegas.Global.onRecyclerReviewListEditItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
-import com.rcnbodegas.ViewModels.ProductionViewModel;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
-public class ListItemAddedActivity extends AppCompatActivity  {
+public class ListItemAddedActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<MaterialViewModel> listMaterialByReview;
     private ArrayList<MaterialViewModel> sortEmpList;
@@ -38,14 +40,16 @@ public class ListItemAddedActivity extends AppCompatActivity  {
     private View mIncidenciasFormView;
     private View mProgressView;
     private TextView txtResumen;
+    private TextView txtTotal;
     private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_item_review);
-        globalVariable = (GlobalClass) getApplicationContext();
+
         InitializeControls();
+        InitializeEvents();
         filterListByNotReview();
         setRecyclerViewData();
 
@@ -59,13 +63,45 @@ public class ListItemAddedActivity extends AppCompatActivity  {
         mIncidenciasFormView = findViewById(R.id.review_recycler_view);
         mProgressView = findViewById(R.id.review_progress);
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
+        txtTotal=findViewById(R.id.txtTotal);
+
         recyclerView.setHasFixedSize(true);
 
-        globalVariable = (GlobalClass) getApplicationContext();
 
         layoutManager = new LinearLayoutManager(ListItemAddedActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+
+    }
+
+    private void SumPurchaseValue(){
+        Double result=0.0;
+        for (MaterialViewModel materialViewModel : listMaterialByReview) {
+            result+=materialViewModel.getUnitPrice();
+        }
+
+
+        NumberFormat format = NumberFormat.getCurrencyInstance(Locale.CANADA);
+        String currency = format.format(result);
+
+
+        txtTotal.setText("Total valor compra: " + currency);
+    }
+    private void InitializeEvents() {
+
+    }
+
+    private void OpenEditDialog(MaterialViewModel wareHouseViewModel) {
+        try {
+            FragmentManager fm = getSupportFragmentManager();
+            DialogFragment warehouseFragment = WarehouseFragment.newInstance(wareHouseViewModel, "");
+            warehouseFragment.show(fm, "Editar");
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void filterListByNotReview() {
@@ -73,19 +109,31 @@ public class ListItemAddedActivity extends AppCompatActivity  {
         if (listMaterialByReview == null)
             listMaterialByReview = new ArrayList<>();
 
-        for (MaterialViewModel materialViewModel : globalVariable.getListMaterialForAdd()) {
+        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getListMaterialForAdd()) {
             if (!materialViewModel.isReview())
                 listMaterialByReview.add(materialViewModel);
         }
 
-        txtResumen.setText(getString(R.string.message_resume_review_list) +listMaterialByReview.size()) ;
+        txtResumen.setText(getString(R.string.message_resume_review_list) + listMaterialByReview.size());
+        SumPurchaseValue();
 
     }
 
     private void setRecyclerViewData() {
-        adapter = new AddedElementListAdapter(listMaterialByReview);
+        adapter = new AddedElementListAdapter(listMaterialByReview, new onRecyclerReviewListEditItemClick() {
+            @Override
+            public void onClick(MaterialViewModel wareHouseViewModel) {
+                OpenEditDialog(wareHouseViewModel);
+            }
+        }, new onRecyclerReviewListDeleteItemClick() {
+            @Override
+            public void onClick(MaterialViewModel wareHouseViewModel) {
+                showConfirmDialog("Seguro de eliminar este elemento?", wareHouseViewModel);
+            }
+        });
         recyclerView.setAdapter(adapter);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         try {
@@ -120,7 +168,6 @@ public class ListItemAddedActivity extends AppCompatActivity  {
     }
 
 
-
     private void FilterListView(String query) {
 
         //mStatusView.setText("Query = " + query + " : submitted");
@@ -148,12 +195,71 @@ public class ListItemAddedActivity extends AppCompatActivity  {
 
             sortEmpList = (ArrayList<MaterialViewModel>) new FilterList().filterList(listMaterialByReview, filter, query);
 
-            adapter = new AddedElementListAdapter(sortEmpList);
+            adapter = new AddedElementListAdapter(sortEmpList, new onRecyclerReviewListEditItemClick() {
+                @Override
+                public void onClick(MaterialViewModel wareHouseViewModel) {
+                    OpenEditDialog(wareHouseViewModel);
+                }
+            }, new onRecyclerReviewListDeleteItemClick() {
+                @Override
+                public void onClick(MaterialViewModel wareHouseViewModel) {
+                    showConfirmDialog("Seguro de eliminar este elemento_", wareHouseViewModel);
+                }
+            });
             recyclerView.setAdapter(adapter);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    private void showConfirmDialog(String message, final MaterialViewModel wareHouseViewModel) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ListItemAddedActivity.this);
+        builder.setCancelable(true);
+        builder.setTitle("Bodegas");
+        builder.setMessage(message);
+        builder.setPositiveButton("Aceptar",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DropElement(wareHouseViewModel);
+                    }
+                });
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            setResult(RESULT_OK, null);
+            finish();
+            return true; //I have tried here true also
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void DropElement(MaterialViewModel dropElement) {
+
+        int index = listMaterialByReview.indexOf(dropElement);
+
+        if (index != -1) {
+            listMaterialByReview.remove(dropElement);
+            GlobalClass.getInstance().getDataMaterial().remove(dropElement);
+            SumPurchaseValue();
+        }
+        adapter.notifyDataSetChanged();
+        adapter.notifyItemRemoved(index);
+
 
     }
 

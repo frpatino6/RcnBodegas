@@ -41,7 +41,6 @@ public class ProductionListActivity extends AppCompatActivity {
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private GlobalClass globalVariable;
     private LinearLayoutManager layoutManager;
     private ArrayList<ProductionViewModel> data;
     private ProductionAdapter adapter;
@@ -98,7 +97,7 @@ public class ProductionListActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.production_recycler_view);
         recyclerView.setHasFixedSize(true);
 
-        globalVariable = (GlobalClass) getApplicationContext();
+
 
         layoutManager = new LinearLayoutManager(ProductionListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
@@ -157,10 +156,10 @@ public class ProductionListActivity extends AppCompatActivity {
 
     private void asyncListProductions() {
 
-        String responsable=globalVariable.getQueryByInventory()? globalVariable.getIdSelectedWareHouseInventory(): globalVariable.getIdSelectedWareHouseWarehouse();
+        String responsable=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedWareHouseInventory(): GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
 
-        String urlIncidencias = globalVariable.getUrlServices() + "Inventory/GetListProduction/" + responsable;
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListProduction/" + responsable;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();

@@ -6,8 +6,8 @@ android {
         applicationId "com.rcnbodegas"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 5
-        versionName "5.0"
+        versionCode 10
+        versionName "5.2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     compileOptions.encoding = 'UTF-8'
@@ -44,4 +44,5 @@ dependencies {
     implementation files('libs/com.symbol.emdk.jar')
     implementation files('libs/com.symbol.emdk.wizard.core.jar')
     implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
 }
