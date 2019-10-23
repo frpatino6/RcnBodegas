@@ -8,6 +8,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -58,7 +59,7 @@ public class WareHouseListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_company_list);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_warehouse));
         InitializeControls();
-        asyncListWareHouse();
+        //asyncListWareHouse();
 
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
@@ -67,9 +68,34 @@ public class WareHouseListActivity extends AppCompatActivity {
 
         }
 
-
+        returnListOffLine();
     }
 
+    private void returnListOffLine(){
+
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+        String res=pref.getString("key_list_warehouse","");
+        TypeToken<List<WareHouseViewModel>> token = new TypeToken<List<WareHouseViewModel>>() {
+        };
+        Gson gson = new GsonBuilder().create();
+        // Define Response class to correspond to the JSON response returned
+        data = gson.fromJson(res, token.getType());
+        adapter = new WareHouseAdapter(data, new onRecyclerWarehouseListItemClick() {
+            @Override
+            public void onClick(WareHouseViewModel result) {
+                final Intent _data = new Intent();
+                _data.putExtra("wareHouseName",result.getWareHouseName());
+                _data.putExtra("wareHouseId", result.getId());
+
+                setResult(RESULT_OK, _data);
+
+                finish();
+            }
+        });
+        recyclerView.setAdapter(adapter);
+        GlobalClass.getInstance().setListWareHouseGlobal(data);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 

@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -48,14 +49,79 @@ public class TypeElementListActivity extends AppCompatActivity {
     private ArrayList<TypeElementViewModel> data;
     private TypeElementAdapter adapter;
     private ArrayList<TypeElementViewModel> sortEmpList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_type_element_list);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_type_element));
         InitializeControls();
-        asyncListResponsibles();
+        //asyncListResponsibles();
+        returnListOffLine();
 
+    }
+
+    private void returnListOffLine() {
+
+        try {
+            String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+            String res = "";
+            if (wareHouse.toString().equals("V"))
+                res = pref.getString("key_list_tipo_prenda", "");
+            else
+                res = pref.getString("key_list_tipo_elemento", "");
+
+
+            TypeToken<List<TypeElementViewModel>> token = new TypeToken<List<TypeElementViewModel>>() {
+            };
+            Gson gson = new GsonBuilder().create();
+            // Define Response class to correspond to the JSON response returned
+            data = gson.fromJson(res, token.getType());
+            adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
+                @Override
+                public void onClick(TypeElementViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("typeElementName", result.getName());
+                    _data.putExtra("typeElementId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+            showProgress(false);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            showMessage(e.getMessage());
+        }
+
+
+    }
+
+    private void showMessage(String res) {
+        try {
+            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(TypeElementListActivity.this);
+
+            dlgAlert.setMessage(res);
+            dlgAlert.setTitle(getString(R.string.app_name));
+            //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+            dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // if this button is clicked, close
+                    // current activity
+
+                }
+            });
+            dlgAlert.setCancelable(true);
+            dlgAlert.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
     }
 
     private void InitializeControls() {
@@ -155,9 +221,9 @@ public class TypeElementListActivity extends AppCompatActivity {
     }
 
     private void asyncListResponsibles() {
-        String wareHouse=GlobalClass.getInstance().getQueryByInventory()? GlobalClass.getInstance().getIdSelectedWareHouseInventory(): GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListTypeElement/"  + wareHouse;
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListTypeElement/" + wareHouse;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -177,7 +243,7 @@ public class TypeElementListActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(TypeElementViewModel result) {
                                     final Intent _data = new Intent();
-                                    _data.putExtra("typeElementName",result.getName());
+                                    _data.putExtra("typeElementName", result.getName());
                                     _data.putExtra("typeElementId", result.getId().toString());
 
                                     setResult(RESULT_OK, _data);
@@ -232,7 +298,7 @@ public class TypeElementListActivity extends AppCompatActivity {
                 @Override
                 public void onClick(TypeElementViewModel result) {
                     final Intent _data = new Intent();
-                    _data.putExtra("typeElementName",result.getName());
+                    _data.putExtra("typeElementName", result.getName());
                     _data.putExtra("typeElementId", result.getId().toString());
 
                     setResult(RESULT_OK, _data);

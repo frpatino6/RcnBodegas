@@ -2,10 +2,12 @@ package com.rcnbodegas.ViewModels;
 
 public class ResponsibleViewModel {
 
-    private Integer id;
+    private Long id;
     private String name;
+    private String tipoBodega;
+    private String codigoProduccion;
 
-    public ResponsibleViewModel(int id, String name) {
+    public ResponsibleViewModel(Long id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -13,11 +15,19 @@ public class ResponsibleViewModel {
     public ResponsibleViewModel() {
     }
 
-    public Integer getId() {
+    public String getCodigoProduccion() {
+        return codigoProduccion;
+    }
+
+    public void setCodigoProduccion(String codigoProduccion) {
+        this.codigoProduccion = codigoProduccion;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -27,5 +37,13 @@ public class ResponsibleViewModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTipoBodega() {
+        return tipoBodega;
+    }
+
+    public void setTipoBodega(String tipoBodega) {
+        tipoBodega = tipoBodega;
     }
 }

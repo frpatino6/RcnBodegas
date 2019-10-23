@@ -2,13 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rcnbodegas">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
 
     <application
-
         android:name=".Global.GlobalClass"
         android:allowBackup="true"
         android:hardwareAccelerated="false"
@@ -18,7 +18,15 @@
         android:roundIcon="@mipmap/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity  android:screenOrientation="portrait" android:name=".Activities.WarehouseUserActivity"></activity>
+
+        <service
+            android:name=".Global.SyncService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".Activities.WarehouseUserActivity"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -76,11 +84,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:screenOrientation="portrait"
             android:name=".Activities.MainActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <service android:name="com.rcnbodegas.Global.KeepLiveApp" />
+
+        <service android:name=".Global.KeepLiveApp" />
     </application>
 
 </manifest>

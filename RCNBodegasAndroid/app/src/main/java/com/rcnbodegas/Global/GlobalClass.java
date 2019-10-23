@@ -11,6 +11,9 @@ import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ProcessLifecycleOwner;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.NotificationCompat;
 
 import com.rcnbodegas.Activities.LoginActivity;
@@ -22,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class GlobalClass extends Application  implements LifecycleObserver {
+public class GlobalClass extends Application implements LifecycleObserver {
 
     private int idSelectedResponsibleInventory = -1;
     private int idSelectedTypeElementInventory = -1;
@@ -32,8 +35,8 @@ public class GlobalClass extends Application  implements LifecycleObserver {
     private int idSelectedTypeElementHeader = -1;
     private String userName;
     private String AdminTypeElementId;
-    //private String urlServices = "http://172.20.0.154:8083/";
-    private String urlServices = "http://192.168.0.6/bodegas/";
+    private String urlServices = "http://172.20.0.154:8083/";
+    //private String urlServices = "http://192.168.0.6/bodegas/";
     // private String urlServices = "http://172.20.17.88/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
@@ -45,21 +48,31 @@ public class GlobalClass extends Application  implements LifecycleObserver {
     private String idSelectedWareHouseWarehouse;
     private String idSelectedProductionWarehouse;
     private ArrayList<MaterialViewModel> dataMaterial;
-    private List<MaterialViewModel> dataMaterialInventory;
+    private ArrayList<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
+    private ArrayList<MaterialViewModel> listMaterialBYProduction;
+    private ArrayList<MaterialViewModel> listMaterialForAdd;
+    private ArrayList<WareHouseViewModel> listWareHouseGlobal;
+    private ArrayList<ArrayList<MaterialViewModel>> listMaterialForSync;
     private String nameSelectedWareHouseWarehouse = "";
     private String nameSelectedWareHouseInventory = "";
     private String userRole;
     private String mCurrentPhotoPath;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private List<MaterialViewModel> listMaterialBYProduction;
-    private ArrayList<MaterialViewModel> listMaterialForAdd;
-    private ArrayList<WareHouseViewModel> listWareHouseGlobal;
     private NotificationManager mNotifyMgr;
     private static GlobalClass instance;
-
     private Intent intent;
     private Activity currentActivity;
+
+    public SharedPreferences getPref() {
+        return pref;
+    }
+
+    public void setPref(SharedPreferences pref) {
+        this.pref = pref;
+    }
+
+    private SharedPreferences pref;
 
 /*
     public void onActivityPause(Class activity, Activity current) {
@@ -138,9 +151,11 @@ public class GlobalClass extends Application  implements LifecycleObserver {
         super.onCreate();
         instance = this;
 
-        intent= new Intent(this, KeepLiveApp.class);
+        intent = new Intent(this, KeepLiveApp.class);
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+
+        //pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -153,16 +168,26 @@ public class GlobalClass extends Application  implements LifecycleObserver {
         stopService(intent);
     }
 
-    public Activity getCurrentActivity(){
-        return currentActivity;
-    }
 
-    public void setCurrentActivity(Activity activity){
-        this.currentActivity=activity;
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
 
     //<editor-fold desc="Custom object">
+
+
+    public ArrayList<ArrayList<MaterialViewModel>> getListMaterialForSync() {
+        if (listMaterialForSync == null) listMaterialForSync = new ArrayList<>();
+        return listMaterialForSync;
+    }
+
+    public void setListMaterialForSync(ArrayList<ArrayList<MaterialViewModel>> listMaterialForSync) {
+        this.listMaterialForSync = listMaterialForSync;
+    }
+
     public ArrayList<WareHouseViewModel> getListWareHouseGlobal() {
         return listWareHouseGlobal;
     }
@@ -202,7 +227,7 @@ public class GlobalClass extends Application  implements LifecycleObserver {
         return dataMaterialInventory;
     }
 
-    public void setDataMaterialInventory(List<MaterialViewModel> dataMaterialInventory) {
+    public void setDataMaterialInventory(ArrayList<MaterialViewModel> dataMaterialInventory) {
         this.dataMaterialInventory = dataMaterialInventory;
     }
 
@@ -373,7 +398,7 @@ public class GlobalClass extends Application  implements LifecycleObserver {
         return listMaterialBYProduction;
     }
 
-    public void setListMaterialBYProduction(List<MaterialViewModel> listMaterialBYProduction) {
+    public void setListMaterialBYProduction(ArrayList<MaterialViewModel> listMaterialBYProduction) {
         this.listMaterialBYProduction = listMaterialBYProduction;
     }
 

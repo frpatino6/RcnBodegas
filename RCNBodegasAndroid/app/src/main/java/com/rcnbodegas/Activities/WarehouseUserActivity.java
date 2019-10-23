@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,9 +27,12 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ResponsibleAdapter;
+import com.rcnbodegas.Global.WareHouseAdapter;
 import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
+import com.rcnbodegas.Global.onRecyclerWarehouseListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
+import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +62,45 @@ public class WarehouseUserActivity extends AppCompatActivity {
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_legalized_by));
 
         InitializeControls();
-        asyncListWarehouseUser();
+        //asyncListWarehouseUser();
+        returnListOffLine();
+    }
+
+    private void returnListOffLine(){
+
+        try {
+            String tipoBodega = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+            showProgress(true);
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+            String res=pref.getString("key_list_users_warehouse","");
+            TypeToken<List<ResponsibleViewModel>> token = new TypeToken<List<ResponsibleViewModel>>() {
+            };
+            Gson gson = new GsonBuilder().create();
+            // Define Response class to correspond to the JSON response returned
+            data = gson.fromJson(res, token.getType());
+
+            FilterListByTipoBodega(tipoBodega);
+
+            adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
+                @Override
+                public void onClick(ResponsibleViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("responsibleWarehouseName", result.getName());
+                    _data.putExtra("responsibleWarehouseId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+            showProgress(false);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            showMessage(e.getMessage());
+        }
+
 
     }
 
@@ -231,7 +273,6 @@ public class WarehouseUserActivity extends AppCompatActivity {
 
                     boolean result = false;
 
-
                     result = object.getName().toString().toLowerCase().contains(String.valueOf(text));
 
                     if (result)
@@ -241,7 +282,7 @@ public class WarehouseUserActivity extends AppCompatActivity {
                 }
             };
 
-            sortEmpList = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
+            data = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
 
             adapter = new ResponsibleAdapter(sortEmpList, new onRecyclerResponsibleListItemClick() {
                 @Override
@@ -262,4 +303,46 @@ public class WarehouseUserActivity extends AppCompatActivity {
         }
 
     }
+
+    private void FilterListByTipoBodega(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<ResponsibleViewModel, String> filter = new Filter<ResponsibleViewModel, String>() {
+                public boolean isMatched(ResponsibleViewModel object, String text) {
+
+                    boolean result = false;
+
+
+                    result = object.getTipoBodega().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            data = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ResponsibleAdapter(sortEmpList, new onRecyclerResponsibleListItemClick() {
+                @Override
+                public void onClick(ResponsibleViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("responsibleWarehouseName", result.getName());
+                    _data.putExtra("responsibleWarehouseId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

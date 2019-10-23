@@ -8,6 +8,7 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.LayerDrawable;
 
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -66,6 +68,7 @@ import com.rcnbodegas.Global.NumberTextWatcher;
 import com.rcnbodegas.Global.PhotoListAdapter;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
+import com.rcnbodegas.Global.SyncService;
 import com.rcnbodegas.Global.TScanner;
 import com.rcnbodegas.Global.Utils;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
@@ -478,14 +481,18 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private void InitializaNewAddElement() {
 
         try {
-
-            asyncListMaterialsByProduction();
+            if (GlobalClass.getInstance().isNetworkAvailable()) {
+                asyncListMaterialsByProduction();
+            } else {
+                confirmAddForSyncAfter();
+            }
 
         } catch (Exception ex) {
             showMessageDialog(ex.getMessage());
         }
 
     }
+
 
     //Valida si hay un proceso de inventario en proceso
     private boolean validateInventoryProcess() {
@@ -949,6 +956,40 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void confirmAddForSyncAfter() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(getString(R.string.no_internet_for_sync));
+        builder.setPositiveButton("Guardar y sincronizar cuando tenga conexión a internet",
+                new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SaveDocumentForSync();
+                        dialog.dismiss();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void SaveDocumentForSync() {
+
+        getActivity().stopService(new Intent(getActivity(), SyncService.class));
+        GlobalClass.getInstance().getListMaterialForSync().add((ArrayList<MaterialViewModel>) GlobalClass.getInstance().getDataMaterial().clone());
+        InitializeNewProcess();
+        getActivity().startService(new Intent(getActivity(), SyncService.class));
+
     }
 
     private void confirmCancelProcess() {
