@@ -32,7 +32,7 @@ namespace Rcn.Bodegas.Api.Controllers
     }
 
     [HttpGet("/Inventory/GetListProduction/{warehouseid=0}")]
-    public async Task<IActionResult> GetLisWareHouseAsync(string warehouseid)
+    public async Task<IActionResult> GetListProductionAsync(string warehouseid)
     {
       try
       {

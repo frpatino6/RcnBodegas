@@ -8,6 +8,8 @@ namespace Rcn.Bodegas.Core.Interfaces
   {
     Task<List<ProductionViewModel>> GetListProductions(string wareHouse);
 
+  
+
     Task<List<ResponsibleViewModel>> GetListResponsible(string wareHouse, string production);
 
     Task<List<ResponsibleViewModel>> GetListWarehouseUserAsync(string tipoBodega);
@@ -20,6 +22,7 @@ namespace Rcn.Bodegas.Core.Interfaces
 
     Task<bool> CreateInconsistency(string warehouseType, string productionId, int responsibleId);
 
+    List<string> getImagesByMaterial(int idMaterial);
 
   }
 }

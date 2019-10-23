@@ -34,5 +34,7 @@ namespace Rcn.Bodegas.Core.ViewModel
     public string terceroActual { get; set; }
 
     public int numero_doc_recepcion { get; set; }
+
+    public string codigo { get; set; }
   }
 }

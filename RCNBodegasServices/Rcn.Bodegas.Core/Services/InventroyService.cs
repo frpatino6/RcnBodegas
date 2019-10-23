@@ -129,6 +129,7 @@ namespace Rcn.Bodegas.Core.Services
       }   
       return result;
     }
+   
 
     /// <summary>
     /// Get list responsible
@@ -421,7 +422,7 @@ namespace Rcn.Bodegas.Core.Services
     /// Carga las imagenes de cada elemento desde la base de datos
     /// </summary>
     /// <param name="idMaterial"></param>
-    private List<string> getImagesByMaterial(int idMaterial)
+    public List<string> getImagesByMaterial(int idMaterial)
     {
       List<string> result = new List<string>();
       List<OracleParameter> parameters = new List<OracleParameter>();
