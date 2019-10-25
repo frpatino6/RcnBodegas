@@ -1,14 +1,12 @@
 package com.rcnbodegas.Activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -32,13 +30,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.SyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Fragments.InventoryFragment;
 import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.KeepLiveApp;
 import com.rcnbodegas.Global.NetworkStateReceiver;
 import com.rcnbodegas.Global.SyncService;
 import com.rcnbodegas.R;
@@ -64,6 +61,7 @@ public class MainActivity extends AppCompatActivity
     private ProgressDialog dialogo;
     private SharedPreferences.Editor editor;
 
+
     private TextView txtUser;
     private android.support.v4.app.FragmentManager fragmentManager;
     private SharedPreferences pref;
@@ -74,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<WareHouseViewModel> dataWarehouse;
     private ArrayList<ResponsibleViewModel> dataResponsable;
     private ArrayList<ResponsibleViewModel> dataUser;
+    private static ArrayList<String> materialSync;
     private NetworkStateReceiver networkStateReceiver;
     private boolean isOk;
     private String lastCreatedNUmberDocument;
@@ -105,11 +104,6 @@ public class MainActivity extends AppCompatActivity
         networkStateReceiver = new NetworkStateReceiver();
         networkStateReceiver.addListener(this);
         this.registerReceiver(networkStateReceiver, new IntentFilter(android.net.ConnectivityManager.CONNECTIVITY_ACTION));
-
-
-        dialog = new ProgressDialog(MainActivity.this);
-        dialog.setMessage("Sincronizando...");
-        AddsharedPreferenceConfig(false);
     }
 
     @Override
@@ -235,42 +229,12 @@ public class MainActivity extends AppCompatActivity
 
     private void AddsharedPreferenceConfig(boolean clear) {
 
+        if (materialSync == null)
+            materialSync = new ArrayList<>();
+        else
+            materialSync.clear();
 
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
-        editor = pref.edit();
-        if (clear)
-            editor.clear().commit();
-        // pref.edit().remove("key_list_responsables").commit();
-
-        String list_warehouse = pref.getString("key_list_warehouse", "");
-        String list_responsable = pref.getString("key_list_responsables", "");
-        String list_productions = pref.getString("key_list_productions", "");
-        String list_tipo_elemento = pref.getString("key_list_tipo_elemento", "");
-        String list_tipo_prenda = pref.getString("key_list_tipo_prenda", "");
-        String list_material = pref.getString("key_list_material", "");
-        String list_warehouser_users = pref.getString("key_list_users_warehouse", "");
-
-
-        if (list_warehouse.equals(""))
-            SyncAllWarehousesData();
-
-        if (list_responsable.equals(""))
-            SyncALlResponsibleData();
-
-        if (list_productions.equals(""))
-            SyncAllProductionsData();
-
-        if (list_tipo_elemento.equals(""))
-            SyncAllTipoElementoData();
-
-        if (list_tipo_prenda.equals(""))
-            SyncAllTipoPrendaData();
-
-        if (list_material.equals(""))
-            SyncCountMaterialData();
-
-        if (list_warehouser_users.equals(""))
-            SyncAllUserWarehousesData();
+        new MyAsyncTask().execute();
 
     }
 
@@ -293,11 +257,10 @@ public class MainActivity extends AppCompatActivity
 
     private void SyncALlResponsibleData() {
         // Create URL
-        dialog.show();
-        dialog.setTitle("Sincronizando Responsables");
+
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetListAllResponsible/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
 
@@ -321,7 +284,7 @@ public class MainActivity extends AppCompatActivity
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
-                            dialogo.dismiss();
+
                         }
                     }
 
@@ -329,7 +292,7 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
+
 
                     }
 
@@ -344,11 +307,9 @@ public class MainActivity extends AppCompatActivity
 
     private void SyncAllWarehousesData() {
         // Create URL
-
-        dialog.setTitle("Sincronizando bodegas");
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetListAllWarehouse/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
 
@@ -379,7 +340,7 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
+
 
                     }
 
@@ -394,11 +355,9 @@ public class MainActivity extends AppCompatActivity
 
     private void SyncAllProductionsData() {
 
-
-        dialog.setTitle("Sincronizando producciones");
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetAllListProductions/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
 
@@ -423,7 +382,6 @@ public class MainActivity extends AppCompatActivity
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
-                            dialogo.dismiss();
                         }
                     }
 
@@ -431,7 +389,7 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
+
 
                     }
 
@@ -445,11 +403,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void SyncAllTipoElementoData() {
-        // Create URL
-        dialog.setTitle("Sincronizando tipos de elementos");
+
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetAllListTipoElemento/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
 
@@ -474,7 +431,7 @@ public class MainActivity extends AppCompatActivity
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
-                            dialogo.dismiss();
+
                         }
                     }
 
@@ -482,7 +439,7 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
+
 
                     }
 
@@ -497,10 +454,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void SyncAllTipoPrendaData() {
-        dialog.setTitle("Sincronizando tipos de prendas");
+
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetAllListTipoPrenda/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
 
@@ -525,7 +482,7 @@ public class MainActivity extends AppCompatActivity
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
-                            dialogo.dismiss();
+
                         }
                     }
 
@@ -533,7 +490,6 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
 
                     }
 
@@ -547,10 +503,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void SyncCountMaterialData() {
-        dialog.setTitle("Sincronizando Material c");
+
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetCountMateriales/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
 
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -560,8 +516,6 @@ public class MainActivity extends AppCompatActivity
                     public void onSuccess(int statusCode, Header[] headers, String res) {
                         // called when response HTTP status is "200 OK"
                         try {
-
-
                             TypeToken<List<Long>> token = new TypeToken<List<Long>>() {
                             };
                             Gson gson = new GsonBuilder().create();
@@ -573,7 +527,7 @@ public class MainActivity extends AppCompatActivity
 
                             while (offSet < coutnMateriales) {
                                 Log.d(TAG, "Iteracion " + offSet);
-                                dialog.show();
+
                                 SyncAllMaterialData(offSet);
 
                                 if ((coutnMateriales - offSet) < 3000) {
@@ -589,7 +543,7 @@ public class MainActivity extends AppCompatActivity
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
-                            dialogo.dismiss();
+
                         }
                     }
 
@@ -597,7 +551,7 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
+
 
                     }
 
@@ -612,11 +566,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void SyncAllMaterialData(Long offSet) {
-        dialog.setTitle("Sincronizando Material");
-        dialog.show();
+
+
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetListAllMaterial/" + offSet;
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
 
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
@@ -628,18 +582,17 @@ public class MainActivity extends AppCompatActivity
                         try {
 
                             Log.d(TAG, "Respuesta recibida");
-                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            dataMaterialELemento = gson.fromJson(res, token.getType());
-                            editor.putString("key_list_material", res);
-                            editor.apply();
+                            //TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
+                            //} ;
+                            //Gson gson = new GsonBuilder().create();
 
+                            //editor.putString("key_list_material", res);
+                            //editor.commit();
+                            materialSync.add(res);
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
-                            dialogo.dismiss();
+
                         }
                     }
 
@@ -647,8 +600,6 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
-
                     }
 
                     @Override
@@ -657,8 +608,7 @@ public class MainActivity extends AppCompatActivity
                         controlRequestMateriales++;
 
                         if ((coutnMateriales / 3000) < controlRequestMateriales) {
-                            dialog.dismiss();
-                            showLoginError("Proceso de sincronización de data básica, ejecutada con éxito!!!");
+                            parseArrayMaterial(materialSync);
                         }
                     }
 
@@ -666,12 +616,30 @@ public class MainActivity extends AppCompatActivity
         );
     }
 
+    private void parseArrayMaterial(ArrayList<String> materialSync) {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("materialbodegasPreferences", 0); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
+
+        editor.putString("key_list_material_count", String.valueOf(materialSync.size()));
+        editor.commit();
+        int materilaSyncIndex = 0;
+        for (String res : materialSync) {
+            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
+            };
+            Gson gson = new GsonBuilder().create();
+
+            editor.putString("key_list_material_" + materilaSyncIndex, res);
+            materilaSyncIndex++;
+        }
+        editor.commit();
+    }
+
     private void SyncAllUserWarehousesData() {
         // Create URL
-        dialog.setTitle("Sincronizando usuarios");
+
         String url = GlobalClass.getInstance().getUrlServices() + "sync/GetListAllWArehouseUser/";
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         RequestParams params = new RequestParams();
 
@@ -703,8 +671,6 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-                        showLoginError(res);
-
                     }
 
                     @Override
@@ -724,7 +690,7 @@ public class MainActivity extends AppCompatActivity
         String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
         String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
-        AsyncHttpClient client = new AsyncHttpClient();
+        SyncHttpClient client = new SyncHttpClient();
         client.setTimeout(60000);
         String tipo = "application/json";
 
@@ -762,12 +728,101 @@ public class MainActivity extends AppCompatActivity
                     GlobalClass.getInstance().getListMaterialForSync().clear();
                     stopService(new Intent(MainActivity.this, SyncService.class));
                     dialog.dismiss();
-                    showLoginError("Sincronización de documentos finalizada correctamente!!!");
                 }
 
             }
         });
     }
 
+
+    private class MyAsyncTask extends AsyncTask<String, String, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            SharedPreferences pref1 = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+            editor = pref1.edit();
+            editor.clear().commit();
+
+
+            String list_warehouse = pref1.getString("key_list_warehouse", "");
+            String list_responsable = pref1.getString("key_list_responsables", "");
+            String list_productions = pref1.getString("key_list_productions", "");
+            String list_tipo_elemento = pref1.getString("key_list_tipo_elemento", "");
+            String list_tipo_prenda = pref1.getString("key_list_tipo_prenda", "");
+            String list_material = pref1.getString("key_list_material", "");
+            String list_warehouser_users = pref1.getString("key_list_users_warehouse", "");
+
+
+            try {
+                if (list_warehouse.equals("")) {
+                    publishProgress("Tarea 1 de 7. Sincronizando Bodegas");
+                    SyncAllWarehousesData();
+                }
+
+                if (list_responsable.equals("")) {
+                    publishProgress("Tarea 2 de 7. Sincronizando Responsables");
+                    SyncALlResponsibleData();
+                }
+
+                if (list_productions.equals("")) {
+                    publishProgress("Tarea 3 de 7. Sincronizando Producciones");
+                    SyncAllProductionsData();
+                }
+
+                if (list_tipo_elemento.equals("")) {
+                    publishProgress("Tarea 4 de 7. Sincronizando Elementos");
+                    SyncAllTipoElementoData();
+                }
+
+                if (list_tipo_prenda.equals("")) {
+                    publishProgress("Tarea 5 de 7. Sincronizando Prendas");
+                    SyncAllTipoPrendaData();
+                }
+
+                if (list_material.equals("")) {
+                    publishProgress("Tarea 6 de 7. Sincronizando Materiales");
+                    SyncCountMaterialData();
+                }
+
+                if (list_warehouser_users.equals("")) {
+                    publishProgress("Tarea 7 de 7. Sincronizando Usuarios por Bodega");
+                    SyncAllUserWarehousesData();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            // super.onPreExecute();
+            dialogo = new ProgressDialog(MainActivity.this);
+            dialogo.setMessage("Cargando datos...");
+            dialogo.setIndeterminate(false);
+            dialogo.setCancelable(false);
+            dialogo.show();
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+
+            if (aBoolean)
+                showLoginError("Sincronización ejecutada con éxito");
+            else
+                showLoginError("Error sincrnonizando, intente de nuevo");
+            dialogo.dismiss();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            dialogo.setMessage(values[0]);
+            super.onProgressUpdate(values);
+        }
+    }
 
 }
