@@ -6,7 +6,10 @@ namespace Rcn.Bodegas.Core.ViewModel
 {
   public class ResponsibleViewModel
   {
-    public int Id { get; set; }
+    public Int64 Id { get; set; }
     public string Name { get; set; }
+    public String TipoBodega { get; set; }
+
+    public string CodigoProduccion { get; set; }
   }
 }

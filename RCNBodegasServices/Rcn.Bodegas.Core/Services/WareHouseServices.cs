@@ -27,7 +27,6 @@ namespace Rcn.Bodegas.Core.Services
 
     public async Task<int> CreateMaterialWarehouse(List<MaterialViewModel> listNewMaterial, string warehouseid)
     {
-      bool isAdmin = false;
       string dateLegalization;
       string adminMaterialTypeId = _IConfiguration.GetSection("AppParameters").GetSection("codigo_tipo_elemento_administrativo").Value;
       int rowCount = 0;
@@ -80,7 +79,6 @@ namespace Rcn.Bodegas.Core.Services
                     oraUpdate.Parameters.Remove(OraUbicacionActua);
                     oraUpdate.Parameters.Remove(OraTerceroActual);
                     oraUpdate.CommandText = SetSqlQueryAdmin(warehouseid, dateLegalization, numeroRecepcion);
-                    isAdmin = true;
                   }
                   else
                     oraUpdate.CommandText = SetSqlQuery(warehouseid, dateLegalization, numeroRecepcion);
@@ -204,13 +202,13 @@ namespace Rcn.Bodegas.Core.Services
       string query;
       if (warehouseid.Equals("V"))
       {
-        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,PA_TERCERO_ACTUAL,TIPO_PRENDA,MARCA,VALOR_RETENCION,ASIGNACION_BARRAS,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,INDICADOR_SALIDA,NUMERO_DOC_RECEPCION)
-                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:PA_TERCERO_ACTUAL,:TIPO_ELEMENTO,:MARCA,0,'S',:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss'),'X'," + numeroRecepcion + ") returning CODIGO into :new_id";
+        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,PA_TERCERO_ACTUAL,TIPO_PRENDA,MARCA,VALOR_RETENCION,ASIGNACION_BARRAS,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,NUMERO_DOC_RECEPCION)
+                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:PA_TERCERO_ACTUAL,:TIPO_ELEMENTO,:MARCA,0,'S',:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss')," + numeroRecepcion + ") returning CODIGO into :new_id";
       }
       else
       {
-        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,PA_TERCERO_ACTUAL,TIPO_ELEMENTO,MARCA,VALOR_RETENCION,ASIGNACION_BARRAS,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,INDICADOR_SALIDA,NUMERO_DOC_RECEPCION)
-                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:PA_TERCERO_ACTUAL,:TIPO_ELEMENTO,:MARCA,0,'S',:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss'),'X'," + numeroRecepcion + ") returning CODIGO into :new_id";
+        query = $@"Insert into BD_MATERIAL (CODIGO,CODIGO_BARRAS,DESCRIPCION,TIPO_BODEGA,BD_UBCCION_ACTUAL,FEC_CREACION,ESTADO,AD_EMPRESA_CODIGO,BD_UBCCION_CODIGO,USU_CREACION,VALOR_COMPRA,VALOR_MATERIA,PA_TERCERO_ACTUAL,TIPO_ELEMENTO,MARCA,VALOR_RETENCION,ASIGNACION_BARRAS,BD_UBICACION_RECIBIDO,PA_TERCERO_RECIBIDO,FECHA_COMPRA,NUMERO_DOC_RECEPCION)
+                 VALUES(BD_MTRIAL_SEQ.nextval, :CODIGO_BARRAS, :DESCRIPCION, :TIPO_BODEGA, :BD_UBCCION_ACTUAL, SYSDATE, :ESTADO, :AD_EMPRESA_CODIGO, :BD_UBCCION_CODIGO, :USU_CREACION, :VALOR_COMPRA, :VALOR_MATERIA,:PA_TERCERO_ACTUAL,:TIPO_ELEMENTO,:MARCA,0,'S',:BD_UBICACION_RECIBIDO,:PA_TERCERO_RECIBIDO,TO_DATE('" + dateLegalization + "', 'YYYY-MM-DD HH:mi:ss')," + numeroRecepcion + ") returning CODIGO into :new_id";
       }
 
       return query;
@@ -248,12 +246,21 @@ namespace Rcn.Bodegas.Core.Services
       parameters.Add(opCodigoMaterial);
 
 
-      var records = _IOracleManagment.GetData(parameters, query);
+      var records = _IOracleManagment.GetDataSet(parameters, query);
 
-      foreach (IDataRecord rec in records)
+      foreach (DataTable table in records.Tables)
       {
-        id = rec.GetInt32(rec.GetOrdinal("NUMERO_DOC"));
+        _logger.LogInformation("Iterando registros");
+        foreach (DataRow dr in table.Rows)
+        {
+         id = Convert.ToInt32(dr["NUMERO_DOC"].ToString());         
+
+        }
       }
+      //foreach (IDataRecord rec in records)
+      //{
+      //  id = rec.GetInt32(rec.GetOrdinal("NUMERO_DOC"));
+      //}
       return id;
     }
 
@@ -280,7 +287,7 @@ namespace Rcn.Bodegas.Core.Services
           });
 
         }
-      }      
+      }
 
       return result;
 

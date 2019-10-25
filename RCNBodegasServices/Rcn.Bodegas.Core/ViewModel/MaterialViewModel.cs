@@ -4,6 +4,11 @@ namespace Rcn.Bodegas.Core.ViewModel
 {
   public class MaterialViewModel
   {
+
+    public MaterialViewModel()
+    {
+      this.numero_doc_recepcion = 0;
+    }
     public int Id { get; set; }
 
     public string wareHouseId { get; set; }
@@ -27,5 +32,9 @@ namespace Rcn.Bodegas.Core.ViewModel
     public System.DateTime saleDate { get; set; }
 
     public string terceroActual { get; set; }
+
+    public int numero_doc_recepcion { get; set; }
+
+    public string codigo { get; set; }
   }
 }

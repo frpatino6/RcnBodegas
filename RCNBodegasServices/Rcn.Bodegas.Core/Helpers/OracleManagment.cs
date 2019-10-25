@@ -58,7 +58,6 @@ namespace Rcn.Bodegas.Core.Helpers
           {
             while (reader.Read())
             {
-              _logger.LogInformation("Enviando resultado a la capa de servicios");
               yield return reader;
             }
           }
@@ -69,7 +68,7 @@ namespace Rcn.Bodegas.Core.Helpers
     public DataSet GetDataSet(List<OracleParameter> parameters, string query)
     {
       DataSet resultDataSet;
-      
+
       using (OracleConnection con = new OracleConnection(GetOracleConnectionParameters()))
       {
         using (OracleCommand cmd = con.CreateCommand())

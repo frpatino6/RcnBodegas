@@ -34,6 +34,7 @@ namespace Rcn.Bodegas.Api
       services.AddScoped<IWareHouseServices, WareHouseServices>();
       services.AddScoped<ICompanyServices, CompanyServices>();
       services.AddScoped<ILoginServices, LoginServices>();
+      services.AddScoped<ISyncronization, SyncronizationService>();
       services.AddScoped<IOracleManagment, OracleManagment>();
       services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
     }
