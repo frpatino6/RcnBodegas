@@ -902,7 +902,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
         AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(120000);
+        client.setTimeout(360000);
         RequestParams params = new RequestParams();
         showProgress(true);
         client.get(url, new TextHttpResponseHandler() {

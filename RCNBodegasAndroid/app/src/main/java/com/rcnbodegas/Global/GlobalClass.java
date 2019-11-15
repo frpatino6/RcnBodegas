@@ -59,81 +59,12 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private String userRole;
     private String mCurrentPhotoPath;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private NotificationManager mNotifyMgr;
     private static GlobalClass instance;
     private Intent intent;
-    private Activity currentActivity;
 
-    public SharedPreferences getPref() {
-        return pref;
-    }
-
-    public void setPref(SharedPreferences pref) {
-        this.pref = pref;
-    }
 
     private SharedPreferences pref;
 
-/*
-    public void onActivityPause(Class activity, Activity current) {
-        classActivity = activity;
-        currentActivity=current;
-        applyStatusBar("", 10);
-
-    }
-
-    public void onActivityResume() {
-
-        if (mNotifyMgr != null)
-            mNotifyMgr.cancelAll();
-    }
-
-    private void applyStatusBar(String iconTitle, int notificationId) {
-        mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_logo)
-                .setContentTitle(iconTitle);
-        Intent resultIntent = new Intent(this, classActivity);
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        Notification notification = mBuilder.build();
-        notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-
-
-        mNotifyMgr.notify(notificationId, notification);
-
-    }
-
-    public static GlobalClass getInstance() {
-        return instance;
-    }
-
-    @Override
-    public void onTerminate() {
-
-        super.onTerminate();
-    }
-
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        instance = this;
-
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    public void onAppBackgrounded() {
-        applyStatusBar("", 10);
-        currentActivity.moveTaskToBack(true);
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    public void onAppForegrounded() {
-        onActivityResume();
-    }*/
 
 
     public static GlobalClass getInstance() {
