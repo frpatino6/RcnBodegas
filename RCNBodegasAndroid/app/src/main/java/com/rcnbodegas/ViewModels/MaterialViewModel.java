@@ -23,7 +23,7 @@ public class MaterialViewModel {
     private String marca;
     private String barCode;
     private String materialName;
-    private Integer numero_doc_recepcion;
+    private Integer numero_doc_recepcion=0;
     private Double unitPrice;
     private Double purchaseValue;
     private ArrayList<Bitmap> listaImagenesBmp;

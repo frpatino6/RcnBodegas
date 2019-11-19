@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity
         else
             materialSync.clear();
 
-        new MyAsyncTask().execute();
+        new asyncBasicTables().execute();
 
     }
 
@@ -685,57 +685,15 @@ public class MainActivity extends AppCompatActivity
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void asyncListMaterialsByProduction(ArrayList<MaterialViewModel> listForSync) {
-        dialog.show();
-        dialog.setTitle("Sincronizando docuemtnos de legalización pendientes");
-        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
-        SyncHttpClient client = new SyncHttpClient();
-        client.setTimeout(60000);
-        String tipo = "application/json";
 
-        StringEntity entity = null;
-        Gson json = new Gson();
+        //dialog.setTitle("Sincronizando documentos de legalización pendientes");
+        new asyncMaterialBackGround().execute(listForSync);
 
-        for (MaterialViewModel materialViewModel : listForSync) {
-            materialViewModel.getListaImagenesBmp().clear();
-        }
-        String resultJson = json.toJson(listForSync);
-
-        entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
-
-        client.post(getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
-
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                isOk = true;
-                Gson gson = new GsonBuilder().create();
-                // Define Response class to correspond to the JSON response returned
-                lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
-                isOk = false;
-            }
-
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onFinish() {
-                super.onFinish();
-                if (isOk) {
-                    GlobalClass.getInstance().getListMaterialForSync().clear();
-                    stopService(new Intent(MainActivity.this, SyncService.class));
-                    dialog.dismiss();
-                }
-
-            }
-        });
     }
 
 
-    private class MyAsyncTask extends AsyncTask<String, String, Boolean> {
+    private class asyncBasicTables extends AsyncTask<String, String, Boolean> {
 
         @Override
         protected Boolean doInBackground(String... params) {
@@ -794,6 +752,100 @@ public class MainActivity extends AppCompatActivity
             }
 
             return true;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            // super.onPreExecute();
+            dialogo = new ProgressDialog(MainActivity.this);
+            dialogo.setMessage("Cargando datos...");
+            dialogo.setIndeterminate(false);
+            dialogo.setCancelable(false);
+            dialogo.show();
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+
+            if (aBoolean)
+                showLoginError("Sincronización ejecutada con éxito");
+            else
+                showLoginError("Error sincrnonizando, intente de nuevo");
+            dialogo.dismiss();
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            dialogo.setMessage(values[0]);
+            super.onProgressUpdate(values);
+        }
+    }
+
+    private class asyncMaterialBackGround extends AsyncTask<ArrayList<MaterialViewModel>, String, Boolean> {
+
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        @Override
+        protected Boolean doInBackground(ArrayList<MaterialViewModel>... params) {
+
+            final boolean isOkResult = true;
+            ArrayList<MaterialViewModel> listForSync = params[0];
+
+            try {
+                String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+                String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
+                SyncHttpClient client = new SyncHttpClient();
+                client.setTimeout(60000);
+                String tipo = "application/json";
+
+                StringEntity entity = null;
+                Gson json = new Gson();
+
+                for (MaterialViewModel materialViewModel : listForSync) {
+                    materialViewModel.getListaImagenesBmp().clear();
+                }
+                String resultJson = json.toJson(listForSync);
+
+                entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
+
+                client.post(getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+
+                    @SuppressLint("RestrictedApi")
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                        isOk = true;
+                        Gson gson = new GsonBuilder().create();
+                        // Define Response class to correspond to the JSON response returned
+                        lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
+
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+                        isOk = false;
+
+                    }
+
+                    @SuppressLint("RestrictedApi")
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        if (isOk) {
+                            GlobalClass.getInstance().getListMaterialForSync().clear();
+                            stopService(new Intent(MainActivity.this, SyncService.class));
+                            GlobalClass.getInstance().getDataMaterial().clear();
+
+                        }
+                    }
+                });
+                return isOkResult;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         @Override
