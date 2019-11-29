@@ -27,12 +27,9 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ProductionAdapter;
-import com.rcnbodegas.Global.ResponsibleAdapter;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
-import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
-import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,38 +39,33 @@ import cz.msebera.android.httpclient.Header;
 public class ProductionListActivity extends AppCompatActivity {
 
 
+    private ProductionAdapter adapter;
+    private ArrayList<ProductionViewModel> data;
+    private LinearLayoutManager layoutManager;
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private LinearLayoutManager layoutManager;
-    private ArrayList<ProductionViewModel> data;
-    private ProductionAdapter adapter;
     private ArrayList<ProductionViewModel> sortEmpList;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_production_list);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_production));
-        InitializeControls();
-        //asyncListProductions();
-        returnListOffLine();
+    private void FilterListByTipoBodega(String query) {
 
-    }
-
-    private void returnListOffLine() {
-
+        //mStatusView.setText("Query = " + query + " : submitted");
         try {
-            String responsable = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+            Filter<ProductionViewModel, String> filter = new Filter<ProductionViewModel, String>() {
+                public boolean isMatched(ProductionViewModel object, String text) {
+                    boolean result = false;
+                    result = object.getProductionName().toString().toLowerCase().contains(String.valueOf(text));
 
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
-            String res = pref.getString("key_list_productions", "");
-            TypeToken<List<ProductionViewModel>> token = new TypeToken<List<ProductionViewModel>>() {
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
             };
-            Gson gson = new GsonBuilder().create();
-            // Define Response class to correspond to the JSON response returned
-            data = gson.fromJson(res, token.getType());
-            adapter = new ProductionAdapter(data, new onRecyclerProductionListItemClick() {
+
+            data = (ArrayList<ProductionViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ProductionAdapter(sortEmpList, new onRecyclerProductionListItemClick() {
                 @Override
                 public void onClick(ProductionViewModel result) {
                     final Intent _data = new Intent();
@@ -86,46 +78,53 @@ public class ProductionListActivity extends AppCompatActivity {
                 }
             });
             recyclerView.setAdapter(adapter);
-            showProgress(false);
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace();
-            showMessage(e.getMessage());
-        }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    private void FilterListView(String query) {
+
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<ProductionViewModel, String> filter = new Filter<ProductionViewModel, String>() {
+                public boolean isMatched(ProductionViewModel object, String text) {
+
+                    boolean result = false;
 
 
-        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
-
-        MenuItem search_item = menu.findItem(R.id.search_warehouse);
-
-        SearchView searchView = (SearchView) search_item.getActionView();
-        searchView.setFocusable(false);
-        searchView.setQueryHint(getString(R.string.search_hint));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    result = object.getProductionName().toString().toLowerCase().contains(String.valueOf(text));
 
 
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-
-                //clear the previous data in search arraylist if exist
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                FilterListView(s);
-                return true;
-            }
-        });
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
 
 
-        return true;
+            sortEmpList = (ArrayList<ProductionViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new ProductionAdapter(sortEmpList, new onRecyclerProductionListItemClick() {
+                @Override
+                public void onClick(ProductionViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("productionName", result.getProductionName());
+                    _data.putExtra("productionId", result.getProductionCode().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -140,6 +139,126 @@ public class ProductionListActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(ProductionListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    private void asyncListProductions() {
+
+        String responsable = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListProduction/" + responsable;
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(urlIncidencias, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        shwoMessage(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<List<ProductionViewModel>> token = new TypeToken<List<ProductionViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            data = gson.fromJson(res, token.getType());
+                            adapter = new ProductionAdapter(data, new onRecyclerProductionListItemClick() {
+                                @Override
+                                public void onClick(ProductionViewModel result) {
+                                    final Intent _data = new Intent();
+                                    _data.putExtra("productionName", result.getProductionName());
+                                    _data.putExtra("productionId", result.getProductionCode().toString());
+
+                                    setResult(RESULT_OK, _data);
+
+                                    finish();
+                                }
+                            });
+                            recyclerView.setAdapter(adapter);
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
+    }
+
+    private void returnListOffLine() {
+
+        try {
+            String responsable = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+            String res = pref.getString("key_list_productions", "");
+            TypeToken<List<ProductionViewModel>> token = new TypeToken<List<ProductionViewModel>>() {
+            };
+            Gson gson = new GsonBuilder().create();
+            // Define Response class to correspond to the JSON response returned
+            data = gson.fromJson(res, token.getType());
+
+            if (data != null) {
+                adapter = new ProductionAdapter(data, new onRecyclerProductionListItemClick() {
+                    @Override
+                    public void onClick(ProductionViewModel result) {
+                        final Intent _data = new Intent();
+                        _data.putExtra("productionName", result.getProductionName());
+                        _data.putExtra("productionId", result.getProductionCode().toString());
+
+                        setResult(RESULT_OK, _data);
+
+                        finish();
+                    }
+                });
+                recyclerView.setAdapter(adapter);
+            } else {
+                showMessage(getString(R.string.message_not_sync_data));
+                finish();
+            }
+            showProgress(false);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            showMessage(e.getMessage());
+        }
+
+
+    }
+
+    private void showMessage(String res) {
+        try {
+            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ProductionListActivity.this);
+
+            dlgAlert.setMessage(res);
+            dlgAlert.setTitle(getString(R.string.app_name));
+            //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+            dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // if this button is clicked, close
+                    // current activity
+
+                }
+            });
+            dlgAlert.setCancelable(true);
+            dlgAlert.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -192,164 +311,48 @@ public class ProductionListActivity extends AppCompatActivity {
         dlgAlert.create().show();
     }
 
-    private void asyncListProductions() {
-
-        String responsable = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
-
-
-        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListProduction/" + responsable;
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(urlIncidencias, new TextHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-                            TypeToken<List<ProductionViewModel>> token = new TypeToken<List<ProductionViewModel>>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            data = gson.fromJson(res, token.getType());
-                            adapter = new ProductionAdapter(data, new onRecyclerProductionListItemClick() {
-                                @Override
-                                public void onClick(ProductionViewModel result) {
-                                    final Intent _data = new Intent();
-                                    _data.putExtra("productionName", result.getProductionName());
-                                    _data.putExtra("productionId", result.getProductionCode().toString());
-
-                                    setResult(RESULT_OK, _data);
-
-                                    finish();
-                                }
-                            });
-                            recyclerView.setAdapter(adapter);
-                            showProgress(false);
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        shwoMessage(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-                }
-        );
-    }
-
-    private void FilterListView(String query) {
-
-        //mStatusView.setText("Query = " + query + " : submitted");
-        try {
-            Filter<ProductionViewModel, String> filter = new Filter<ProductionViewModel, String>() {
-                public boolean isMatched(ProductionViewModel object, String text) {
-
-                    boolean result = false;
-
-
-                    result = object.getProductionName().toString().toLowerCase().contains(String.valueOf(text));
-
-
-                    if (result)
-                        return true;
-                    else
-                        return false;
-                }
-            };
-
-
-            sortEmpList = (ArrayList<ProductionViewModel>) new FilterList().filterList(data, filter, query);
-
-            adapter = new ProductionAdapter(sortEmpList, new onRecyclerProductionListItemClick() {
-                @Override
-                public void onClick(ProductionViewModel result) {
-                    final Intent _data = new Intent();
-                    _data.putExtra("productionName", result.getProductionName());
-                    _data.putExtra("productionId", result.getProductionCode().toString());
-
-                    setResult(RESULT_OK, _data);
-
-                    finish();
-                }
-            });
-            recyclerView.setAdapter(adapter);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_production_list);
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_production));
+        InitializeControls();
+        //asyncListProductions();
+        returnListOffLine();
 
     }
 
-    private void FilterListByTipoBodega(String query) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-        //mStatusView.setText("Query = " + query + " : submitted");
-        try {
-            Filter<ProductionViewModel, String> filter = new Filter<ProductionViewModel, String>() {
-                public boolean isMatched(ProductionViewModel object, String text) {
-                    boolean result = false;
-                    result = object.getProductionName().toString().toLowerCase().contains(String.valueOf(text));
 
-                    if (result)
-                        return true;
-                    else
-                        return false;
-                }
-            };
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
 
-            data = (ArrayList<ProductionViewModel>) new FilterList().filterList(data, filter, query);
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
 
-            adapter = new ProductionAdapter(sortEmpList, new onRecyclerProductionListItemClick() {
-                @Override
-                public void onClick(ProductionViewModel result) {
-                    final Intent _data = new Intent();
-                    _data.putExtra("productionName", result.getProductionName());
-                    _data.putExtra("productionId", result.getProductionCode().toString());
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-                    setResult(RESULT_OK, _data);
 
-                    finish();
-                }
-            });
-            recyclerView.setAdapter(adapter);
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            @Override
+            public boolean onQueryTextSubmit(String s) {
 
-    }
+                //clear the previous data in search arraylist if exist
 
-    private void showMessage(String res) {
-        try {
-            AlertDialog.Builder dlgAlert = new AlertDialog.Builder(ProductionListActivity.this);
+                return false;
+            }
+        });
 
-            dlgAlert.setMessage(res);
-            dlgAlert.setTitle(getString(R.string.app_name));
-            //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
-            dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // if this button is clicked, close
-                    // current activity
 
-                }
-            });
-            dlgAlert.setCancelable(true);
-            dlgAlert.create().show();
-        } catch (Exception e) {
-            e.printStackTrace();
+        return true;
 
-        }
     }
 }

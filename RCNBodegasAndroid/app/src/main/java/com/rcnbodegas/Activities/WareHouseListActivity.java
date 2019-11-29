@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -29,12 +27,9 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ResponsibleAdapter;
 import com.rcnbodegas.Global.WareHouseAdapter;
-import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.Global.onRecyclerWarehouseListItemClick;
 import com.rcnbodegas.R;
-import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
@@ -45,90 +40,52 @@ import cz.msebera.android.httpclient.Header;
 public class WareHouseListActivity extends AppCompatActivity {
 
 
+    private WareHouseAdapter adapter;
+    private ArrayList<WareHouseViewModel> data;
+    private LinearLayoutManager layoutManager;
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private LinearLayoutManager layoutManager;
-    private ArrayList<WareHouseViewModel> data;
-    private WareHouseAdapter adapter;
     private ArrayList<WareHouseViewModel> sortEmpList;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_company_list);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_warehouse));
-        InitializeControls();
-        //asyncListWareHouse();
+    private void FilterListView(String query) {
 
-        // Get the intent, verify the action and get the query
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<WareHouseViewModel, String> filter = new Filter<WareHouseViewModel, String>() {
+                public boolean isMatched(WareHouseViewModel object, String text) {
 
+                    boolean result = false;
+
+
+                    result = object.getWareHouseName().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            sortEmpList = (ArrayList<WareHouseViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new WareHouseAdapter(sortEmpList, new onRecyclerWarehouseListItemClick() {
+                @Override
+                public void onClick(WareHouseViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("wareHouseName", result.getWareHouseName());
+                    _data.putExtra("wareHouseId", result.getId());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        returnListOffLine();
-    }
-
-    private void returnListOffLine(){
-
-
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
-        String res=pref.getString("key_list_warehouse","");
-        TypeToken<List<WareHouseViewModel>> token = new TypeToken<List<WareHouseViewModel>>() {
-        };
-        Gson gson = new GsonBuilder().create();
-        // Define Response class to correspond to the JSON response returned
-        data = gson.fromJson(res, token.getType());
-        adapter = new WareHouseAdapter(data, new onRecyclerWarehouseListItemClick() {
-            @Override
-            public void onClick(WareHouseViewModel result) {
-                final Intent _data = new Intent();
-                _data.putExtra("wareHouseName",result.getWareHouseName());
-                _data.putExtra("wareHouseId", result.getId());
-
-                setResult(RESULT_OK, _data);
-
-                finish();
-            }
-        });
-        recyclerView.setAdapter(adapter);
-        GlobalClass.getInstance().setListWareHouseGlobal(data);
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-
-        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
-
-        MenuItem search_item = menu.findItem(R.id.search_warehouse);
-
-        SearchView searchView = (SearchView) search_item.getActionView();
-        searchView.setFocusable(false);
-        searchView.setQueryHint(getString(R.string.search_hint));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-
-                //clear the previous data in search arraylist if exist
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                FilterListView(s);
-                return true;
-            }
-        });
-
-
-
-
-        return true;
 
     }
 
@@ -142,6 +99,96 @@ public class WareHouseListActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(WareHouseListActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    private void asyncListWareHouse() {
+
+
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "WareHouse/GetLisWareHouse/" + GlobalClass.getInstance().getUserName() + "/" + GlobalClass.getInstance().getIdSelectedCompanyInventory();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(urlIncidencias, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        showMessage(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<List<WareHouseViewModel>> token = new TypeToken<List<WareHouseViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            data = gson.fromJson(res, token.getType());
+                            adapter = new WareHouseAdapter(data, new onRecyclerWarehouseListItemClick() {
+                                @Override
+                                public void onClick(WareHouseViewModel result) {
+                                    final Intent _data = new Intent();
+                                    _data.putExtra("wareHouseName", result.getWareHouseName());
+                                    _data.putExtra("wareHouseId", result.getId());
+
+                                    setResult(RESULT_OK, _data);
+
+                                    finish();
+                                }
+                            });
+                            recyclerView.setAdapter(adapter);
+                            GlobalClass.getInstance().setListWareHouseGlobal(data);
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
+    }
+
+    private void returnListOffLine() {
+
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+        String res = pref.getString("key_list_warehouse", "");
+        TypeToken<List<WareHouseViewModel>> token = new TypeToken<List<WareHouseViewModel>>() {
+        };
+        Gson gson = new GsonBuilder().create();
+        // Define Response class to correspond to the JSON response returned
+        data = gson.fromJson(res, token.getType());
+
+        if (data != null) {
+            adapter = new WareHouseAdapter(data, new onRecyclerWarehouseListItemClick() {
+                @Override
+                public void onClick(WareHouseViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("wareHouseName", result.getWareHouseName());
+                    _data.putExtra("wareHouseId", result.getId());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+            GlobalClass.getInstance().setListWareHouseGlobal(data);
+        }
+        else{
+            showMessage(getString(R.string.message_not_sync_data));
+
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -177,7 +224,7 @@ public class WareHouseListActivity extends AppCompatActivity {
         }
     }
 
-    private void shwoMessage(String res) {
+    private void showMessage(String res) {
         AlertDialog.Builder dlgAlert = new AlertDialog.Builder(WareHouseListActivity.this);
 
         dlgAlert.setMessage(res);
@@ -194,101 +241,55 @@ public class WareHouseListActivity extends AppCompatActivity {
         dlgAlert.create().show();
     }
 
-    private void asyncListWareHouse() {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_company_list);
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_warehouse));
+        InitializeControls();
+        //asyncListWareHouse();
 
+        // Get the intent, verify the action and get the query
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
 
-        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "WareHouse/GetLisWareHouse/" + GlobalClass.getInstance().getUserName() + "/" + GlobalClass.getInstance().getIdSelectedCompanyInventory();
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(urlIncidencias, new TextHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
+        }
 
-                            TypeToken<List<WareHouseViewModel>> token = new TypeToken<List<WareHouseViewModel>>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            data = gson.fromJson(res, token.getType());
-                            adapter = new WareHouseAdapter(data, new onRecyclerWarehouseListItemClick() {
-                                @Override
-                                public void onClick(WareHouseViewModel result) {
-                                    final Intent _data = new Intent();
-                                    _data.putExtra("wareHouseName",result.getWareHouseName());
-                                    _data.putExtra("wareHouseId", result.getId());
-
-                                    setResult(RESULT_OK, _data);
-
-                                    finish();
-                                }
-                            });
-                            recyclerView.setAdapter(adapter);
-                            GlobalClass.getInstance().setListWareHouseGlobal(data);
-                            showProgress(false);
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        shwoMessage(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-                }
-        );
+        returnListOffLine();
     }
 
-    private void FilterListView(String query) {
-
-        //mStatusView.setText("Query = " + query + " : submitted");
-        try {
-            Filter<WareHouseViewModel, String> filter = new Filter<WareHouseViewModel, String>() {
-                public boolean isMatched(WareHouseViewModel object, String text) {
-
-                    boolean result = false;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
 
-                    result = object.getWareHouseName().toString().toLowerCase().contains(String.valueOf(text));
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
 
-                    if (result)
-                        return true;
-                    else
-                        return false;
-                }
-            };
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
 
-            sortEmpList = (ArrayList<WareHouseViewModel>) new FilterList().filterList(data, filter, query);
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-            adapter = new WareHouseAdapter(sortEmpList, new onRecyclerWarehouseListItemClick() {
-                @Override
-                public void onClick(WareHouseViewModel result) {
-                    final Intent _data = new Intent();
-                    _data.putExtra("wareHouseName",result.getWareHouseName());
-                    _data.putExtra("wareHouseId", result.getId());
 
-                    setResult(RESULT_OK, _data);
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
 
-                    finish();
-                }
-            });
-            recyclerView.setAdapter(adapter);
+            @Override
+            public boolean onQueryTextSubmit(String s) {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                //clear the previous data in search arraylist if exist
+
+                return false;
+            }
+        });
+
+
+        return true;
 
     }
 }

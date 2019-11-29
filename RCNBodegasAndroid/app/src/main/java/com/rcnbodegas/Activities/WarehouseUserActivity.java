@@ -80,21 +80,26 @@ public class WarehouseUserActivity extends AppCompatActivity {
             // Define Response class to correspond to the JSON response returned
             data = gson.fromJson(res, token.getType());
 
-            FilterListByTipoBodega(tipoBodega);
+            if(data != null) {
+                FilterListByTipoBodega(tipoBodega);
 
-            adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
-                @Override
-                public void onClick(ResponsibleViewModel result) {
-                    final Intent _data = new Intent();
-                    _data.putExtra("responsibleWarehouseName", result.getName());
-                    _data.putExtra("responsibleWarehouseId", result.getId().toString());
+                adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
+                    @Override
+                    public void onClick(ResponsibleViewModel result) {
+                        final Intent _data = new Intent();
+                        _data.putExtra("responsibleWarehouseName", result.getName());
+                        _data.putExtra("responsibleWarehouseId", result.getId().toString());
 
-                    setResult(RESULT_OK, _data);
+                        setResult(RESULT_OK, _data);
 
-                    finish();
-                }
-            });
-            recyclerView.setAdapter(adapter);
+                        finish();
+                    }
+                });
+                recyclerView.setAdapter(adapter);
+            } else{
+                showMessage(getString(R.string.message_not_sync_data));
+
+            }
             showProgress(false);
         } catch (JsonSyntaxException e) {
             e.printStackTrace();

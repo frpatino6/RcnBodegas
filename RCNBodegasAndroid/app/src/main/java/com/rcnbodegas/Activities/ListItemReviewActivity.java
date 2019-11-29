@@ -43,6 +43,8 @@ public class ListItemReviewActivity extends AppCompatActivity  {
     private TextView txtResumen;
     private TextView txtTotal;
     private SearchView searchView;
+    private Bundle extras;
+    private String selectedOption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,9 @@ public class ListItemReviewActivity extends AppCompatActivity  {
         
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_review));
 
+        extras = getIntent().getExtras();
+
+//        selectedOption = extras.getString("Inventory");
         InitializeControls();
         filterListByNotReview();
         setRecyclerViewData();
@@ -72,6 +77,10 @@ public class ListItemReviewActivity extends AppCompatActivity  {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
 
+        /*if(!selectedOption.equals("1"))
+            txtResumen.setVisibility(View.GONE);
+        else
+            txtResumen.setVisibility(View.VISIBLE);*/
 
     }
 

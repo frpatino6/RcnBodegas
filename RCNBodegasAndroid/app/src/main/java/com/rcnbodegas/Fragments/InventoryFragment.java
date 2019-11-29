@@ -103,251 +103,110 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_TYPE_ELEMENT = 3;
     private static final int REQUEST_TYPE_ELEMENT_HEADER = 5;
     private static final int REQUEST_WAREHOUSE = 4;
+    private static final String TAG = "InventoryFragment";
+    private ArrayList<Bitmap> ListaImagenes;
+    private TScanner Scanner_manager = null;
+    private PhotosAdapter adapter;
+    private BarcodeManager barcodeManager = null;
     // TODO: Rename and change types of parameter
     private ImageButton btnSearch;
-    private FloatingActionButton inventory_btn_new_element;
-    private FloatingActionButton inventory_btn_camera;
-    private Button inventory_btn_ok;
-
-    private String mParam1;
-    private String mParam2;
-    private LinearLayout inventory_element;
-    private LinearLayout inventory_data;
-    private EditText inventory_warehouse_option;
-    private EditText inventory_program_option;
-    private EditText inventory_type_element_option;
-    private EditText inventory_date_option;
-    private EditText inventory_responsible_option;
-    private EditText inventory_element_type_edit;
-    private EditText inventory_element_barcode_edit;
-    private EditText inventory_element_edit;
-    private EditText inventory_element_brand_edit;
-    private EditText inventory_element_price_edit;
-    private EditText inventory_element_value_edit;
-    private ArrayList<Bitmap> ListaImagenes;
-    private ArrayList<String> listaNombresImagenes;
-    private PhotosAdapter adapter;
-    private RecyclerView photos_recycler_view;
-    private LinearLayoutManager layoutManager;
+    private ArrayList<MaterialViewModel> dataMaterial;
     private DatePickerDialog datePickerDialog = null;
     private DateTimeUtilities dateTimeUtilities;
-    private View mIncidenciasFormView;
-    private View mProgressView;
-    private MaterialViewModel itemMaterialAdded;
+    private ProgressDialog dialog;
     private EMDKManager emdkManager = null;
-    private BarcodeManager barcodeManager = null;
-    private Scanner scanner = null;
-    private TScanner Scanner_manager = null;
+    private FloatingActionButton inventory_btn_camera;
+    private FloatingActionButton inventory_btn_new_element;
+    private Button inventory_btn_ok;
+    private LinearLayout inventory_data;
+    private EditText inventory_date_option;
+    private LinearLayout inventory_element;
+    private EditText inventory_element_barcode_edit;
+    private EditText inventory_element_brand_edit;
+    private EditText inventory_element_edit;
+    private EditText inventory_element_price_edit;
+    private EditText inventory_element_type_edit;
+    private EditText inventory_element_value_edit;
+    private EditText inventory_program_option;
+    private EditText inventory_responsible_option;
+    private EditText inventory_type_element_option;
+    private EditText inventory_warehouse_option;
+    private MaterialViewModel itemMaterialAdded;
+    private LinearLayoutManager layoutManager;
+    private ArrayList<String> listaNombresImagenes;
+    private View mIncidenciasFormView;
+    private String mParam1;
+    private String mParam2;
+    private View mProgressView;
+    private MenuItem mnuCancel;
     private MenuItem mnuReview;
     private MenuItem mnuSave;
-    private MenuItem mnuCancel;
-    private ArrayList<MaterialViewModel> dataMaterial;
-    private static final String TAG = "InventoryFragment";
-    private ProgressDialog dialog;
+    private RecyclerView photos_recycler_view;
+    private Scanner scanner = null;
 
     public InventoryFragment() {
         // Required empty public constructor
     }
 
+    private void AddElementToReview() {
 
-    public static InventoryFragment newInstance(String param1, String param2) {
-        InventoryFragment fragment = new InventoryFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+
+        GlobalClass.getInstance().getDataReviewMaterial().add(itemMaterialAdded);
+        itemMaterialAdded.setReview(true);
+
+        hideKeyboard(getActivity());
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getActivity().setTitle(getString(R.string.title_inventory_fragment));
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-        dateTimeUtilities = new DateTimeUtilities(getActivity());
-        setHasOptionsMenu(true);
-        dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("Sincronizando...");
-
+    private void ClearFields() {
+        inventory_element_barcode_edit.setText("");
+        inventory_element_edit.setText("");
+        inventory_element_type_edit.setText("");
+        inventory_element_brand_edit.setText("");
+        inventory_element_price_edit.setText("");
+        inventory_element_value_edit.setText("");
+        adapter.getDataSet().clear();
+        adapter.notifyDataSetChanged();
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.activity_inventory, container, false);
-        inventory_element = view.findViewById(R.id.inventory_element);
-        inventory_data = view.findViewById(R.id.inventory_data);
-        inventory_element.setVisibility(View.GONE);
+    private void FilterListByProduction(final String wharehouse, final String production, final int responsible, final int type_element) {
 
-        InitializeControls(view);
-        InitializeEvents();
+        //mStatusView.setText("Query = " + query + " : submitted");
+        try {
+            Filter<MaterialViewModel, String> filter = new Filter<MaterialViewModel, String>() {
+                public boolean isMatched(MaterialViewModel object, String text) {
 
-        if (!validateInventoryProcess()) {
-            inventory_element.setVisibility(View.GONE);
-            inventory_data.setVisibility(View.VISIBLE);
-        } else {
-            inventory_element.setVisibility(View.VISIBLE);
-            inventory_data.setVisibility(View.GONE);
+                    boolean result = false;
 
-        }
-        showProgress(false);
-        return view;
-    }
+                    result =
+                            object.getProductionId().toString().equals(String.valueOf(production)) &&
+                                    object.getWareHouseId().toString().equals(String.valueOf(wharehouse));
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
 
-        if (requestCode == REQUEST_PRODUCTION) {
-            if (resultCode == -1) {
-                String result = data.getStringExtra("productionName");
-                GlobalClass.getInstance().setIdSelectedProductionInventory(data.getStringExtra("productionId"));
-                this.inventory_program_option.setText(result);
-
-            }
-        }
-        if (requestCode == REQUEST_RESPONSIBLE) {
-            if (resultCode == -1) {
-                String result = data.getStringExtra("responsibleName");
-                GlobalClass.getInstance().setIdSelectedResponsibleInventory(Integer.valueOf(data.getStringExtra("responsibleId")));
-                this.inventory_responsible_option.setText(result);
-
-            }
-        }
-        if (requestCode == REQUEST_TYPE_ELEMENT) {
-            if (resultCode == -1) {
-                String result = data.getStringExtra("typeElementName");
-                GlobalClass.getInstance().setIdSelectedTypeElementInventory(Integer.valueOf(data.getStringExtra("typeElementId")));
-                this.inventory_element_type_edit.setText(result);
-
-            }
-        }
-        if (requestCode == REQUEST_WAREHOUSE) {
-            if (resultCode == RESULT_OK) {
-                String result = data.getStringExtra("wareHouseName");
-                this.inventory_warehouse_option.setText(result);
-                GlobalClass.getInstance().setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
-                GlobalClass.getInstance().setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
-            }
-        }
-        if (requestCode == REQUEST_TYPE_ELEMENT_HEADER) {
-            if (resultCode == RESULT_OK) {
-                String result = data.getStringExtra("typeElementName");
-                GlobalClass.getInstance().setIdSelectedTypeElementHeader(Integer.valueOf(data.getStringExtra("typeElementId")));
-                this.inventory_type_element_option.setText(result);
-            }
-        }
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        mnuReview = menu.findItem(R.id.mnu_review);
-        mnuSave = menu.findItem(R.id.mnu_save);
-        mnuCancel = menu.findItem(R.id.mnu_cancel);
-
-        if (validateInventoryProcess()) {
-            mnuReview.setVisible(true);
-            mnuSave.setVisible(true);
-            mnuCancel.setVisible(true);
-        } else {
-            mnuReview.setVisible(false);
-            mnuSave.setVisible(false);
-            mnuCancel.setVisible(false);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_inventory, menu);
-        super.onCreateOptionsMenu(menu, inflater);
+            dataMaterial = (ArrayList<MaterialViewModel>) new FilterList().filterList(dataMaterial, filter, "");
+            Log.d(TAG, "Elementos a mostrar " + dataMaterial.size());
 
 
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        Intent intent = null;
-        switch (id) {
-
-            case R.id.mnu_review:
-                intent = null;
-                intent = new Intent(getActivity(), ListItemReviewActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.mnu_save:
-                confirmInventory();
-                return true;
-            case R.id.mnu_cancel:
-                confirmCancelInventory();
-                return true;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        return super.onOptionsItemSelected(item); // important line
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        Scanner_manager.ScannerOFF();
-    }
+    private int GetIndexCountMaterial() {
+        SharedPreferences pref = getActivity().getApplicationContext().getSharedPreferences("materialbodegasPreferences", 0); // 0 - for private mode
+        String res = pref.getString("key_list_material_count", "0");
 
-    @Override
-    public void onDestroy() {
-
-        Scanner_manager.ScannerOFF();
-
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getActivity().registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-
-        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
-        Scanner_manager.AddObserver(this);
-        Scanner_manager.ScannerON(true);
-
-
-    }
-
-    //Valida si hay un proceso de inventario en proceso
-    private boolean validateInventoryProcess() {
-
-        return GlobalClass.getInstance().getCurrentInventoryActiveProcess();
-    }
-
-    @SuppressLint("RestrictedApi")
-    private void InitializeNewInventroyProcess() {
-        GlobalClass.getInstance().setCurrentInventoryActiveProcess(false);
-        inventory_element.setVisibility(View.GONE);
-        inventory_data.setVisibility(View.VISIBLE);
-        GlobalClass.getInstance().setIdSelectedProductionInventory("");
-        GlobalClass.getInstance().setIdSelectedResponsibleInventory(-1);
-        GlobalClass.getInstance().setIdSelectedTypeElementInventory(-1);
-        inventory_program_option.setText("");
-        inventory_responsible_option.setText("");
-        inventory_btn_new_element.setVisibility(View.GONE);
-        GlobalClass.getInstance().setDataMaterialInventory(new ArrayList<MaterialViewModel>());
-        GlobalClass.getInstance().setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
-        mnuReview.setVisible(false);
-        mnuSave.setVisible(false);
-        mnuCancel.setVisible(false);
-
-        if (ListaImagenes != null)
-            ListaImagenes.clear();
+        if (res.equals("0"))
+            showMessageDialog("No existen elementos, conectese a internet y sincronice los datos b[asicos");
+        else
+            return Integer.valueOf(res);
+        return 0;
     }
 
     private void InitializeControls(View v) {
@@ -495,154 +354,30 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     }
 
-    private int GetIndexCountMaterial() {
-        SharedPreferences pref = getActivity().getApplicationContext().getSharedPreferences("materialbodegasPreferences", 0); // 0 - for private mode
-        String res = pref.getString("key_list_material_count", "0");
-
-        if (res.equals("0"))
-            showMessageDialog("No existen elementos, conectese a internet y sincronice los datos b[asicos");
-        else
-            return Integer.valueOf(res);
-        return 0;
-    }
-
     @SuppressLint("RestrictedApi")
-    private void getLocalMagterialByProduction() {
+    private void InitializeNewInventroyProcess() {
+        GlobalClass.getInstance().setCurrentInventoryActiveProcess(false);
+        inventory_element.setVisibility(View.GONE);
+        inventory_data.setVisibility(View.VISIBLE);
+        GlobalClass.getInstance().setIdSelectedProductionInventory("");
+        GlobalClass.getInstance().setIdSelectedResponsibleInventory(-1);
+        GlobalClass.getInstance().setIdSelectedTypeElementInventory(-1);
+        inventory_program_option.setText("");
+        inventory_responsible_option.setText("");
+        inventory_btn_new_element.setVisibility(View.GONE);
+        GlobalClass.getInstance().setDataMaterialInventory(new ArrayList<MaterialViewModel>());
+        GlobalClass.getInstance().setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
+        mnuReview.setVisible(false);
+        mnuSave.setVisible(false);
+        mnuCancel.setVisible(false);
 
-
-        FilterListByProduction(GlobalClass.getInstance().getIdSelectedWareHouseInventory(),
-                GlobalClass.getInstance().getIdSelectedProductionInventory(),
-                GlobalClass.getInstance().getIdSelectedResponsibleInventory(),
-                GlobalClass.getInstance().getIdSelectedTypeElementHeader()
-        );
-        GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
-
-        if (dataMaterial != null)
-            GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
-        else
-            showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-        showProgress(false);
-        mnuReview.setVisible(true);
-        mnuSave.setVisible(true);
-        mnuCancel.setVisible(true);
-        GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
-        inventory_btn_new_element.setVisibility(View.VISIBLE);
+        if (ListaImagenes != null)
+            ListaImagenes.clear();
     }
-
-    private void FilterListByProduction(final String wharehouse, final String production, final int responsible, final int type_element) {
-
-        //mStatusView.setText("Query = " + query + " : submitted");
-        try {
-            Filter<MaterialViewModel, String> filter = new Filter<MaterialViewModel, String>() {
-                public boolean isMatched(MaterialViewModel object, String text) {
-
-                    boolean result = false;
-
-                    result =
-                            object.getProductionId().toString().equals(String.valueOf(production)) &&
-                                    object.getWareHouseId().toString().equals(String.valueOf(wharehouse));
-
-                    if (result)
-                        return true;
-                    else
-                        return false;
-                }
-            };
-
-            dataMaterial = (ArrayList<MaterialViewModel>) new FilterList().filterList(dataMaterial, filter, "");
-            Log.d(TAG, "Elementos a mostrar " + dataMaterial.size());
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
 
     private void OpenListWareHouse() {
         Intent intent = new Intent(getActivity(), WareHouseListActivity.class);
         startActivityForResult(intent, REQUEST_WAREHOUSE);
-    }
-
-    private void AddElementToReview() {
-
-
-        GlobalClass.getInstance().getDataReviewMaterial().add(itemMaterialAdded);
-        itemMaterialAdded.setReview(true);
-
-        hideKeyboard(getActivity());
-    }
-
-    private void confirmInventory() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true);
-        builder.setTitle(getString(R.string.app_name));
-        builder.setMessage(getString(R.string.message_confirm_save));
-        builder.setPositiveButton(getString(R.string.btn_confirm),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
-                            InitializeNewInventroyProcess();
-                        else
-                            showMessageDialog(getString(R.string.message_not_elements_inventory));
-                    }
-                });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void confirmCancelInventory() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true);
-        builder.setTitle(getString(R.string.app_name));
-        builder.setMessage(getString(R.string.message_confirm_cancel));
-        builder.setPositiveButton(getString(R.string.btn_confirm),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        InitializeNewInventroyProcess();
-                    }
-                });
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    public static void hideKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = activity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(activity);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    private void ClearFields() {
-        inventory_element_barcode_edit.setText("");
-        inventory_element_edit.setText("");
-        inventory_element_type_edit.setText("");
-        inventory_element_brand_edit.setText("");
-        inventory_element_price_edit.setText("");
-        inventory_element_value_edit.setText("");
     }
 
     private boolean ValidaRequieredElementInfo() {
@@ -680,47 +415,271 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     }
 
-    private boolean validateFiels() {
-        inventory_warehouse_option.setError(null);
-        inventory_program_option.setError(null);
-        inventory_date_option.setError(null);
+    private void asyncListMaterialsByBarCode() {
 
-        boolean cancel = false;
-        View focusView = null;
 
-        if (TextUtils.isEmpty(inventory_warehouse_option.getText().toString())) {
-            inventory_warehouse_option.setError(getString(R.string.error_warehouse_empty));
-            focusView = inventory_warehouse_option;
-            cancel = true;
-        }
-        if (TextUtils.isEmpty(inventory_program_option.getText().toString())) {
-            inventory_program_option.setError(getString(R.string.error_program_empty));
-            focusView = inventory_program_option;
-            cancel = true;
-        }
-        if (TextUtils.isEmpty(inventory_date_option.getText().toString())) {
-            inventory_date_option.setError(getString(R.string.error_fecha_empty));
-            focusView = inventory_date_option;
-            cancel = true;
-        }
-        if (cancel) {
-            focusView.requestFocus();
-            return false;
-        } else {
-            inventory_element.setVisibility(View.VISIBLE);
-            inventory_data.setVisibility(View.GONE);
-        }
-        return true;
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(url, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        showMessageDialog(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<MaterialViewModel> token = new TypeToken<MaterialViewModel>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            itemMaterialAdded = gson.fromJson(res, token.getType());
+
+                            if (itemMaterialAdded != null)
+                                setMaterialData(itemMaterialAdded);
+                            else
+                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
+
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
     }
 
-    private boolean validaIsAddeddElement(String barcode) {
+    private void asyncListMaterialsByProduction() {
 
-        if (GlobalClass.getInstance().getDataReviewMaterial() != null)
-            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataReviewMaterial()) {
-                if (materialViewModel.getBarCode().equals(barcode))
-                    return true;
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(360000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(url, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        showMessageDialog(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @SuppressLint("RestrictedApi")
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+
+                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
+                            GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
+
+                            if (dataMaterial != null)
+                                GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
+                            else
+                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
+
+                            showProgress(false);
+                            mnuReview.setVisible(true);
+                            mnuSave.setVisible(true);
+                            mnuCancel.setVisible(true);
+                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
+                            inventory_btn_new_element.setVisibility(View.VISIBLE);
+
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
+    }
+
+    private void confirmCancelInventory() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(getString(R.string.message_confirm_cancel));
+        builder.setPositiveButton(getString(R.string.btn_confirm),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        InitializeNewInventroyProcess();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
-        return false;
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void confirmInventory() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(getString(R.string.message_confirm_save));
+        builder.setPositiveButton(getString(R.string.btn_confirm),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
+                            InitializeNewInventroyProcess();
+                        else
+                            showMessageDialog(getString(R.string.message_not_elements_inventory));
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void createBitMapFromString(MaterialViewModel itemMaterialAdded) {
+
+        if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
+        else
+            ListaImagenes.clear();
+
+        for (String encodedString : itemMaterialAdded.getListaImagenesStr()) {
+            try {
+                byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+                ListaImagenes.add(bitmap);
+
+            } catch (Exception e) {
+                e.getMessage();
+            }
+        }
+
+    }
+
+    private MaterialViewModel findElementByBarCode() {
+
+        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterialInventory()) {
+            if (materialViewModel.getBarCode().equals(inventory_element_barcode_edit.getText().toString()))
+                return materialViewModel;
+        }
+        return null;
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void getLocalMagterialByProduction() {
+
+
+        FilterListByProduction(GlobalClass.getInstance().getIdSelectedWareHouseInventory(),
+                GlobalClass.getInstance().getIdSelectedProductionInventory(),
+                GlobalClass.getInstance().getIdSelectedResponsibleInventory(),
+                GlobalClass.getInstance().getIdSelectedTypeElementHeader()
+        );
+        GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
+
+        if (dataMaterial != null)
+            GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
+        else
+            showMessageDialog("No se encontró elemento con el código de barras ingresado");
+
+        showProgress(false);
+        mnuReview.setVisible(true);
+        mnuSave.setVisible(true);
+        mnuCancel.setVisible(true);
+        GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
+        inventory_btn_new_element.setVisibility(View.VISIBLE);
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public static InventoryFragment newInstance(String param1, String param2) {
+        InventoryFragment fragment = new InventoryFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM2, param2);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    private void setListImagesAdapter() {
+        adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
+            @Override
+            public void onClick(ProductionViewModel wareHouseViewModel) {
+
+            }
+        });
+        photos_recycler_view.setAdapter(adapter);
+    }
+
+    private void setMaterialData(MaterialViewModel data) {
+        inventory_element_edit.setText(data.getMaterialName());
+        inventory_element_type_edit.setText(data.getTypeElementName());
+        inventory_element_brand_edit.setText(data.getMarca().toString());
+        inventory_element_price_edit.setText(data.getUnitPrice().toString());
+        hideKeyboard(getActivity());
+        createBitMapFromString(data);
+        setListImagesAdapter();
+
+    }
+
+    private void showMessageDialog(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // if this button is clicked, close
+                // current activity
+
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -756,41 +715,53 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         }
     }
 
-    private void showMessageDialog(String res) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
+    private boolean validaIsAddeddElement(String barcode) {
 
-        dlgAlert.setMessage(res);
-        dlgAlert.setTitle(getString(R.string.app_name));
-        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
-        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // if this button is clicked, close
-                // current activity
-
+        if (GlobalClass.getInstance().getDataReviewMaterial() != null)
+            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataReviewMaterial()) {
+                if (materialViewModel.getBarCode().equals(barcode))
+                    return true;
             }
-        });
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
+        return false;
     }
 
-    private MaterialViewModel findElementByBarCode() {
+    private boolean validateFiels() {
+        inventory_warehouse_option.setError(null);
+        inventory_program_option.setError(null);
+        inventory_date_option.setError(null);
 
-        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterialInventory()) {
-            if (materialViewModel.getBarCode().equals(inventory_element_barcode_edit.getText().toString()))
-                return materialViewModel;
+        boolean cancel = false;
+        View focusView = null;
+
+        if (TextUtils.isEmpty(inventory_warehouse_option.getText().toString())) {
+            inventory_warehouse_option.setError(getString(R.string.error_warehouse_empty));
+            focusView = inventory_warehouse_option;
+            cancel = true;
         }
-        return null;
+        if (TextUtils.isEmpty(inventory_program_option.getText().toString())) {
+            inventory_program_option.setError(getString(R.string.error_program_empty));
+            focusView = inventory_program_option;
+            cancel = true;
+        }
+        if (TextUtils.isEmpty(inventory_date_option.getText().toString())) {
+            inventory_date_option.setError(getString(R.string.error_fecha_empty));
+            focusView = inventory_date_option;
+            cancel = true;
+        }
+        if (cancel) {
+            focusView.requestFocus();
+            return false;
+        } else {
+            inventory_element.setVisibility(View.VISIBLE);
+            inventory_data.setVisibility(View.GONE);
+        }
+        return true;
     }
 
-    private void setMaterialData(MaterialViewModel data) {
-        inventory_element_edit.setText(data.getMaterialName());
-        inventory_element_type_edit.setText(data.getTypeElementName());
-        inventory_element_brand_edit.setText(data.getMarca().toString());
-        inventory_element_price_edit.setText(data.getUnitPrice().toString());
-        hideKeyboard(getActivity());
-        createBitMapFromString(data);
-        setListImagesAdapter();
+    //Valida si hay un proceso de inventario en proceso
+    private boolean validateInventoryProcess() {
 
+        return GlobalClass.getInstance().getCurrentInventoryActiveProcess();
     }
 
     public void DataRecived(String BarcodeData) {
@@ -822,6 +793,171 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         Scanner_manager.ScannerON(true);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_PRODUCTION) {
+            if (resultCode == -1) {
+                String result = data.getStringExtra("productionName");
+                GlobalClass.getInstance().setIdSelectedProductionInventory(data.getStringExtra("productionId"));
+                this.inventory_program_option.setText(result);
+
+            }
+        }
+        if (requestCode == REQUEST_RESPONSIBLE) {
+            if (resultCode == -1) {
+                String result = data.getStringExtra("responsibleName");
+                GlobalClass.getInstance().setIdSelectedResponsibleInventory(Integer.valueOf(data.getStringExtra("responsibleId")));
+                this.inventory_responsible_option.setText(result);
+
+            }
+        }
+        if (requestCode == REQUEST_TYPE_ELEMENT) {
+            if (resultCode == -1) {
+                String result = data.getStringExtra("typeElementName");
+                GlobalClass.getInstance().setIdSelectedTypeElementInventory(Integer.valueOf(data.getStringExtra("typeElementId")));
+                this.inventory_element_type_edit.setText(result);
+
+            }
+        }
+        if (requestCode == REQUEST_WAREHOUSE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("wareHouseName");
+                this.inventory_warehouse_option.setText(result);
+                GlobalClass.getInstance().setIdSelectedWareHouseInventory(data.getStringExtra("wareHouseId"));
+                GlobalClass.getInstance().setNameSelectedWareHouseInventory(data.getStringExtra("wareHouseName"));
+            }
+        }
+        if (requestCode == REQUEST_TYPE_ELEMENT_HEADER) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("typeElementName");
+                GlobalClass.getInstance().setIdSelectedTypeElementHeader(Integer.valueOf(data.getStringExtra("typeElementId")));
+                this.inventory_type_element_option.setText(result);
+            }
+        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getActivity().setTitle(getString(R.string.title_inventory_fragment));
+
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+        dateTimeUtilities = new DateTimeUtilities(getActivity());
+        setHasOptionsMenu(true);
+        dialog = new ProgressDialog(getActivity());
+        dialog.setMessage("Sincronizando...");
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_inventory, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.activity_inventory, container, false);
+        inventory_element = view.findViewById(R.id.inventory_element);
+        inventory_data = view.findViewById(R.id.inventory_data);
+        inventory_element.setVisibility(View.GONE);
+
+        InitializeControls(view);
+        InitializeEvents();
+
+        if (!validateInventoryProcess()) {
+            inventory_element.setVisibility(View.GONE);
+            inventory_data.setVisibility(View.VISIBLE);
+        } else {
+            inventory_element.setVisibility(View.VISIBLE);
+            inventory_data.setVisibility(View.GONE);
+
+        }
+        showProgress(false);
+        return view;
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+    }
+
+    @Override
+    public void onDestroy() {
+
+        Scanner_manager.ScannerOFF();
+
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        Intent intent = null;
+        switch (id) {
+
+            case R.id.mnu_review:
+                intent = null;
+                intent = new Intent(getActivity(), ListItemReviewActivity.class);
+                //intent.putExtra("Inventory", "1");
+                startActivity(intent);
+                return true;
+            case R.id.mnu_save:
+                confirmInventory();
+                return true;
+            case R.id.mnu_cancel:
+                confirmCancelInventory();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item); // important line
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Scanner_manager.ScannerOFF();
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        mnuReview = menu.findItem(R.id.mnu_review);
+        mnuSave = menu.findItem(R.id.mnu_save);
+        mnuCancel = menu.findItem(R.id.mnu_cancel);
+
+        if (validateInventoryProcess()) {
+            mnuReview.setVisible(true);
+            mnuSave.setVisible(true);
+            mnuCancel.setVisible(true);
+        } else {
+            mnuReview.setVisible(false);
+            mnuSave.setVisible(false);
+            mnuCancel.setVisible(false);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
+        Scanner_manager.AddObserver(this);
+        Scanner_manager.ScannerON(true);
+
+
+    }
+
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
@@ -846,142 +982,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             //btnDate.setText(ConverterDate.ConvertDate(year, month + 1, day));
             txtDate.setText(dateTimeUtilities.parseDateTurno(year, month + 1, day));
         }
-    }
-
-    private void asyncListMaterialsByBarCode() {
-
-
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(url, new TextHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-                            TypeToken<MaterialViewModel> token = new TypeToken<MaterialViewModel>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            itemMaterialAdded = gson.fromJson(res, token.getType());
-
-                            if (itemMaterialAdded != null)
-                                setMaterialData(itemMaterialAdded);
-                            else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-                            showProgress(false);
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-                }
-        );
-    }
-
-    private void asyncListMaterialsByProduction() {
-
-
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(360000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(url, new TextHttpResponseHandler() {
-                    @SuppressLint("RestrictedApi")
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-
-                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
-                            GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
-
-                            if (dataMaterial != null)
-                                GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
-                            else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-                            showProgress(false);
-                            mnuReview.setVisible(true);
-                            mnuSave.setVisible(true);
-                            mnuCancel.setVisible(true);
-                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
-                            inventory_btn_new_element.setVisibility(View.VISIBLE);
-
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-                }
-        );
-    }
-
-    private void createBitMapFromString(MaterialViewModel itemMaterialAdded) {
-
-        if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
-        else
-            ListaImagenes.clear();
-
-        for (String encodedString : itemMaterialAdded.getListaImagenesStr()) {
-            try {
-                byte[] encodeByte = Base64.decode(encodedString, Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-                ListaImagenes.add(bitmap);
-
-            } catch (Exception e) {
-                e.getMessage();
-            }
-        }
-
-    }
-
-    private void setListImagesAdapter() {
-        adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
-            @Override
-            public void onClick(ProductionViewModel wareHouseViewModel) {
-
-            }
-        });
-        photos_recycler_view.setAdapter(adapter);
     }
 
     class asyncGetMaterial extends AsyncTask {
@@ -1018,16 +1018,16 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         }
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog.show();
-        }
-
-        @Override
         protected void onPostExecute(Object o) {
 
             getLocalMagterialByProduction();
             super.onPostExecute(o);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.show();
         }
     }
 

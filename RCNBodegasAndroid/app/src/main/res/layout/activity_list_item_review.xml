@@ -17,9 +17,9 @@
         android:layout_weight="0"
         android:id="@+id/txtResumen"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:textSize="@dimen/abc_text_view_title_resumen_size"
-        android:text="TextView" />
+        android:text="" />
 
     <android.support.v7.widget.RecyclerView
         android:layout_weight="11"
