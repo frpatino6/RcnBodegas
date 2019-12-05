@@ -17,6 +17,7 @@ import android.net.NetworkInfo;
 import android.support.v4.app.NotificationCompat;
 
 import com.rcnbodegas.Activities.LoginActivity;
+import com.rcnbodegas.BuildConfig;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
@@ -35,8 +36,8 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private int idSelectedTypeElementHeader = -1;
     private String userName;
     private String AdminTypeElementId;
-    //private String urlServices = "http://172.20.0.154:8083/";
-    private String urlServices = "http://192.168.0.7/bodegas/";
+    private String urlServices = "http://172.20.0.154:8083/";
+    //private String urlServices = "http://192.168.0.7/bodegas/";
     // private String urlServices = "http://172.20.17.88/bodegas/";
     private Integer idSelectedCompanyInventory;
     private String idSelectedWareHouseInventory;
@@ -84,6 +85,13 @@ public class GlobalClass extends Application implements LifecycleObserver {
         intent = new Intent(this, KeepLiveApp.class);
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+
+        if (BuildConfig.DEBUG) {
+            urlServices = "http://192.168.0.7/bodegas/";
+        }
+        else{
+            urlServices = "http://172.20.0.154:8083/";
+        }
 
         //pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
     }

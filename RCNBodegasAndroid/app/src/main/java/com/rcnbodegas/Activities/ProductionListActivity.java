@@ -317,8 +317,11 @@ public class ProductionListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_production_list);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_production));
         InitializeControls();
-        //asyncListProductions();
-        returnListOffLine();
+
+        if (GlobalClass.getInstance().isNetworkAvailable())
+            asyncListProductions();
+        else
+            returnListOffLine();
 
     }
 

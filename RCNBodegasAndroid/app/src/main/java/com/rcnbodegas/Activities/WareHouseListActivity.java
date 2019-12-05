@@ -184,11 +184,27 @@ public class WareHouseListActivity extends AppCompatActivity {
             });
             recyclerView.setAdapter(adapter);
             GlobalClass.getInstance().setListWareHouseGlobal(data);
-        }
-        else{
+        } else {
             showMessage(getString(R.string.message_not_sync_data));
 
         }
+    }
+
+    private void showMessage(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(WareHouseListActivity.this);
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // if this button is clicked, close
+                // current activity
+
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -224,23 +240,6 @@ public class WareHouseListActivity extends AppCompatActivity {
         }
     }
 
-    private void showMessage(String res) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(WareHouseListActivity.this);
-
-        dlgAlert.setMessage(res);
-        dlgAlert.setTitle(getString(R.string.app_name));
-        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
-        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // if this button is clicked, close
-                // current activity
-
-            }
-        });
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -253,10 +252,12 @@ public class WareHouseListActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-
         }
 
-        returnListOffLine();
+        if (GlobalClass.getInstance().isNetworkAvailable())
+            asyncListWareHouse();
+        else
+            returnListOffLine();
     }
 
     @Override

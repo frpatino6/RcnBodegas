@@ -278,8 +278,11 @@ public class TypeElementListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_type_element_list);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_type_element));
         InitializeControls();
-        //asyncListResponsibles();
-        returnListOffLine();
+
+        if (GlobalClass.getInstance().isNetworkAvailable())
+            asyncListResponsibles();
+        else
+            returnListOffLine();
 
     }
 

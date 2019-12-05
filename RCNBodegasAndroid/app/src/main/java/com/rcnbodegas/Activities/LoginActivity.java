@@ -30,6 +30,7 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
+import com.rcnbodegas.BuildConfig;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ResponsibleAdapter;
 import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
@@ -74,6 +75,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.action_sign_in));
         context = this;
+
+
         InitializaControls();
         InitializaEvents();
     }
@@ -85,6 +88,11 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
+        if (BuildConfig.DEBUG) {
+            input_email.setText("frodriguezp");
+            input_password.setText("bogota1*");
+            // do something for a debug build
+        }
         //globalVariable = (GlobalClass) getApplicationContext();
 
     }

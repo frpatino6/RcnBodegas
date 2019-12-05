@@ -232,7 +232,7 @@ public class ResponsibleListActivity extends AppCompatActivity {
                     }
                 });
                 recyclerView.setAdapter(adapter);
-            }else{
+            } else {
                 showMessage(getString(R.string.message_not_sync_data));
             }
             showProgress(false);
@@ -310,8 +310,10 @@ public class ResponsibleListActivity extends AppCompatActivity {
             ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_legalized_by));
 
         InitializeControls();
-        //asyncListResponsibles();
-        returnListOffLine();
+        if (GlobalClass.getInstance().isNetworkAvailable())
+            asyncListResponsibles();
+        else
+            returnListOffLine();
 
     }
 
