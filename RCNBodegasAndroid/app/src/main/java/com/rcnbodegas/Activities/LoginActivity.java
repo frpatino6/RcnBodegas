@@ -4,21 +4,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,8 +26,6 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.BuildConfig;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ResponsibleAdapter;
-import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
@@ -42,44 +34,26 @@ import com.rcnbodegas.ViewModels.TypeElementViewModel;
 import com.rcnbodegas.ViewModels.UserViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private View mLoginFormView;
-    private View mProgressView;
-    private ProgressDialog dialogo;
-    private EditText input_email;
-
-    private EditText input_password;
     private Button btn_login;
-
-    private ArrayList<WareHouseViewModel> dataWarehouse;
-    private ArrayList<ResponsibleViewModel> dataResponsable;
-
     private Context context;
     private UserViewModel data;
-    private SharedPreferences pref;
-    private ArrayList<ProductionViewModel> dataProductions;
-    private ArrayList<TypeElementViewModel> dataTipoELemento;
     private ArrayList<MaterialViewModel> dataMaterialELemento;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.action_sign_in));
-        context = this;
-
-
-        InitializaControls();
-        InitializaEvents();
-    }
+    private ArrayList<ProductionViewModel> dataProductions;
+    private ArrayList<ResponsibleViewModel> dataResponsable;
+    private ArrayList<TypeElementViewModel> dataTipoELemento;
+    private ArrayList<WareHouseViewModel> dataWarehouse;
+    private ProgressDialog dialogo;
+    private EditText input_email;
+    private EditText input_password;
+    private View mLoginFormView;
+    private View mProgressView;
+    private SharedPreferences pref;
 
     private void InitializaControls() {
         input_email = findViewById(R.id.input_email);
@@ -88,10 +62,14 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
+
         if (BuildConfig.DEBUG) {
             input_email.setText("frodriguezp");
             input_password.setText("bogota1*");
             // do something for a debug build
+        } else {
+            input_email.setText("");
+            input_password.setText("");
         }
         //globalVariable = (GlobalClass) getApplicationContext();
 
@@ -104,6 +82,61 @@ public class LoginActivity extends AppCompatActivity {
                 attempLogin();
             }
         });
+    }
+
+    private void asyncLogin() {
+        // Create URL
+        final String username = input_email.getText().toString();
+        String pws = input_password.getText().toString();
+        String urlCustomers = GlobalClass.getInstance().getUrlServices() + "User/LoginActiveDirectory/" + username + "/" + pws;
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+
+        client.get(urlCustomers, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                        int resultCode = statusCode;
+                        showLoginError(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<UserViewModel> token = new TypeToken<UserViewModel>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            data = gson.fromJson(res, token.getType());
+
+                            GlobalClass.getInstance().setUserName(input_email.getText().toString());
+                            GlobalClass.getInstance().setUserRole(data.getRoleName());
+                            GlobalClass.getInstance().setAdminTypeElementId(data.getAdminTypeElementId());
+
+                            Intent intent = null;
+                            intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+                            dialogo.dismiss();
+                        }
+                    }
+                }
+        );
     }
 
     private void attempLogin() {
@@ -143,6 +176,23 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void showLoginError(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(LoginActivity.this);
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // if this button is clicked, close
+                // current activity
+
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
+    }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -176,78 +226,17 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void showLoginError(String res) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(LoginActivity.this);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.action_sign_in));
+        context = this;
 
-        dlgAlert.setMessage(res);
-        dlgAlert.setTitle(getString(R.string.app_name));
-        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
-        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // if this button is clicked, close
-                // current activity
 
-            }
-        });
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
+        InitializaControls();
+        InitializaEvents();
     }
-
-    private void asyncLogin() {
-        // Create URL
-        final String username = input_email.getText().toString();
-        String pws = input_password.getText().toString();
-        String urlCustomers = GlobalClass.getInstance().getUrlServices() + "User/LoginActiveDirectory/" + username + "/" + pws;
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-
-        client.get(urlCustomers, new TextHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-                            TypeToken<UserViewModel> token = new TypeToken<UserViewModel>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            data = gson.fromJson(res, token.getType());
-
-                            GlobalClass.getInstance().setUserName(input_email.getText().toString());
-                            GlobalClass.getInstance().setUserRole(data.getRoleName());
-                            GlobalClass.getInstance().setAdminTypeElementId(data.getAdminTypeElementId());
-
-                            Intent intent = null;
-                            intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-                            dialogo.dismiss();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        // called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                        int resultCode = statusCode;
-                        showLoginError(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-                }
-        );
-    }
-
 
     @Override
     protected void onStop() {

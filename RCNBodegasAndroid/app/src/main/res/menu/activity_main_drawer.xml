@@ -10,7 +10,10 @@
                 android:id="@+id/navBodegasVestuario"
                 android:icon="@drawable/baseline_local_offer_24"
                 android:title="Ingreso de mercancia" />
-
+            <item
+                android:id="@+id/navVerDocumentosGenerados"
+                android:icon="@drawable/baseline_assignment_black_24"
+                android:title="Ver últimos documentos de legalización" />
         </menu>
     </item>
 

@@ -8,7 +8,6 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,14 +16,13 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.LayerDrawable;
-
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -48,6 +46,7 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -65,7 +64,6 @@ import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.IObserver;
 import com.rcnbodegas.Global.NumberTextWatcher;
-import com.rcnbodegas.Global.PhotoListAdapter;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.SyncService;
@@ -75,13 +73,10 @@ import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
-import com.symbol.emdk.barcode.Scanner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -89,7 +84,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -107,21 +102,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1900;
     private static final int REQUEST_REVIEW = 6;
     private static MaterialViewModel _MaterialViewModel;
-
-    public PhotoListAdapter adapterPhotos;
     public String mCurrentPhotoPath;
     private ArrayList<String> ListFotos;
     private ArrayList<Bitmap> ListaImagenes;
     private TScanner Scanner_manager = null;
-    private PhotosAdapter adapter;
     private CheckBox chkIsAdmin;
-    private Integer consecutive = 1;
     private DateTimeUtilities dateTimeUtilities;
-    private Uri file;
     private MenuItem iconScanMenu;
     private boolean isOk;
     private String lastCreatedNUmberDocument = "";
-    private LinearLayoutManager layoutManager;
     private ArrayList<String> listaNombresImagenes;
     private int mDay;
     private View mIncidenciasFormView;
@@ -132,7 +121,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private MenuItem menuSave;
     private MenuItem mnuCancel;
     private RecyclerView photos_recycler_view;
-    private Scanner scanner = null;
+    private String selectedProductionName;
     private FloatingActionButton warehouse_btn_camera;
     private FloatingActionButton warehouse_btn_new_element;
     private Button warehouse_btn_ok;
@@ -143,6 +132,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private EditText warehouse_element_edit;
     private LinearLayout warehouse_element_layout;
     private EditText warehouse_element_price_edit;
+    private TextView warehouse_element_prod;
     private EditText warehouse_element_type_edit;
     private EditText warehouse_element_value_edit;
     private EditText warehouse_legalizedBy_option;
@@ -192,6 +182,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_type_edit = v.findViewById(R.id.warehouse_element_type_edit);
         warehouse_element_edit = v.findViewById(R.id.warehouse_element_edit);
         warehouse_element_price_edit = v.findViewById(R.id.warehouse_element_price_edit);
+        warehouse_element_prod= v.findViewById(R.id.warehouse_element_prod);
         warehouse_element_value_edit = v.findViewById(R.id.warehouse_element_value_edit);
         warehouse_user_option = v.findViewById(R.id.warehouse_user_option);
         warehouse_data = v.findViewById(R.id.warehouse_data);
@@ -199,15 +190,16 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_date_option.setText(dateTimeUtilities.parseDateTurno());
         warehouse_option.setText(GlobalClass.getInstance().getNameSelectedWareHouseWarehouse());
 
-        photos_recycler_view = (RecyclerView) v.findViewById(R.id.photos_recycler_view);
+        photos_recycler_view = v.findViewById(R.id.photos_recycler_view);
         photos_recycler_view.setHasFixedSize(true);
 
+        warehouse_element_value_edit.setText("$0.0");
         warehouse_element_price_edit.addTextChangedListener(new NumberTextWatcher(warehouse_element_price_edit, "#,###"));
         warehouse_element_value_edit.addTextChangedListener(new NumberTextWatcher(warehouse_element_value_edit, "#,###"));
 
         mIncidenciasFormView = v.findViewById(R.id.layout_header);
         mProgressView = v.findViewById(R.id.warehouse_progress);
-        layoutManager = new LinearLayoutManager(getActivity());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         photos_recycler_view.setLayoutManager(layoutManager);
         photos_recycler_view.setItemAnimator(new DefaultItemAnimator());
 
@@ -226,6 +218,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         });
 
         warehouse_btn_camera.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -251,7 +244,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_program_option.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = null;
+                Intent intent;
                 intent = new Intent(getActivity(), ProductionListActivity.class);
                 startActivityForResult(intent, REQUEST_PRODUCTION);
             }
@@ -259,7 +252,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_user_option.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = null;
+                Intent intent;
 
                 if (warehouse_option.getText().toString().equals("")) {
                     warehouse_option.setError(getString(R.string.error_warehouse_empty));
@@ -271,9 +264,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             }
         });
         warehouse_date_option.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
-                DialogFragment newFragment = new InventoryFragment.DatePickerFragment();
+                new InventoryFragment.DatePickerFragment();
                 /*((DatePickerFragment) newFragment).txtDate = warehouse_date_option;
                 ((DatePickerFragment) newFragment).dateTimeUtilities = dateTimeUtilities;
 
@@ -284,9 +278,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 mDay = c.get(Calendar.DAY_OF_MONTH);
 
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(),
+                DatePickerDialog datePickerDialog = new DatePickerDialog(Objects.requireNonNull(getActivity()),
                         new DatePickerDialog.OnDateSetListener() {
 
+                            @SuppressLint("SetTextI18n")
                             @Override
                             public void onDateSet(DatePicker view, int year,
                                                   int monthOfYear, int dayOfMonth) {
@@ -322,7 +317,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_type_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = null;
+                Intent intent;
                 intent = new Intent(getActivity(), TypeElementListActivity.class);
                 startActivityForResult(intent, REQUEST_TYPE_ELEMENT);
             }
@@ -353,6 +348,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         menuReview.setVisible(false);
         mnuCancel.setVisible(false);
         warehouse_element_layout.setVisibility(View.GONE);
+        warehouse_element_value_edit.setText("$0.0");
         warehouse_data.setVisibility(View.VISIBLE);
         GlobalClass.getInstance().getDataMaterial().clear();
         chkIsAdmin.setChecked(false);
@@ -365,7 +361,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
         try {
             if (ListaImagenes == null) {
-                ListaImagenes = new ArrayList<Bitmap>();
+                ListaImagenes = new ArrayList<>();
                 listaNombresImagenes = new ArrayList<>();
                 ListaImagenes.add(photo);
                 listaNombresImagenes.add(nombreFichero);
@@ -392,9 +388,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         Utils.setBadgeCount(getActivity(), icon, GlobalClass.getInstance().getDataMaterial().size());
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void SaveDocumentForSync() {
 
-        getActivity().stopService(new Intent(getActivity(), SyncService.class));
+        Objects.requireNonNull(getActivity()).stopService(new Intent(getActivity(), SyncService.class));
         GlobalClass.getInstance().getListMaterialForSync().add((ArrayList<MaterialViewModel>) GlobalClass.getInstance().getDataMaterial().clone());
         InitializeNewProcess();
         getActivity().startService(new Intent(getActivity(), SyncService.class));
@@ -418,16 +415,18 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         return view;
     }
 
-    public void SetImage(Intent data) {
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void SetImage() {
 
 
-        if (ListFotos == null)
-            ListFotos = new ArrayList<String>();
+        if (ListFotos == null) {
+            ListFotos = new ArrayList<>();
+        }
 
         try {
 
             DisplayMetrics metrics = new DisplayMetrics();
-            getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            Objects.requireNonNull(getActivity()).getWindowManager().getDefaultDisplay().getMetrics(metrics);
             int height = metrics.heightPixels / 2; //dividimos por 2 pues no se ven a pantalla completa.
             int width = metrics.widthPixels / 2; //dividimos por 2 pues no se ven a pantalla completa.
             File file = new File(GlobalClass.getInstance().getmCurrentPhotoPath());
@@ -447,17 +446,16 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
 
 
+            int consecutive = 1;
             String prefijo = warehouse_element_barcode_edit.getText().toString() + consecutive;
             prefijo = prefijo.replace(' ', '_');
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
             String fechaActual = sdf.format(new Date());
             String nombreFichero = prefijo + "_" + fechaActual;
             ListFotos.add(GlobalClass.getInstance().getmCurrentPhotoPath());
-            String srSignature = "";
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] b = baos.toByteArray();
             int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
             bitmap = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
 
@@ -467,13 +465,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         } catch (Exception e) {
             e.printStackTrace();
         }
-        InputStream is;
     }
 
-    private boolean ValidateBarCode(String barcode) {
+    private boolean ValidateBarCode() {
         if (GlobalClass.getInstance().getDataMaterial().size() > 0)
             for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
-                if (materialViewModel.getBarCode().toString().equals(warehouse_element_barcode_edit.getText().toString()))
+                if (materialViewModel.getBarCode().equals(warehouse_element_barcode_edit.getText().toString()))
                     return false;
             }
         return true;
@@ -482,7 +479,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     @SuppressLint("RestrictedApi")
     private void addElement() {
         try {
-            DecimalFormat precision = new DecimalFormat("0.00");
+            new DecimalFormat("0.00");
 
             showProgress(true);
             MaterialViewModel newElement = new MaterialViewModel();
@@ -495,7 +492,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             newElement.setLegalizedBy(String.valueOf(GlobalClass.getInstance().getIdSelectedResponsibleWarehouse()));
 
 
-            String currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
+            String currencyUnitPriceString;
+            currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
                     .replace(",", "")
                     .replace(".", ".")
                     .replaceAll("[^\\d.-]", "");
@@ -549,11 +547,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     }
 
-    private void addMaterialToList() {
-        if (GlobalClass.getInstance().getDataMaterial() == null)
-            GlobalClass.getInstance().setDataMaterial(new ArrayList<MaterialViewModel>());
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void asyncListMaterialsByProduction() {
 
@@ -565,7 +558,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         client.setTimeout(60000);
         String tipo = "application/json";
 
-        StringEntity entity = null;
+        StringEntity entity;
         Gson json = new Gson();
 
         for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
@@ -575,7 +568,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
         entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
 
-        client.post(getActivity().getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+        client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
@@ -588,10 +581,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             @Override
             public void onFinish() {
                 super.onFinish();
-                getActivity().runOnUiThread(new Runnable() {
+                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (isOk == true) {
+                        if (isOk) {
                             InitializeNewProcess();
                             showProgress(false);
                             showMessageDialog(lastCreatedNUmberDocument);
@@ -703,14 +696,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         dialog.show();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private File createImageFile() throws IOException {
         // Create an image file name
         String prefijo = "GENERAL";
         prefijo = prefijo.replace(' ', '_');
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String fechaActual = sdf.format(new Date());
         String nombreFichero = prefijo + "_" + fechaActual;
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = Objects.requireNonNull(getActivity()).getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 nombreFichero,  /* prefix */
                 ".jpg",         /* suffix */
@@ -723,10 +717,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         return image;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+        if (takePictureIntent.resolveActivity(Objects.requireNonNull(getActivity()).getPackageManager()) != null) {
             // Create the File where the photo should go
             File photoFile = null;
             try {
@@ -752,30 +747,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
-    private static File getOutputMediaFile() {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "CameraDemo");
-
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                return null;
-            }
-        }
-
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        return new File(mediaStorageDir.getPath() + File.separator +
-                "IMG_" + timeStamp + ".jpg");
-    }
-
     private void loadEditData() {
         int indexMaterilForEdit = GlobalClass.getInstance().getDataMaterial().indexOf(_MaterialViewModel);
-        this._MaterialViewModel = GlobalClass.getInstance().getDataMaterial().get(indexMaterilForEdit);
-        this.warehouse_element_barcode_edit.setText(this._MaterialViewModel.getBarCode());
-        this.warehouse_element_desc_edit.setText(this._MaterialViewModel.getMaterialName());
-        this.warehouse_element_type_edit.setText(this._MaterialViewModel.getTypeElementName());
-        this.warehouse_element_edit.setText(this._MaterialViewModel.getMarca());
-        this.warehouse_element_price_edit.setText(this._MaterialViewModel.getUnitPrice().toString());
-        this.warehouse_element_value_edit.setText(this._MaterialViewModel.getPurchaseValue().toString());
+        _MaterialViewModel = GlobalClass.getInstance().getDataMaterial().get(indexMaterilForEdit);
+        this.warehouse_element_barcode_edit.setText(_MaterialViewModel.getBarCode());
+        this.warehouse_element_desc_edit.setText(_MaterialViewModel.getMaterialName());
+        this.warehouse_element_type_edit.setText(_MaterialViewModel.getTypeElementName());
+        this.warehouse_element_edit.setText(_MaterialViewModel.getMarca());
+        this.warehouse_element_price_edit.setText(_MaterialViewModel.getUnitPrice().toString());
+        this.warehouse_element_value_edit.setText(_MaterialViewModel.getPurchaseValue().toString());
 
     }
 
@@ -785,8 +765,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
-    // TODO: Rename and change types and number of parameters
-    public static WarehouseFragment newInstance(MaterialViewModel param1, String param2) {
+    public static WarehouseFragment newInstance(MaterialViewModel param1) {
         WarehouseFragment fragment = new WarehouseFragment();
         Bundle args = new Bundle();
         _MaterialViewModel = param1;
@@ -796,19 +775,17 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     private String parseImage(String photo) {
         File folder = new File(Environment.getExternalStorageDirectory().toString() + "/bodegas_images");
-        File f = new File(folder, photo);
-        byte[] b = readPhotoAndRezise(photo, 7);
-        String srSignature = Base64.encodeToString(b, Base64.DEFAULT);
+        byte[] b = readPhotoAndRezise(photo);
 
-        return srSignature;
+        return Base64.encodeToString(b, Base64.DEFAULT);
     }
 
-    private byte[] readPhotoAndRezise(String f, int ToScale) {
+    private byte[] readPhotoAndRezise(String f) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         File fdelete = new File(f);
-        Bitmap bMap = BitmapFactory.decodeFile(f.toString(), options);
-        if (ToScale > 1) bMap = scaleBitmap(bMap, ToScale);
+        Bitmap bMap = BitmapFactory.decodeFile(f, options);
+        bMap = scaleBitmap(bMap, 7);
         ByteArrayOutputStream baos = new ByteArrayOutputStream(bMap.getByteCount());
         bMap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
         bMap.recycle();
@@ -819,7 +796,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         } catch (IOException e) {
             e.printStackTrace();
         }
-        baos = null;
 
         if (fdelete.exists()) {
             if (fdelete.delete()) {
@@ -859,8 +835,19 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         return bm;
     }
 
+    private void setActionBarTittle() {
+
+
+        if (selectedProductionName == null)
+            selectedProductionName = "";
+
+        warehouse_element_prod.setText(selectedProductionName);
+        dateTimeUtilities = new DateTimeUtilities(getActivity());
+
+    }
+
     private void setListImagesAdapter() {
-        adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
+        PhotosAdapter adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
             @Override
             public void onClick(ProductionViewModel wareHouseViewModel) {
 
@@ -869,6 +856,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         photos_recycler_view.setAdapter(adapter);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void showCamera() {
         try {
 
@@ -879,7 +867,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 }
 
             List<String> listPermissionsNeeded = new ArrayList<>();
-            int camera = ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.CAMERA);
+            int camera = ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), android.Manifest.permission.CAMERA);
             int storage = ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
             if (camera != PackageManager.PERMISSION_GRANTED) {
@@ -945,35 +933,28 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mIncidenciasFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mIncidenciasFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
-    private boolean validateFields() {
+    private void validateFields() {
         warehouse_element_barcode_edit.setError(null);
         warehouse_element_desc_edit.setError(null);
         warehouse_element_type_edit.setError(null);
@@ -1024,15 +1005,13 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
         if (cancel) {
             focusView.requestFocus();
-            return false;
         } else {
             addElement();
         }
-        return true;
     }
 
     @SuppressLint("RestrictedApi")
-    private boolean validateFieldsHeader() {
+    private void validateFieldsHeader() {
         warehouse_option.setError(null);
         warehouse_program_option.setError(null);
         warehouse_legalizedBy_option.setError(null);
@@ -1062,7 +1041,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
         if (cancel) {
             focusView.requestFocus();
-            return false;
         } else {
             warehouse_element_layout.setVisibility(View.VISIBLE);
             warehouse_data.setVisibility(View.GONE);
@@ -1073,8 +1051,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             menuReview.setVisible(true);
             mnuCancel.setVisible(true);
             PrintCountElementes();
+            setActionBarTittle();
         }
-        return true;
     }
 
     //Valida si hay un proceso de inventario en proceso
@@ -1083,15 +1061,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         return GlobalClass.getInstance().getCurrentAddElementActiveProcess();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void DataRecived(final String BarcodeData) {
-        final String _barcodeData = BarcodeData;
-        getActivity().runOnUiThread(new Runnable() {
+        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (!chkIsAdmin.isChecked()) {
                     warehouse_element_barcode_edit.setText(BarcodeData);
-                    if (!ValidateBarCode(BarcodeData)) {
+                    if (!ValidateBarCode()) {
                         showMessageDialog("El código de barras " + BarcodeData + " ya ha sido agregado a este documento de legalización");
                         warehouse_element_barcode_edit.setText("");
                     }
@@ -1109,17 +1087,18 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         Scanner_manager.ScannerON(true);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            SetImage(data);
+            SetImage();
         }
         if (requestCode == REQUEST_PRODUCTION) {
             if (resultCode == -1) {
-                String result = data.getStringExtra("productionName");
+                selectedProductionName = data.getStringExtra("productionName");
                 GlobalClass.getInstance().setIdSelectedProductionWarehouse(data.getStringExtra("productionId"));
-                this.warehouse_program_option.setText(result);
+                this.warehouse_program_option.setText(selectedProductionName);
 
             }
         }
@@ -1170,16 +1149,17 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         getActivity().setTitle(getString(R.string.title_element_legalization));
         dateTimeUtilities = new DateTimeUtilities(getActivity());
         setHasOptionsMenu(true);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @NonNull
     @SuppressLint("RestrictedApi")
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View layout = getActivity().getLayoutInflater().inflate(R.layout.activity_warehouse, null, false);
+        View layout = Objects.requireNonNull(getActivity()).getLayoutInflater().inflate(R.layout.activity_warehouse, null, false);
         assert layout != null;
         AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
         b.setView(layout);
@@ -1253,13 +1233,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = null;
         if (_MaterialViewModel == null) {
             view = SetDialogConfig(inflater, container);
 
         }
+
         return view;
     }
 
@@ -1278,12 +1259,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // handle item selection
-        Intent intent = null;
+        Intent intent;
         switch (item.getItemId()) {
             /**/
             case R.id.menu_review:
                 GlobalClass.getInstance().setListMaterialForAdd(GlobalClass.getInstance().getDataMaterial());
-                intent = null;
                 intent = new Intent(getActivity(), ListItemAddedActivity.class);
                 intent.putExtra("Inventory", "0");
                 startActivityForResult(intent, REQUEST_REVIEW);
@@ -1333,32 +1313,29 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
         boolean canUseExternalStorage = false;
 
-        switch (requestCode) {
-            case REQUEST_ID_MULTIPLE_PERMISSIONS: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    canUseExternalStorage = true;
-                    showCamera();
-                }
-                if (!canUseExternalStorage) {
-                    Toast.makeText(getActivity(), "No se puede usar esta función sin el permiso solicitado", Toast.LENGTH_SHORT).show();
-                } else {
-                    // user now provided permission
-                    // perform function for what you want to achieve
-                }
+        if (requestCode == REQUEST_ID_MULTIPLE_PERMISSIONS) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                canUseExternalStorage = true;
+                showCamera();
+            }
+            if (!canUseExternalStorage) {
+                Toast.makeText(getActivity(), "No se puede usar esta función sin el permiso solicitado", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        Objects.requireNonNull(getActivity()).registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
         Scanner_manager.AddObserver(this);
@@ -1371,6 +1348,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         public EditText txtDate;
         private DateTimeUtilities dateTimeUtilities;
 
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
 
@@ -1379,13 +1358,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             int year = c.get(Calendar.YEAR);
             int month = c.get(Calendar.MONTH);
             int day = c.get(Calendar.DAY_OF_MONTH);
-            DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
+            DatePickerDialog dialog = new DatePickerDialog(Objects.requireNonNull(getActivity()), this, year, month, day);
             dialog.getDatePicker().setMaxDate(c.getTimeInMillis());
             return dialog;
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-            int _month = month + 1;
             //btnDate.setText(ConverterDate.ConvertDate(year, month + 1, day));
             txtDate.setText(dateTimeUtilities.parseDateTurno(year, month + 1, day));
         }

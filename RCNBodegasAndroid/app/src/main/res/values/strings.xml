@@ -28,6 +28,7 @@
     <string name="error_description_empty">Descripción es requerido</string>
     <string name="error_type_empty">Tipo elemento es requerido</string>
     <string name="message_resume_review_list">Cantidad de elementos faltantes:</string>
+    <string name="message_resume_review_list_added">Cantidad de elementos agregados:</string>
     <string name="message_not_find_element">No se encontró el elemento</string>
     <string name="message_element_exist">Ya se reviso el elemento</string>
     <string name="search_hint">Buscar</string>
@@ -48,5 +49,6 @@
     <string name="name_of_your_app">Rcn bodegas</string>
     <string name="no_internet_for_sync">No hay conexión a internet disponible para la sincronización.</string>
     <string name="message_not_sync_data">No hay información, sincronice el dispositivo e intente de nuevo</string>
+    <string name="title_list_last_documents_created">Ultimos docs creados</string>
 
 </resources>

@@ -38,6 +38,7 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Fragments.InventoryFragment;
+import com.rcnbodegas.Fragments.ListDocumentsFragment;
 import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.NetworkStateReceiver;
@@ -469,8 +470,6 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
-
-
                     }
 
                     @Override
@@ -654,19 +653,27 @@ public class MainActivity extends AppCompatActivity
 
         Fragment fragment = null;
 
-        if (id == R.id.navBodegasVestuario) {
-            fragment = new WarehouseFragment();
+        switch (id) {
+            case R.id.navBodegasVestuario:
+                fragment = new WarehouseFragment();
 
-        } else if (id == R.id.navInventario) {
-            fragment = new InventoryFragment();
+                break;
+            case R.id.navInventario:
+                fragment = new InventoryFragment();
 
-        } else if (id == R.id.navSyncLDataBasica) {
+                break;
+            case R.id.navSyncLDataBasica:
 
-            AddsharedPreferenceConfig(true);
+                AddsharedPreferenceConfig(true);
 
-        } else if (id == R.id.navSyncLegalizacion) {
-            SendPendingMaterials(true);
+                break;
+            case R.id.navSyncLegalizacion:
+                SendPendingMaterials(true);
 
+                break;
+            case R.id.navVerDocumentosGenerados:
+                fragment = new ListDocumentsFragment();
+                break;
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -848,6 +855,8 @@ public class MainActivity extends AppCompatActivity
 
                         // Define Response class to correspond to the JSON response returned
                         lastCreatedNUmberDocument = android.text.TextUtils.join(",", data);//gson.fromJson(responseString, String.class);
+
+                        GlobalClass.getInstance().setLastDocuments(data);
                     }
                 });
                 return isOkResult;

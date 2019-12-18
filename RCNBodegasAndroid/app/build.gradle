@@ -6,8 +6,8 @@ android {
         applicationId "com.rcnbodegas"
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 18
-        versionName "6.7.8"
+        versionCode 19
+        versionName "6.7.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     compileOptions.encoding = 'UTF-8'
