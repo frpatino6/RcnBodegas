@@ -393,57 +393,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     }
 
-    private void asyncListMaterialsByBarCode() {
-
-
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(url, new TextHttpResponseHandler() {
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-
-                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-                            TypeToken<MaterialViewModel> token = new TypeToken<MaterialViewModel>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            itemMaterialAdded = gson.fromJson(res, token.getType());
-
-                            if (itemMaterialAdded != null)
-                                setMaterialData(itemMaterialAdded);
-                            else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-                            showProgress(false);
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-                }
-        );
-    }
-
-    private void asyncListMaterialsByProduction() {
+    private void asyncListCountMaterialsByProduction() {
 
 
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
@@ -498,7 +448,58 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 }
         );
     }
-    private void asyncListCountMaterialsByProduction() {
+
+    private void asyncListMaterialsByBarCode() {
+
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(url, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        showMessageDialog(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<MaterialViewModel> token = new TypeToken<MaterialViewModel>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            itemMaterialAdded = gson.fromJson(res, token.getType());
+
+                            if (itemMaterialAdded != null)
+                                setMaterialData(itemMaterialAdded);
+                            else
+                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
+
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
+    }
+
+    private void asyncListMaterialsByProduction() {
 
 
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
@@ -1031,10 +1032,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         protected Object doInBackground(Object[] objects) {
-
+            String res = "";
             Integer result = 0;
             SharedPreferences pref = Objects.requireNonNull(getActivity()).getApplicationContext().getSharedPreferences("materialbodegasPreferences", 0); // 0 - for private mode
-            String res = pref.getString("key_list_material_count", "0");
+            if (GlobalClass.getInstance().getIdSelectedWareHouseInventory().equals("A"))
+                res = pref.getString("key_list_material_ambientacion_count", "0");
+            else
+                res = pref.getString("key_list_material_vestuario_count", "0");
 
             assert res != null;
             if (res.equals("0")) {

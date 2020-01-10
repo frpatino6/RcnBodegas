@@ -175,6 +175,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Descripción"
+                        android:capitalize="characters"
                         android:singleLine="true"
                         android:text=""
                         android:textColor="#333"
@@ -226,6 +227,7 @@
                         android:layout_height="wrap_content"
                         android:hint="Marca"
                         android:singleLine="true"
+                        android:capitalize="characters"
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />

@@ -30,7 +30,11 @@
             <item
                 android:id="@+id/navSyncLDataBasica"
                 android:icon="@drawable/baseline_local_play_24"
-                android:title="SIncronizar datos básicos " />
+                android:title="Sinc datos ambientación " />
+            <item
+                android:id="@+id/navSyncLDataBasicaVestuario"
+                android:icon="@drawable/baseline_local_play_24"
+                android:title="Sinc datos vestuario " />
             <item
                 android:id="@+id/navSyncLegalizacion"
                 android:icon="@drawable/ic_menu_send"

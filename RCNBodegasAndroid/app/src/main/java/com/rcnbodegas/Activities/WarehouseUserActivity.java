@@ -108,7 +108,7 @@ public class WarehouseUserActivity extends AppCompatActivity {
 
             data = (ArrayList<ResponsibleViewModel>) new FilterList().filterList(data, filter, query);
 
-            adapter = new ResponsibleAdapter(sortEmpList, new onRecyclerResponsibleListItemClick() {
+            adapter = new ResponsibleAdapter(data, new onRecyclerResponsibleListItemClick() {
                 @Override
                 public void onClick(ResponsibleViewModel result) {
                     final Intent _data = new Intent();

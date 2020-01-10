@@ -1,13 +1,12 @@
 package com.rcnbodegas.Fragments;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -40,6 +39,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -157,6 +157,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
         } catch (Exception ex) {
             showMessageDialog(ex.getMessage());
+            confirmAddForSyncAfterByGenerateError("Se presentó un error");
         }
 
     }
@@ -182,7 +183,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_type_edit = v.findViewById(R.id.warehouse_element_type_edit);
         warehouse_element_edit = v.findViewById(R.id.warehouse_element_edit);
         warehouse_element_price_edit = v.findViewById(R.id.warehouse_element_price_edit);
-        warehouse_element_prod= v.findViewById(R.id.warehouse_element_prod);
+        warehouse_element_prod = v.findViewById(R.id.warehouse_element_prod);
         warehouse_element_value_edit = v.findViewById(R.id.warehouse_element_value_edit);
         warehouse_user_option = v.findViewById(R.id.warehouse_user_option);
         warehouse_data = v.findViewById(R.id.warehouse_data);
@@ -478,10 +479,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     @SuppressLint("RestrictedApi")
     private void addElement() {
+        ProgressDialog dialogo = new ProgressDialog(getActivity());
         try {
             new DecimalFormat("0.00");
 
-            showProgress(true);
+            dialogo.setMessage("Enviando...");
             MaterialViewModel newElement = new MaterialViewModel();
             newElement.setBarCode(warehouse_element_barcode_edit.getText().toString());
             newElement.setWareHouseId(GlobalClass.getInstance().getIdSelectedWareHouseWarehouse());
@@ -536,74 +538,85 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             clearFields();
             //loadTest(newElement);//Metodo para emular la carga de N elemntos
             PrintCountElementes();
+            dialogo.dismiss();
         } catch (NumberFormatException e) {
             e.printStackTrace();
+            dialogo.dismiss();
             showMessageDialog(e.getMessage());
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+            dialogo.dismiss();
             showMessageDialog(e.getMessage());
         }
-        showProgress(false);
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void asyncListMaterialsByProduction() {
+    private void asyncListMaterialsByProduction() throws IOException {
 
-        showProgress(true);
-        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+        try {
+            //final ProgressDialog dialogo = new ProgressDialog(getActivity());
+            final ProgressDialog dialogo = null;
+            dialogo.setMessage("Sincronizando materiales...");
+            dialogo.setIndeterminate(false);
+            dialogo.setCancelable(false);
+            dialogo.show();
 
-        String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        String tipo = "application/json";
+            String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
-        StringEntity entity;
-        Gson json = new Gson();
+            String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.setTimeout(60000);
+            String tipo = "application/json";
 
-        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
-            materialViewModel.getListaImagenesBmp().clear();
-        }
-        String resultJson = json.toJson(GlobalClass.getInstance().getDataMaterial());
+            StringEntity entity;
+            Gson json = new Gson();
 
-        entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
-
-        client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
-                showProgress(false);
-                showMessageDialog(responseBody);
-                isOk = false;
+            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
+                materialViewModel.getListaImagenesBmp().clear();
             }
+            String resultJson = json.toJson(GlobalClass.getInstance().getDataMaterial());
 
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onFinish() {
-                super.onFinish();
-                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isOk) {
-                            InitializeNewProcess();
-                            showProgress(false);
-                            showMessageDialog(lastCreatedNUmberDocument);
+            entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
+
+            client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+
+                    showMessageDialog(responseBody);
+                    isOk = false;
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onFinish() {
+                    super.onFinish();
+                    Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isOk) {
+                                InitializeNewProcess();
+                                showMessageDialog(lastCreatedNUmberDocument);
+                            }
                         }
-                    }
-                });
+                    });
+                    dialogo.dismiss();
+                }
 
-            }
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    isOk = true;
+                    Gson gson = new GsonBuilder().create();
+                    // Define Response class to correspond to the JSON response returned
+                    lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
 
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                isOk = true;
-                Gson gson = new GsonBuilder().create();
-                // Define Response class to correspond to the JSON response returned
-                lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
-
-            }
-        });
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            confirmAddForSyncAfterByGenerateError(e.getMessage());
+        }
     }
 
     private void clearFields() {
@@ -629,6 +642,31 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         builder.setTitle(getString(R.string.app_name));
         builder.setMessage(getString(R.string.no_internet_for_sync));
         builder.setPositiveButton("Guardar y sincronizar cuando tenga conexión a internet",
+                new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SaveDocumentForSync();
+                        dialog.dismiss();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void confirmAddForSyncAfterByGenerateError(String error) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle(getString(R.string.app_name));
+        builder.setMessage(error);
+        builder.setPositiveButton("Guardar y sincronizar en segundo plano",
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
@@ -911,6 +949,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
+    private void showKeyBoard() {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService((Context.INPUT_METHOD_SERVICE));
+        imm.showSoftInput(warehouse_element_desc_edit, InputMethodManager.SHOW_IMPLICIT);
+    }
+
     private void showMessageDialog(String res) {
         AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
 
@@ -928,31 +971,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         dlgAlert.create().show();
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        mIncidenciasFormView.animate().setDuration(shortAnimTime).alpha(
-                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mIncidenciasFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            }
-        });
-
-        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(
-                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        });
-    }
 
     private void validateFields() {
         warehouse_element_barcode_edit.setError(null);
@@ -1072,6 +1090,9 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                     if (!ValidateBarCode()) {
                         showMessageDialog("El código de barras " + BarcodeData + " ya ha sido agregado a este documento de legalización");
                         warehouse_element_barcode_edit.setText("");
+                    } else {
+                        warehouse_element_desc_edit.requestFocus();
+                        showKeyBoard();
                     }
                 } else {
                     showMessageDialog("El elemento es administrativo, lo cual no se asignará codigo de barras");

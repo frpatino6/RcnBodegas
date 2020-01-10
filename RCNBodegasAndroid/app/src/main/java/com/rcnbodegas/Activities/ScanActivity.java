@@ -2,11 +2,10 @@ package com.rcnbodegas.Activities;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.google.zxing.Result;
-import com.rcnbodegas.R;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 

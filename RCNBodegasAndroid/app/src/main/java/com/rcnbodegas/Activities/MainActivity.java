@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity
     private NetworkStateReceiver networkStateReceiver;
     private SharedPreferences pref;
     private TextView txtUser;
+    private String warehouseType;
 
     private void AddsharedPreferenceConfig(boolean clear) {
 
@@ -90,9 +91,18 @@ public class MainActivity extends AppCompatActivity
             materialSync = new ArrayList<>();
         else
             materialSync.clear();
-
+        warehouseType = "A";
         new asyncBasicTables().execute();
 
+    }
+
+    private void AddsharedPreferenceConfigVestuario(boolean b) {
+        if (materialSync == null)
+            materialSync = new ArrayList<>();
+        else
+            materialSync.clear();
+        warehouseType = "V";
+        new asyncBasicTables().execute();
     }
 
     private void SendPendingMaterials(boolean showMessage) {
@@ -162,11 +172,11 @@ public class MainActivity extends AppCompatActivity
     private void SyncAllMaterialData(Long offSet) {
 
 
-        String url = GlobalClass.getInstance().getUrlServices() + "sync/GetListAllMaterial/" + offSet;
+        String url = GlobalClass.getInstance().getUrlServices() + "sync/GetListAllMaterial/" + offSet + "/" + warehouseType;
 
         SyncHttpClient client = new SyncHttpClient();
 
-        client.setTimeout(60000);
+        client.setTimeout(260000);
         RequestParams params = new RequestParams();
 
         client.get(url, new TextHttpResponseHandler() {
@@ -181,7 +191,7 @@ public class MainActivity extends AppCompatActivity
                         super.onFinish();
                         controlRequestMateriales++;
 
-                        if ((coutnMateriales / 3000) < controlRequestMateriales) {
+                        if ((coutnMateriales / 5000) < controlRequestMateriales) {
                             parseArrayMaterial(materialSync);
                         }
                     }
@@ -458,7 +468,7 @@ public class MainActivity extends AppCompatActivity
 
     private void SyncCountMaterialData() {
 
-        String url = GlobalClass.getInstance().getUrlServices() + "sync/GetCountMateriales/";
+        String url = GlobalClass.getInstance().getUrlServices() + "sync/GetCountMateriales/" + warehouseType;
 
         SyncHttpClient client = new SyncHttpClient();
 
@@ -470,6 +480,7 @@ public class MainActivity extends AppCompatActivity
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
                         // called when response HTTP status is "4XX" (eg. 401, 403, 404)
                         int resultCode = statusCode;
+                        Log.d(TAG, "CRASH...." + statusCode);
                     }
 
                     @Override
@@ -497,11 +508,11 @@ public class MainActivity extends AppCompatActivity
 
                                 SyncAllMaterialData(offSet);
 
-                                if ((coutnMateriales - offSet) < 3000) {
-                                    //Log.d(TAG, "!!!!!!ULTIMA ITERACION!!!!! " + (coutnMateriales - offSet));
+                                if ((coutnMateriales - offSet) < 5000) {
+                                    Log.d(TAG, "!!!!!!ULTIMA ITERACION!!!!! " + (coutnMateriales - offSet));
                                     offSet += (coutnMateriales - offSet);
                                 } else {
-                                    offSet += 3000;
+                                    offSet += 5000;
                                 }
                                 countRequest++;
                             }
@@ -521,7 +532,11 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences pref = getApplicationContext().getSharedPreferences("materialbodegasPreferences", 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
 
-        editor.putString("key_list_material_count", String.valueOf(materialSync.size()));
+        if (warehouseType.equals("A"))
+            editor.putString("key_list_material_ambientacion_count", String.valueOf(materialSync.size()));
+        else
+            editor.putString("key_list_material_vestuario_count", String.valueOf(materialSync.size()));
+
         editor.commit();
         int materilaSyncIndex = 0;
         for (String res : materialSync) {
@@ -665,6 +680,11 @@ public class MainActivity extends AppCompatActivity
             case R.id.navSyncLDataBasica:
 
                 AddsharedPreferenceConfig(true);
+
+                break;
+            case R.id.navSyncLDataBasicaVestuario:
+
+                AddsharedPreferenceConfigVestuario(true);
 
                 break;
             case R.id.navSyncLegalizacion:

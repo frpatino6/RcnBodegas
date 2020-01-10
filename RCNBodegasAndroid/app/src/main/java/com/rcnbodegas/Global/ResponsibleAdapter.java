@@ -10,32 +10,18 @@ import android.widget.TextView;
 
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
-import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResponsibleAdapter extends RecyclerView.Adapter<ResponsibleAdapter.MyViewHolder> {
-    private ArrayList<ResponsibleViewModel> dataSet;
-    private onRecyclerResponsibleListItemClick _event;
-    private int row_index;
-    private boolean isClicked = false;
-    private View _view;
+    List<RelativeLayout> layoutViewList = new ArrayList<>();
     private Integer SelectedIncidencia;
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
-
-        TextView txtId;
-        TextView txtName;
-        ConstraintLayout layoutCompanyView;
-
-        public MyViewHolder(View itemView) {
-            super(itemView);
-            layoutCompanyView = itemView.findViewById(R.id.layoutCompany);
-            this.txtName= (TextView) itemView.findViewById(R.id.txtName);
-            this.txtId= (TextView) itemView.findViewById(R.id.txtId);
-
-        }
-    }
+    private onRecyclerResponsibleListItemClick _event;
+    private View _view;
+    private ArrayList<ResponsibleViewModel> dataSet;
+    private boolean isClicked = false;
+    private int row_index;
 
     public ResponsibleAdapter(ArrayList<ResponsibleViewModel> data, onRecyclerResponsibleListItemClick event) {
         this.dataSet = data;
@@ -43,7 +29,36 @@ public class ResponsibleAdapter extends RecyclerView.Adapter<ResponsibleAdapter.
 
     }
 
-    List<RelativeLayout> layoutViewList = new ArrayList<>();
+    @Override
+    public int getItemCount() {
+
+        if (dataSet != null)
+            return dataSet.size();
+        else
+            return 0;
+    }
+
+    @Override
+    public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
+
+        TextView txtId = holder.txtId;
+        TextView txtName = holder.txtName;
+
+
+        txtName.setText(dataSet.get(listPosition).getName());
+        txtId.setText(dataSet.get(listPosition).getId().toString());
+
+        holder.layoutCompanyView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                row_index = listPosition;
+                isClicked = true;
+                if (_event != null)
+                    _event.onClick(dataSet.get(listPosition));
+                notifyDataSetChanged();
+            }
+        });
+    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent,
@@ -63,31 +78,19 @@ public class ResponsibleAdapter extends RecyclerView.Adapter<ResponsibleAdapter.
         return myViewHolder;
     }
 
-    @Override
-    public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView txtId = holder.txtId;
-        TextView txtName= holder.txtName;
+        TextView txtId;
+        TextView txtName;
+        ConstraintLayout layoutCompanyView;
 
+        public MyViewHolder(View itemView) {
+            super(itemView);
+            layoutCompanyView = itemView.findViewById(R.id.layoutCompany);
+            this.txtName = (TextView) itemView.findViewById(R.id.txtName);
+            this.txtId = (TextView) itemView.findViewById(R.id.txtId);
 
-        txtName.setText(dataSet.get(listPosition).getName());
-        txtId.setText(dataSet.get(listPosition).getId().toString());
-
-        holder.layoutCompanyView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                row_index = listPosition;
-                isClicked = true;
-                if (_event != null)
-                    _event.onClick(dataSet.get(listPosition));
-                notifyDataSetChanged();
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return dataSet.size();
+        }
     }
 }
 
