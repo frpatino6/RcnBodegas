@@ -24,8 +24,8 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private ArrayList<MaterialViewModel> dataMaterial;
     private ArrayList<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
-    private String urlServices = "http://192.168.0.7/bodegas/";
-    //private String urlServices = "http://solpe.rcntv.com.co:8083/";
+    //private String urlServices = "http://192.168.0.7/bodegas/";
+    private String urlServices = "http://solpe.rcntv.com.co:8083/";
     private Integer idSelectedCompanyInventory;
     private Integer idSelectedCompanyWarehouse;
     private String idSelectedProductionInventory;

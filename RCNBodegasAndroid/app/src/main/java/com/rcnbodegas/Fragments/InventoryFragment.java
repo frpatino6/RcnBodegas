@@ -555,6 +555,62 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         );
     }
 
+    private void asyncInconsistencies() {
+
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInconsistencies/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(360000);
+        showProgress(true);
+        client.get(url, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        showMessageDialog(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @SuppressLint("RestrictedApi")
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
+                            GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
+
+                            if (dataMaterial != null)
+                                GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
+                            else
+                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
+
+                            showProgress(false);
+                            mnuReview.setVisible(true);
+                            mnuSave.setVisible(true);
+                            mnuCancel.setVisible(true);
+                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
+                            inventory_btn_new_element.setVisibility(View.VISIBLE);
+                            setActionBarTittle();
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
+    }
+
     private void confirmCancelInventory() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true);
