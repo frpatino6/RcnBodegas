@@ -26,12 +26,9 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.ResponsibleAdapter;
 import com.rcnbodegas.Global.TypeElementAdapter;
-import com.rcnbodegas.Global.onRecyclerResponsibleListItemClick;
 import com.rcnbodegas.Global.onRecyclerTypeElementListItemClick;
 import com.rcnbodegas.R;
-import com.rcnbodegas.ViewModels.ResponsibleViewModel;
 import com.rcnbodegas.ViewModels.TypeElementViewModel;
 
 import java.util.ArrayList;
@@ -42,23 +39,118 @@ import cz.msebera.android.httpclient.Header;
 public class TypeElementListActivity extends AppCompatActivity {
 
 
+    private TypeElementAdapter adapter;
+    private ArrayList<TypeElementViewModel> data;
+    private LinearLayoutManager layoutManager;
     private View mIncidenciasFormView;
     private View mProgressView;
     private RecyclerView recyclerView;
-    private LinearLayoutManager layoutManager;
-    private ArrayList<TypeElementViewModel> data;
-    private TypeElementAdapter adapter;
     private ArrayList<TypeElementViewModel> sortEmpList;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_type_element_list);
-        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_type_element));
-        InitializeControls();
-        //asyncListResponsibles();
-        returnListOffLine();
+    private void FilterListView(String query) {
 
+        try {
+            Filter<TypeElementViewModel, String> filter = new Filter<TypeElementViewModel, String>() {
+                public boolean isMatched(TypeElementViewModel object, String text) {
+
+                    boolean result = false;
+                    result = object.getName().toString().toLowerCase().contains(String.valueOf(text));
+
+                    if (result)
+                        return true;
+                    else
+                        return false;
+                }
+            };
+
+            sortEmpList = (ArrayList<TypeElementViewModel>) new FilterList().filterList(data, filter, query);
+
+            adapter = new TypeElementAdapter(sortEmpList, new onRecyclerTypeElementListItemClick() {
+                @Override
+                public void onClick(TypeElementViewModel result) {
+                    final Intent _data = new Intent();
+                    _data.putExtra("typeElementName", result.getName());
+                    _data.putExtra("typeElementId", result.getId().toString());
+
+                    setResult(RESULT_OK, _data);
+
+                    finish();
+                }
+            });
+            recyclerView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void InitializeControls() {
+
+        mIncidenciasFormView = findViewById(R.id.type_element_recycler_view);
+        mProgressView = findViewById(R.id.type_element_progress);
+        recyclerView = (RecyclerView) findViewById(R.id.type_element_recycler_view);
+        recyclerView.setHasFixedSize(true);
+
+        layoutManager = new LinearLayoutManager(TypeElementListActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    private void asyncListResponsibles() {
+        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListTypeElement/" + wareHouse;
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        RequestParams params = new RequestParams();
+        showProgress(true);
+        client.get(urlIncidencias, new TextHttpResponseHandler() {
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        shwoMessage(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        showProgress(false);
+
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<List<TypeElementViewModel>> token = new TypeToken<List<TypeElementViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            data = gson.fromJson(res, token.getType());
+                            adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
+                                @Override
+                                public void onClick(TypeElementViewModel result) {
+                                    final Intent _data = new Intent();
+                                    _data.putExtra("typeElementName", result.getName());
+                                    _data.putExtra("typeElementId", result.getId().toString());
+
+                                    setResult(RESULT_OK, _data);
+
+                                    finish();
+                                }
+                            });
+                            recyclerView.setAdapter(adapter);
+                            showProgress(false);
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
     }
 
     private void returnListOffLine() {
@@ -79,19 +171,25 @@ public class TypeElementListActivity extends AppCompatActivity {
             Gson gson = new GsonBuilder().create();
             // Define Response class to correspond to the JSON response returned
             data = gson.fromJson(res, token.getType());
-            adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
-                @Override
-                public void onClick(TypeElementViewModel result) {
-                    final Intent _data = new Intent();
-                    _data.putExtra("typeElementName", result.getName());
-                    _data.putExtra("typeElementId", result.getId().toString());
 
-                    setResult(RESULT_OK, _data);
+            if (data != null) {
+                adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
+                    @Override
+                    public void onClick(TypeElementViewModel result) {
+                        final Intent _data = new Intent();
+                        _data.putExtra("typeElementName", result.getName());
+                        _data.putExtra("typeElementId", result.getId().toString());
 
-                    finish();
-                }
-            });
-            recyclerView.setAdapter(adapter);
+                        setResult(RESULT_OK, _data);
+
+                        finish();
+                    }
+                });
+                recyclerView.setAdapter(adapter);
+            } else {
+                showMessage(getString(R.string.message_not_sync_data));
+
+            }
 
             showProgress(false);
         } catch (JsonSyntaxException e) {
@@ -122,52 +220,6 @@ public class TypeElementListActivity extends AppCompatActivity {
             e.printStackTrace();
 
         }
-    }
-
-    private void InitializeControls() {
-
-        mIncidenciasFormView = findViewById(R.id.type_element_recycler_view);
-        mProgressView = findViewById(R.id.type_element_progress);
-        recyclerView = (RecyclerView) findViewById(R.id.type_element_recycler_view);
-        recyclerView.setHasFixedSize(true);
-
-        layoutManager = new LinearLayoutManager(TypeElementListActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-
-        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
-
-        MenuItem search_item = menu.findItem(R.id.search_warehouse);
-
-        SearchView searchView = (SearchView) search_item.getActionView();
-        searchView.setFocusable(false);
-        searchView.setQueryHint(getString(R.string.search_hint));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-
-                //clear the previous data in search arraylist if exist
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                FilterListView(s);
-                return true;
-            }
-        });
-
-
-        return true;
-
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -220,97 +272,51 @@ public class TypeElementListActivity extends AppCompatActivity {
         dlgAlert.create().show();
     }
 
-    private void asyncListResponsibles() {
-        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_type_element_list);
+        ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_type_element));
+        InitializeControls();
 
-        String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Inventory/GetListTypeElement/" + wareHouse;
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(urlIncidencias, new TextHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
+        if (GlobalClass.getInstance().isNetworkAvailable())
+            asyncListResponsibles();
+        else
+            returnListOffLine();
 
-                            TypeToken<List<TypeElementViewModel>> token = new TypeToken<List<TypeElementViewModel>>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            data = gson.fromJson(res, token.getType());
-                            adapter = new TypeElementAdapter(data, new onRecyclerTypeElementListItemClick() {
-                                @Override
-                                public void onClick(TypeElementViewModel result) {
-                                    final Intent _data = new Intent();
-                                    _data.putExtra("typeElementName", result.getName());
-                                    _data.putExtra("typeElementId", result.getId().toString());
-
-                                    setResult(RESULT_OK, _data);
-
-                                    finish();
-                                }
-                            });
-                            recyclerView.setAdapter(adapter);
-                            showProgress(false);
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        shwoMessage(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-                }
-        );
     }
 
-    private void FilterListView(String query) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-        try {
-            Filter<TypeElementViewModel, String> filter = new Filter<TypeElementViewModel, String>() {
-                public boolean isMatched(TypeElementViewModel object, String text) {
 
-                    boolean result = false;
-                    result = object.getName().toString().toLowerCase().contains(String.valueOf(text));
+        getMenuInflater().inflate(R.menu.menu_warehouselist, menu);
 
-                    if (result)
-                        return true;
-                    else
-                        return false;
-                }
-            };
+        MenuItem search_item = menu.findItem(R.id.search_warehouse);
 
-            sortEmpList = (ArrayList<TypeElementViewModel>) new FilterList().filterList(data, filter, query);
+        SearchView searchView = (SearchView) search_item.getActionView();
+        searchView.setFocusable(false);
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-            adapter = new TypeElementAdapter(sortEmpList, new onRecyclerTypeElementListItemClick() {
-                @Override
-                public void onClick(TypeElementViewModel result) {
-                    final Intent _data = new Intent();
-                    _data.putExtra("typeElementName", result.getName());
-                    _data.putExtra("typeElementId", result.getId().toString());
 
-                    setResult(RESULT_OK, _data);
+            @Override
+            public boolean onQueryTextChange(String s) {
+                FilterListView(s);
+                return true;
+            }
 
-                    finish();
-                }
-            });
-            recyclerView.setAdapter(adapter);
+            @Override
+            public boolean onQueryTextSubmit(String s) {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                //clear the previous data in search arraylist if exist
+
+                return false;
+            }
+        });
+
+
+        return true;
 
     }
 }

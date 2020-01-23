@@ -1,10 +1,6 @@
 package com.rcnbodegas.Global;
 
-import android.app.Activity;
 import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
@@ -14,187 +10,51 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.v4.app.NotificationCompat;
 
-import com.rcnbodegas.Activities.LoginActivity;
-import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class GlobalClass extends Application implements LifecycleObserver {
 
-    private int idSelectedResponsibleInventory = -1;
-    private int idSelectedTypeElementInventory = -1;
-    private int idSelectedResponsibleWarehouse = -1;
-    private int idSelectedUserWarehouse = -1;
-    private Integer idSelectedTypeElementWarehouse = -1;
-    private int idSelectedTypeElementHeader = -1;
-    private String userName;
+    private static GlobalClass instance;
     private String AdminTypeElementId;
-    private String urlServices = "http://172.20.0.154:8083/";
-    //private String urlServices = "http://192.168.0.6/bodegas/";
-    // private String urlServices = "http://172.20.17.88/bodegas/";
-    private Integer idSelectedCompanyInventory;
-    private String idSelectedWareHouseInventory;
-    private String idSelectedProductionInventory;
-    private Boolean queryByInventory = false;
-    private Boolean isCurrentInventoryActiveProcess = false;
-    private Boolean isCurrentAddElementActiveProcess = false;
-    private Integer idSelectedCompanyWarehouse;
-    private String idSelectedWareHouseWarehouse;
-    private String idSelectedProductionWarehouse;
+    private String currentproductionName; //Persiste en memoria el nombre de la producci[on de un inventario pendiente por finalizar
     private ArrayList<MaterialViewModel> dataMaterial;
     private ArrayList<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
+    //private String urlServices = "http://solpe.rcntv.com.co:8083/";
+    private Integer idSelectedCompanyInventory;
+    private Integer idSelectedCompanyWarehouse;
+    private String idSelectedProductionInventory;
+    private String idSelectedProductionWarehouse;
+    private int idSelectedResponsibleInventory = -1;
+    private int idSelectedResponsibleWarehouse = -1;
+    private int idSelectedTypeElementHeader = -1;
+    private int idSelectedTypeElementInventory = -1;
+    private Integer idSelectedTypeElementWarehouse = -1;
+    private int idSelectedUserWarehouse = -1;
+    private String idSelectedWareHouseInventory;
+    private String idSelectedWareHouseWarehouse;
+    private Intent intent;
+    private Boolean isCurrentAddElementActiveProcess = false;
+    private Boolean isCurrentInventoryActiveProcess = false;
+    private ArrayList<Integer> lastDocuments;
     private ArrayList<MaterialViewModel> listMaterialBYProduction;
     private ArrayList<MaterialViewModel> listMaterialForAdd;
-    private ArrayList<WareHouseViewModel> listWareHouseGlobal;
     private ArrayList<ArrayList<MaterialViewModel>> listMaterialForSync;
-    private String nameSelectedWareHouseWarehouse = "";
-    private String nameSelectedWareHouseInventory = "";
-    private String userRole;
+    private ArrayList<WareHouseViewModel> listWareHouseGlobal;
     private String mCurrentPhotoPath;
-    private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private NotificationManager mNotifyMgr;
-    private static GlobalClass instance;
-    private Intent intent;
-    private Activity currentActivity;
-
-    public SharedPreferences getPref() {
-        return pref;
-    }
-
-    public void setPref(SharedPreferences pref) {
-        this.pref = pref;
-    }
-
+    private String nameSelectedWareHouseInventory = "";
+    private String nameSelectedWareHouseWarehouse = "";
     private SharedPreferences pref;
-
-/*
-    public void onActivityPause(Class activity, Activity current) {
-        classActivity = activity;
-        currentActivity=current;
-        applyStatusBar("", 10);
-
-    }
-
-    public void onActivityResume() {
-
-        if (mNotifyMgr != null)
-            mNotifyMgr.cancelAll();
-    }
-
-    private void applyStatusBar(String iconTitle, int notificationId) {
-        mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_logo)
-                .setContentTitle(iconTitle);
-        Intent resultIntent = new Intent(this, classActivity);
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        Notification notification = mBuilder.build();
-        notification.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
-
-
-        mNotifyMgr.notify(notificationId, notification);
-
-    }
-
-    public static GlobalClass getInstance() {
-        return instance;
-    }
-
-    @Override
-    public void onTerminate() {
-
-        super.onTerminate();
-    }
-
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        instance = this;
-
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    public void onAppBackgrounded() {
-        applyStatusBar("", 10);
-        currentActivity.moveTaskToBack(true);
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    public void onAppForegrounded() {
-        onActivityResume();
-    }*/
-
-
-    public static GlobalClass getInstance() {
-        return instance;
-    }
-
-    @Override
-    public void onTerminate() {
-
-        super.onTerminate();
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        instance = this;
-
-        intent = new Intent(this, KeepLiveApp.class);
-
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
-
-        //pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    public void onAppBackgrounded() {
-        startService(intent);
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    public void onAppForegrounded() {
-        stopService(intent);
-    }
-
-
-    public boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
-    //<editor-fold desc="Custom object">
-
-
-    public ArrayList<ArrayList<MaterialViewModel>> getListMaterialForSync() {
-        if (listMaterialForSync == null) listMaterialForSync = new ArrayList<>();
-        return listMaterialForSync;
-    }
-
-    public void setListMaterialForSync(ArrayList<ArrayList<MaterialViewModel>> listMaterialForSync) {
-        this.listMaterialForSync = listMaterialForSync;
-    }
-
-    public ArrayList<WareHouseViewModel> getListWareHouseGlobal() {
-        return listWareHouseGlobal;
-    }
-
-    public void setListWareHouseGlobal(ArrayList<WareHouseViewModel> listWareHouseGlobal) {
-        this.listWareHouseGlobal = listWareHouseGlobal;
-    }
+    private Boolean queryByInventory = false;
+    private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
+    private String urlServices = "http://192.168.0.7/bodegas/";
+    private String userName;
+    private String userRole;
 
     public String getAdminTypeElementId() {
         return AdminTypeElementId;
@@ -202,43 +62,6 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
     public void setAdminTypeElementId(String adminTypeElementId) {
         AdminTypeElementId = adminTypeElementId;
-    }
-
-    public int getIdSelectedUserWarehouse() {
-        return idSelectedUserWarehouse;
-    }
-
-    public void setIdSelectedUserWarehouse(int idSelectedUserWarehouse) {
-        this.idSelectedUserWarehouse = idSelectedUserWarehouse;
-    }
-
-    public ArrayList<MaterialViewModel> getDataReviewMaterial() {
-
-        if (dataReviewMaterial == null) dataReviewMaterial = new ArrayList<>();
-        return dataReviewMaterial;
-    }
-
-    public void setDataReviewMaterial(ArrayList<MaterialViewModel> dataReviewMaterial) {
-        this.dataReviewMaterial = dataReviewMaterial;
-    }
-
-    public List<MaterialViewModel> getDataMaterialInventory() {
-        if (dataMaterialInventory == null) dataMaterialInventory = new ArrayList<>();
-        return dataMaterialInventory;
-    }
-
-    public void setDataMaterialInventory(ArrayList<MaterialViewModel> dataMaterialInventory) {
-        this.dataMaterialInventory = dataMaterialInventory;
-    }
-
-    public ArrayList<MaterialViewModel> getDataMaterial() {
-
-        if (dataMaterial == null) dataMaterial = new ArrayList<>();
-        return dataMaterial;
-    }
-
-    public void setDataMaterial(ArrayList<MaterialViewModel> dataMaterial) {
-        this.dataMaterial = dataMaterial;
     }
 
     public Boolean getCurrentAddElementActiveProcess() {
@@ -257,45 +80,43 @@ public class GlobalClass extends Application implements LifecycleObserver {
         isCurrentInventoryActiveProcess = currentActiveProcess;
     }
 
-    public String getNameSelectedWareHouseWarehouse() {
-        return nameSelectedWareHouseWarehouse;
+    public String getCurrentproductionName() {
+        return currentproductionName;
     }
 
-    public void setNameSelectedWareHouseWarehouse(String nameSelectedWareHouseWarehouse) {
-        this.nameSelectedWareHouseWarehouse = nameSelectedWareHouseWarehouse;
+    public void setCurrentproductionName(String currentproductionName) {
+        this.currentproductionName = currentproductionName;
     }
 
-    public Boolean getQueryByInventory() {
-        return queryByInventory;
+    //<editor-fold desc="Custom object">
+
+    public ArrayList<MaterialViewModel> getDataMaterial() {
+
+        if (dataMaterial == null) dataMaterial = new ArrayList<>();
+        return dataMaterial;
     }
 
-    public void setQueryByInventory(Boolean queryByInventory) {
-        this.queryByInventory = queryByInventory;
+    public void setDataMaterial(ArrayList<MaterialViewModel> dataMaterial) {
+        this.dataMaterial = dataMaterial;
     }
 
-
-    public String getUserRole() {
-        return userRole;
+    public List<MaterialViewModel> getDataMaterialInventory() {
+        if (dataMaterialInventory == null) dataMaterialInventory = new ArrayList<>();
+        return dataMaterialInventory;
     }
 
-    public void setUserRole(String userRole) {
-        this.userRole = userRole;
+    public void setDataMaterialInventory(ArrayList<MaterialViewModel> dataMaterialInventory) {
+        this.dataMaterialInventory = dataMaterialInventory;
     }
 
-    public String getUserName() {
-        return userName;
+    public ArrayList<MaterialViewModel> getDataReviewMaterial() {
+
+        if (dataReviewMaterial == null) dataReviewMaterial = new ArrayList<>();
+        return dataReviewMaterial;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getUrlServices() {
-        return urlServices;
-    }
-
-    public void setUrlServices(String urlServices) {
-        this.urlServices = urlServices;
+    public void setDataReviewMaterial(ArrayList<MaterialViewModel> dataReviewMaterial) {
+        this.dataReviewMaterial = dataReviewMaterial;
     }
 
     public Integer getIdSelectedCompanyInventory() {
@@ -306,12 +127,12 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.idSelectedCompanyInventory = idSelectedCompanyInventory;
     }
 
-    public String getIdSelectedWareHouseInventory() {
-        return idSelectedWareHouseInventory;
+    public Integer getIdSelectedCompanyWarehouse() {
+        return idSelectedCompanyWarehouse;
     }
 
-    public void setIdSelectedWareHouseInventory(String idSelectedWareHouseInventory) {
-        this.idSelectedWareHouseInventory = idSelectedWareHouseInventory;
+    public void setIdSelectedCompanyWarehouse(Integer idSelectedCompanyWarehouse) {
+        this.idSelectedCompanyWarehouse = idSelectedCompanyWarehouse;
     }
 
     public String getIdSelectedProductionInventory() {
@@ -322,44 +143,20 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.idSelectedProductionInventory = idSelectedProductionInventory;
     }
 
-    public int getIdSelectedResponsibleInventory() {
-        return idSelectedResponsibleInventory;
-    }
-
-    public void setIdSelectedResponsibleInventory(int idSelectedResponsibleInventory) {
-        this.idSelectedResponsibleInventory = idSelectedResponsibleInventory;
-    }
-
-    public int getIdSelectedTypeElementInventory() {
-        return idSelectedTypeElementInventory;
-    }
-
-    public void setIdSelectedTypeElementInventory(int idSelectedTypeElementInventory) {
-        this.idSelectedTypeElementInventory = idSelectedTypeElementInventory;
-    }
-
-    public Integer getIdSelectedCompanyWarehouse() {
-        return idSelectedCompanyWarehouse;
-    }
-
-    public void setIdSelectedCompanyWarehouse(Integer idSelectedCompanyWarehouse) {
-        this.idSelectedCompanyWarehouse = idSelectedCompanyWarehouse;
-    }
-
-    public String getIdSelectedWareHouseWarehouse() {
-        return idSelectedWareHouseWarehouse;
-    }
-
-    public void setIdSelectedWareHouseWarehouse(String idSelectedWareHouseWarehouse) {
-        this.idSelectedWareHouseWarehouse = idSelectedWareHouseWarehouse;
-    }
-
     public String getIdSelectedProductionWarehouse() {
         return idSelectedProductionWarehouse;
     }
 
     public void setIdSelectedProductionWarehouse(String idSelectedProductionWarehouse) {
         this.idSelectedProductionWarehouse = idSelectedProductionWarehouse;
+    }
+
+    public int getIdSelectedResponsibleInventory() {
+        return idSelectedResponsibleInventory;
+    }
+
+    public void setIdSelectedResponsibleInventory(int idSelectedResponsibleInventory) {
+        this.idSelectedResponsibleInventory = idSelectedResponsibleInventory;
     }
 
     public int getIdSelectedResponsibleWarehouse() {
@@ -370,6 +167,22 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.idSelectedResponsibleWarehouse = idSelectedResponsibleWarehouse;
     }
 
+    public int getIdSelectedTypeElementHeader() {
+        return idSelectedTypeElementHeader;
+    }
+
+    public void setIdSelectedTypeElementHeader(int idSelectedTypeElementHeader) {
+        this.idSelectedTypeElementHeader = idSelectedTypeElementHeader;
+    }
+
+    public int getIdSelectedTypeElementInventory() {
+        return idSelectedTypeElementInventory;
+    }
+
+    public void setIdSelectedTypeElementInventory(int idSelectedTypeElementInventory) {
+        this.idSelectedTypeElementInventory = idSelectedTypeElementInventory;
+    }
+
     public Integer getIdSelectedTypeElementWarehouse() {
         return idSelectedTypeElementWarehouse;
     }
@@ -378,20 +191,43 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.idSelectedTypeElementWarehouse = idSelectedTypeElementWarehouse;
     }
 
-    public String getmCurrentPhotoPath() {
-        return mCurrentPhotoPath;
+    public int getIdSelectedUserWarehouse() {
+        return idSelectedUserWarehouse;
     }
 
-    public void setmCurrentPhotoPath(String mCurrentPhotoPath) {
-        this.mCurrentPhotoPath = mCurrentPhotoPath;
+    public void setIdSelectedUserWarehouse(int idSelectedUserWarehouse) {
+        this.idSelectedUserWarehouse = idSelectedUserWarehouse;
     }
 
-    public boolean isResponsable() {
-        return responsable;
+    public String getIdSelectedWareHouseInventory() {
+        return idSelectedWareHouseInventory;
     }
 
-    public void setResponsable(boolean responsable) {
-        this.responsable = responsable;
+    public void setIdSelectedWareHouseInventory(String idSelectedWareHouseInventory) {
+        this.idSelectedWareHouseInventory = idSelectedWareHouseInventory;
+    }
+
+    public String getIdSelectedWareHouseWarehouse() {
+        return idSelectedWareHouseWarehouse;
+    }
+
+    public void setIdSelectedWareHouseWarehouse(String idSelectedWareHouseWarehouse) {
+        this.idSelectedWareHouseWarehouse = idSelectedWareHouseWarehouse;
+    }
+
+    public static GlobalClass getInstance() {
+        return instance;
+    }
+
+    public ArrayList<Integer> getLastDocuments() {
+        if (lastDocuments == null) lastDocuments = new ArrayList<>();
+        return lastDocuments;
+    }
+
+    public void setLastDocuments(ArrayList<Integer> lastDocuments) {
+
+        if (this.lastDocuments == null) this.lastDocuments = new ArrayList<>();
+        this.lastDocuments = lastDocuments;
     }
 
     public List<MaterialViewModel> getListMaterialBYProduction() {
@@ -411,6 +247,23 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.listMaterialForAdd = listMaterialForAdd;
     }
 
+    public ArrayList<ArrayList<MaterialViewModel>> getListMaterialForSync() {
+        if (listMaterialForSync == null) listMaterialForSync = new ArrayList<>();
+        return listMaterialForSync;
+    }
+
+    public void setListMaterialForSync(ArrayList<ArrayList<MaterialViewModel>> listMaterialForSync) {
+        this.listMaterialForSync = listMaterialForSync;
+    }
+
+    public ArrayList<WareHouseViewModel> getListWareHouseGlobal() {
+        return listWareHouseGlobal;
+    }
+
+    public void setListWareHouseGlobal(ArrayList<WareHouseViewModel> listWareHouseGlobal) {
+        this.listWareHouseGlobal = listWareHouseGlobal;
+    }
+
     public String getNameSelectedWareHouseInventory() {
         return nameSelectedWareHouseInventory;
     }
@@ -419,12 +272,101 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.nameSelectedWareHouseInventory = nameSelectedWareHouseInventory;
     }
 
-    public int getIdSelectedTypeElementHeader() {
-        return idSelectedTypeElementHeader;
+    public String getNameSelectedWareHouseWarehouse() {
+        return nameSelectedWareHouseWarehouse;
     }
 
-    public void setIdSelectedTypeElementHeader(int idSelectedTypeElementHeader) {
-        this.idSelectedTypeElementHeader = idSelectedTypeElementHeader;
+    public void setNameSelectedWareHouseWarehouse(String nameSelectedWareHouseWarehouse) {
+        this.nameSelectedWareHouseWarehouse = nameSelectedWareHouseWarehouse;
+    }
+
+    public Boolean getQueryByInventory() {
+        return queryByInventory;
+    }
+
+    public void setQueryByInventory(Boolean queryByInventory) {
+        this.queryByInventory = queryByInventory;
+    }
+
+    public String getUrlServices() {
+        return urlServices;
+    }
+
+    public void setUrlServices(String urlServices) {
+        this.urlServices = urlServices;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
+    }
+
+    public String getmCurrentPhotoPath() {
+        return mCurrentPhotoPath;
+    }
+
+    public void setmCurrentPhotoPath(String mCurrentPhotoPath) {
+        this.mCurrentPhotoPath = mCurrentPhotoPath;
+    }
+
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    public boolean isResponsable() {
+        return responsable;
+    }
+
+    public void setResponsable(boolean responsable) {
+        this.responsable = responsable;
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void onAppBackgrounded() {
+        startService(intent);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void onAppForegrounded() {
+        stopService(intent);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        instance = this;
+
+        intent = new Intent(this, KeepLiveApp.class);
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+
+        /*if (BuildConfig.DEBUG) {
+            urlServices = "http://190.24.154.2:8083/";
+        } else {
+            urlServices = "http://192.168.0.7/bodegas/";
+        }*/
+
+        //pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
+    }
+
+    @Override
+    public void onTerminate() {
+
+        super.onTerminate();
     }
     //</editor-fold>
 

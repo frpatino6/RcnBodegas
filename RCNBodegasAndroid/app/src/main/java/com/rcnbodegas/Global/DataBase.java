@@ -23,18 +23,21 @@ public class DataBase extends SQLiteOpenHelper {
     private static final String PRODUCCION = "CREATE TABLE Produccion" +
             "(productionName TEXT, productionId int)";
 
+    private static final String MATERIAL = "CREATE TABLE Material" +
+            "(DESCRIPCION TEXT, TIPO_ELEMENTO TEXT ,MARCA TEXT,CODIGO_BARRAS TEXT,VALOR_COMPRA TEXT,CODIGO Int, PRODUCCION Int)";
+
     public DataBase(Context context) {
         super(context, NOMBRE_BASEDATOS, null, VERSION_BASEDATOS);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
+        db.execSQL(MATERIAL);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS Material");
     }
     public void doesDatabaseExist(Context context) {
         File database = context.getDatabasePath("BodegasDb.db");

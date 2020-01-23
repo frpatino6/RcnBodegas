@@ -14,7 +14,7 @@
     <item
         android:id="@+id/mnu_cancel"
         android:icon="@mipmap/ic_menu_cancel"
-        android:title="CAncelar inventario"
+        android:title=""
         app:showAsAction="always" />
 
 

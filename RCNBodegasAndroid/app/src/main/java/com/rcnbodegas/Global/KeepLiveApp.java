@@ -1,5 +1,6 @@
 package com.rcnbodegas.Global;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -71,7 +72,7 @@ public class KeepLiveApp extends Service {
             }
         }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, nIntent, ID_NOTIFICACION_CREAR);
+        @SuppressLint("WrongConstant") PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, nIntent, ID_NOTIFICACION_CREAR);
 
         Notification notiBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle("Rcn")

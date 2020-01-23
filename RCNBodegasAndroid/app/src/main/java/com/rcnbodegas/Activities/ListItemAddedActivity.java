@@ -95,7 +95,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
     private void OpenEditDialog(MaterialViewModel wareHouseViewModel) {
         try {
             FragmentManager fm = getSupportFragmentManager();
-            DialogFragment warehouseFragment = WarehouseFragment.newInstance(wareHouseViewModel, "");
+            DialogFragment warehouseFragment = WarehouseFragment.newInstance(wareHouseViewModel);
             warehouseFragment.show(fm, "Editar");
 
 

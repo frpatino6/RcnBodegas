@@ -3,33 +3,31 @@ package com.rcnbodegas.ViewModels;
 import android.graphics.Bitmap;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class MaterialViewModel {
 
-
-    private Boolean isAdmin;
-    private String saleDate;
-    private String wareHouseId;
-    private String wareHouseName;
-    private Integer productionId;
-    private String productionName;
-    private Integer responsibleId;
-    private Integer terceroActual;
-    private String responsibleName;
-    private String typeElementId;
-    private String typeElementName;
-    private String legalizedBy;
-    private String marca;
     private String barCode;
-    private String materialName;
-    private Integer numero_doc_recepcion;
-    private Double unitPrice;
-    private Double purchaseValue;
+    private int id;
+    private Boolean isAdmin;
+    private boolean isReview;
+    private String legalizedBy;
     private ArrayList<Bitmap> listaImagenesBmp;
     private ArrayList<String> listaImagenesStr;
-
-    private boolean isReview;
+    private String marca;
+    private String materialName;
+    private Integer numero_doc_recepcion = 0;
+    private Integer productionId;
+    private String productionName;
+    private Double purchaseValue;
+    private Integer responsibleId;
+    private String responsibleName;
+    private String saleDate;
+    private Integer terceroActual;
+    private String typeElementId;
+    private String typeElementName;
+    private Double unitPrice;
+    private String wareHouseId;
+    private String wareHouseName;
 
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
@@ -44,16 +42,14 @@ public class MaterialViewModel {
         this.marca = marca;
         this.barCode = barCode;
         this.materialName = materialName;
-        this.numero_doc_recepcion=0;
+        this.numero_doc_recepcion = 0;
 
     }
 
-    public Integer getNumero_doc_recepcion() {
-        return numero_doc_recepcion;
-    }
-
-    public void setNumero_doc_recepcion(Integer numero_doc_recepcion) {
-        this.numero_doc_recepcion = numero_doc_recepcion;
+    public MaterialViewModel() {
+        this.isReview = false;
+        listaImagenesBmp = new ArrayList<>();
+        listaImagenesStr = new ArrayList<>();
     }
 
     public Boolean getAdmin() {
@@ -64,20 +60,20 @@ public class MaterialViewModel {
         isAdmin = admin;
     }
 
-    public Integer getTerceroActual() {
-        return terceroActual;
+    public String getBarCode() {
+        return barCode;
     }
 
-    public void setTerceroActual(Integer terceroActual) {
-        this.terceroActual = terceroActual;
+    public void setBarCode(String barCode) {
+        this.barCode = barCode;
     }
 
-    public String getSaleDate() {
-        return saleDate;
+    public int getId() {
+        return id;
     }
 
-    public void setSaleDate(String saleDate) {
-        this.saleDate = saleDate;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getLegalizedBy() {
@@ -86,24 +82,6 @@ public class MaterialViewModel {
 
     public void setLegalizedBy(String legalizedBy) {
         this.legalizedBy = legalizedBy;
-    }
-
-    public Double getPurchaseValue() {
-        return purchaseValue;
-    }
-
-    public void setPurchaseValue(Double purchaseValue) {
-        this.purchaseValue = purchaseValue;
-    }
-
-    public ArrayList<String> getListaImagenesStr() {
-
-        if (listaImagenesStr == null) listaImagenesStr = new ArrayList<>();
-        return listaImagenesStr;
-    }
-
-    public void setListaImagenesStr(ArrayList<String> listaImagenesStr) {
-        this.listaImagenesStr = listaImagenesStr;
     }
 
     public ArrayList<Bitmap> getListaImagenesBmp() {
@@ -117,47 +95,38 @@ public class MaterialViewModel {
         this.listaImagenesBmp = listaImagenesBmp;
     }
 
-    public MaterialViewModel() {
-        this.isReview = false;
-        listaImagenesBmp = new ArrayList<>();
-        listaImagenesStr = new ArrayList<>();
+    public ArrayList<String> getListaImagenesStr() {
+
+        if (listaImagenesStr == null) listaImagenesStr = new ArrayList<>();
+        return listaImagenesStr;
     }
 
-    public Double getUnitPrice() {
-        return unitPrice;
+    public void setListaImagenesStr(ArrayList<String> listaImagenesStr) {
+        this.listaImagenesStr = listaImagenesStr;
     }
 
-    public void setUnitPrice(Double unitPrice) {
-        this.unitPrice = unitPrice;
+    public String getMarca() {
+        return marca;
     }
 
-    public boolean isReview() {
-        return isReview;
+    public void setMarca(String marca) {
+        this.marca = marca;
     }
 
-    public void setReview(boolean review) {
-        isReview = review;
+    public String getMaterialName() {
+        return materialName;
     }
 
-    @Override
-    public String toString() {
-        return this.barCode.toString();
+    public void setMaterialName(String materialName) {
+        this.materialName = materialName;
     }
 
-    public String getWareHouseId() {
-        return wareHouseId;
+    public Integer getNumero_doc_recepcion() {
+        return numero_doc_recepcion;
     }
 
-    public void setWareHouseId(String wareHouseId) {
-        this.wareHouseId = wareHouseId;
-    }
-
-    public String getWareHouseName() {
-        return wareHouseName;
-    }
-
-    public void setWareHouseName(String wareHouseName) {
-        this.wareHouseName = wareHouseName;
+    public void setNumero_doc_recepcion(Integer numero_doc_recepcion) {
+        this.numero_doc_recepcion = numero_doc_recepcion;
     }
 
     public Integer getProductionId() {
@@ -176,6 +145,14 @@ public class MaterialViewModel {
         this.productionName = productionName;
     }
 
+    public Double getPurchaseValue() {
+        return purchaseValue;
+    }
+
+    public void setPurchaseValue(Double purchaseValue) {
+        this.purchaseValue = purchaseValue;
+    }
+
     public Integer getResponsibleId() {
         return responsibleId;
     }
@@ -190,6 +167,22 @@ public class MaterialViewModel {
 
     public void setResponsibleName(String responsibleName) {
         this.responsibleName = responsibleName;
+    }
+
+    public String getSaleDate() {
+        return saleDate;
+    }
+
+    public void setSaleDate(String saleDate) {
+        this.saleDate = saleDate;
+    }
+
+    public Integer getTerceroActual() {
+        return terceroActual;
+    }
+
+    public void setTerceroActual(Integer terceroActual) {
+        this.terceroActual = terceroActual;
     }
 
     public String getTypeElementId() {
@@ -208,27 +201,40 @@ public class MaterialViewModel {
         this.typeElementName = typeElementName;
     }
 
-    public String getMarca() {
-        return marca;
+    public Double getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setMarca(String marca) {
-        this.marca = marca;
+    public void setUnitPrice(Double unitPrice) {
+        this.unitPrice = unitPrice;
     }
 
-    public String getBarCode() {
-        return barCode;
+    public String getWareHouseId() {
+        return wareHouseId;
     }
 
-    public void setBarCode(String barCode) {
-        this.barCode = barCode;
+    public void setWareHouseId(String wareHouseId) {
+        this.wareHouseId = wareHouseId;
     }
 
-    public String getMaterialName() {
-        return materialName;
+    public String getWareHouseName() {
+        return wareHouseName;
     }
 
-    public void setMaterialName(String materialName) {
-        this.materialName = materialName;
+    public void setWareHouseName(String wareHouseName) {
+        this.wareHouseName = wareHouseName;
+    }
+
+    public boolean isReview() {
+        return isReview;
+    }
+
+    public void setReview(boolean review) {
+        isReview = review;
+    }
+
+    @Override
+    public String toString() {
+        return this.barCode.toString();
     }
 }

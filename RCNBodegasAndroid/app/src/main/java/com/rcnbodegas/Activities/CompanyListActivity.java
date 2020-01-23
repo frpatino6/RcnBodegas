@@ -47,7 +47,7 @@ public class CompanyListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_company_list);
         ((AppCompatActivity) this).getSupportActionBar().setTitle(getString(R.string.title_bar_company));
         InitializeControls();
-        asyncListFurgonetas();
+        asyncListCompany();
 
     }
 
@@ -115,7 +115,7 @@ public class CompanyListActivity extends AppCompatActivity {
         dlgAlert.create().show();
     }
 
-    private void asyncListFurgonetas() {
+    private void asyncListCompany() {
 
 
         String urlIncidencias = GlobalClass.getInstance().getUrlServices() + "Company/GetLisCompany/" + GlobalClass.getInstance().getUserName();

@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,47 +26,73 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class SyncService extends Service {
-    private static final int ID_NOTIFICACION_SYNC = 2;
-    private NotificationManager mNotifyMgr;
-    private static final String TAG = KeepLiveApp.class.getSimpleName();
-    private Handler mHandler = new Handler();
-    private Timer mTimer = null;    //timer handling
     public static final int notify = 60000;  //interval between two services(Here Service run every 5 seconds)
+    private static final int ID_NOTIFICACION_SYNC = 2;
+    private static final String TAG = KeepLiveApp.class.getSimpleName();
     NotificationManager notificationManager;
     private boolean isOk;
     private String lastCreatedNUmberDocument;
+    private Handler mHandler = new Handler();
+    private NotificationManager mNotifyMgr;
+    private Timer mTimer = null;    //timer handling
 
     public SyncService() {
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void asyncListMaterialsByProduction(ArrayList<MaterialViewModel> listForSync) {
+
+
+        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+
+        String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(60000);
+        String tipo = "application/json";
+
+        StringEntity entity = null;
+        Gson json = new Gson();
+
+        for (MaterialViewModel materialViewModel : listForSync) {
+            materialViewModel.getListaImagenesBmp().clear();
+        }
+        String resultJson = json.toJson(listForSync);
+
+        entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
+
+        client.post(getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+                isOk = false;
+            }
+
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onFinish() {
+                super.onFinish();
+                if (isOk) {
+                    notificationManager.cancel(ID_NOTIFICACION_SYNC);
+                    GlobalClass.getInstance().getListMaterialForSync().clear();
+                }
+            }
+
+            @SuppressLint("RestrictedApi")
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                isOk = true;
+                Gson gson = new GsonBuilder().create();
+                // Define Response class to correspond to the JSON response returned
+                lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
+
+            }
+        });
     }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        createNotification();
-
-        return START_STICKY;
-    }
-
 
     private void createNotification() {
         Intent nIntent = new Intent();
@@ -105,58 +130,28 @@ public class SyncService extends Service {
     }
 
     @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         notificationManager.cancel(ID_NOTIFICACION_SYNC);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void asyncListMaterialsByProduction(ArrayList<MaterialViewModel> listForSync) {
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        createNotification();
 
-
-        String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
-
-        String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        String tipo = "application/json";
-
-        StringEntity entity = null;
-        Gson json = new Gson();
-
-        for (MaterialViewModel materialViewModel : listForSync) {
-            materialViewModel.getListaImagenesBmp().clear();
-        }
-        String resultJson = json.toJson(listForSync);
-
-        entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
-
-        client.post(getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
-
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                isOk = true;
-                Gson gson = new GsonBuilder().create();
-                // Define Response class to correspond to the JSON response returned
-                lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
-                isOk = false;
-            }
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onFinish() {
-                super.onFinish();
-                if (isOk) {
-                    notificationManager.cancel(ID_NOTIFICACION_SYNC);
-                    GlobalClass.getInstance().getListMaterialForSync().clear();
-                }
-            }
-        });
+        return START_STICKY;
     }
 
     class TimeDisplay extends TimerTask {
