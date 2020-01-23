@@ -554,8 +554,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private void asyncListMaterialsByProduction() throws IOException {
 
         try {
-            //final ProgressDialog dialogo = new ProgressDialog(getActivity());
-            final ProgressDialog dialogo = null;
+            final ProgressDialog dialogo = new ProgressDialog(getActivity());
+//            final ProgressDialog dialogo = null;
             dialogo.setMessage("Sincronizando materiales...");
             dialogo.setIndeterminate(false);
             dialogo.setCancelable(false);

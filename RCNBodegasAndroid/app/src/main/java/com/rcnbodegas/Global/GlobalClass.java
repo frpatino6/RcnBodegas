@@ -21,11 +21,11 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
     private static GlobalClass instance;
     private String AdminTypeElementId;
+    private String currentproductionName; //Persiste en memoria el nombre de la producci[on de un inventario pendiente por finalizar
     private ArrayList<MaterialViewModel> dataMaterial;
     private ArrayList<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
-    //private String urlServices = "http://192.168.0.7/bodegas/";
-    private String urlServices = "http://solpe.rcntv.com.co:8083/";
+    //private String urlServices = "http://solpe.rcntv.com.co:8083/";
     private Integer idSelectedCompanyInventory;
     private Integer idSelectedCompanyWarehouse;
     private String idSelectedProductionInventory;
@@ -52,7 +52,7 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private SharedPreferences pref;
     private Boolean queryByInventory = false;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-
+    private String urlServices = "http://192.168.0.7/bodegas/";
     private String userName;
     private String userRole;
 
@@ -78,6 +78,14 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
     public void setCurrentInventoryActiveProcess(Boolean currentActiveProcess) {
         isCurrentInventoryActiveProcess = currentActiveProcess;
+    }
+
+    public String getCurrentproductionName() {
+        return currentproductionName;
+    }
+
+    public void setCurrentproductionName(String currentproductionName) {
+        this.currentproductionName = currentproductionName;
     }
 
     //<editor-fold desc="Custom object">

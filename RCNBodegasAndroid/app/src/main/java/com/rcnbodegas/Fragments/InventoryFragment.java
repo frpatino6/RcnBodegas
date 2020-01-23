@@ -67,15 +67,19 @@ import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.TScanner;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.ViewModels.InventoryDetailViewModel;
+import com.rcnbodegas.ViewModels.InventroyHeaderViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -104,6 +108,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private ArrayList<MaterialViewModel> dataMaterial;
     private DateTimeUtilities dateTimeUtilities;
     private ProgressDialog dialogo;
+    private int inventoryId;
     private FloatingActionButton inventory_btn_new_element;
     private Button inventory_btn_ok;
     private LinearLayout inventory_data;
@@ -127,7 +132,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private MenuItem mnuReview;
     private MenuItem mnuSave;
     private RecyclerView photos_recycler_view;
-    private String selectedProductionName;
+
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -181,7 +186,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         }
 
     }
-
 
     @SuppressLint("CutPasteId")
     private void InitializeControls(View v) {
@@ -314,13 +318,9 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void onClick(View v) {
-                if (validateFiels())
-                    if (GlobalClass.getInstance().isNetworkAvailable())
-                        asyncListMaterialsByProduction();
-                    else {
-                        new asyncGetCountMaterial().execute();
-
-                    }
+                if (validateFiels()) {
+                    LoadElements(true);
+                }
             }
         });
         inventory_warehouse_option.setOnClickListener(new View.OnClickListener() {
@@ -345,12 +345,94 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_btn_new_element.setVisibility(View.GONE);
         GlobalClass.getInstance().setDataMaterialInventory(new ArrayList<MaterialViewModel>());
         GlobalClass.getInstance().setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
+        GlobalClass.getInstance().setDataReviewMaterial(new ArrayList<MaterialViewModel>());
         mnuReview.setVisible(false);
         mnuSave.setVisible(false);
         mnuCancel.setVisible(false);
 
         if (ListaImagenes != null)
             ListaImagenes.clear();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void LoadElements(boolean createHeader) {
+        if (GlobalClass.getInstance().isNetworkAvailable())
+
+            if (createHeader)
+                asyncInventoryHeader();
+            else
+                asyncListMaterialsByProduction();
+        else {
+            new asyncGetCountMaterial().execute();
+
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void LoadElements(int finalize) {
+
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryDetail/" + finalize;
+
+        try {
+            final ProgressDialog dialogo = new ProgressDialog(getActivity());
+            dialogo.setMessage("Enviando inventario...");
+            dialogo.setIndeterminate(false);
+            dialogo.setCancelable(false);
+            dialogo.show();
+
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.setTimeout(60000);
+            String tipo = "application/json";
+
+            StringEntity entity;
+            Gson json = new Gson();
+            ArrayList<InventoryDetailViewModel> listInventoryDetailViewModels = new ArrayList<>();
+
+            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataReviewMaterial()) {
+                InventoryDetailViewModel inventoryDetailViewModel = new InventoryDetailViewModel();
+
+                inventoryDetailViewModel.setElementId(materialViewModel.getId());
+                inventoryDetailViewModel.setResponsibleId(-1);
+                inventoryDetailViewModel.setInventoryId(inventoryId);
+                inventoryDetailViewModel.setFound(1);
+                inventoryDetailViewModel.setElementType(materialViewModel.getTypeElementId());
+                inventoryDetailViewModel.setDeliveryDate(inventory_date_option.getText().toString());
+                inventoryDetailViewModel.setStateDescription("");
+                listInventoryDetailViewModels.add(inventoryDetailViewModel);
+            }
+            String resultJson = json.toJson(listInventoryDetailViewModels);
+
+            entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
+
+            client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+
+                    showMessageDialog(responseBody);
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onFinish() {
+                    super.onFinish();
+
+                    dialogo.dismiss();
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    InitializeNewInventroyProcess();
+
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
     }
 
     private void OpenListWareHouse() {
@@ -391,6 +473,128 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         }
         return true;
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void asyncInventoryHeader() {
+
+        InventroyHeaderViewModel inventroyHeaderViewModel = new InventroyHeaderViewModel();
+        inventroyHeaderViewModel.setCompanyId(1);
+        inventroyHeaderViewModel.setProductionId(Integer.valueOf(GlobalClass.getInstance().getIdSelectedProductionInventory()));
+        inventroyHeaderViewModel.setWarehouseTypeId(GlobalClass.getInstance().getIdSelectedWareHouseInventory());
+        inventroyHeaderViewModel.setResponsibleId(GlobalClass.getInstance().getIdSelectedResponsibleInventory());
+        inventroyHeaderViewModel.setInventoryUser(GlobalClass.getInstance().getUserName());
+        inventroyHeaderViewModel.setInitDate(inventory_date_option.getText().toString());
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryHeader/";
+
+        try {
+            final ProgressDialog dialogo = new ProgressDialog(getActivity());
+            dialogo.setMessage("Iniciando inventario...");
+            dialogo.setIndeterminate(false);
+            dialogo.setCancelable(false);
+            dialogo.show();
+
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.setTimeout(60000);
+            String tipo = "application/json";
+
+            StringEntity entity;
+            Gson json = new Gson();
+
+            String resultJson = json.toJson(inventroyHeaderViewModel);
+
+            entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
+
+            client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+
+                    showMessageDialog(responseBody);
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onFinish() {
+                    super.onFinish();
+
+                    dialogo.dismiss();
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    asyncListMaterialsByProduction();
+                    inventoryId = Integer.valueOf(responseString);
+
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+    }
+
+    private void asyncInventoryPending() {
+
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetPendingInventoryByUser/" + GlobalClass.getInstance().getUserName();
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setTimeout(30000);
+        final ProgressDialog dialogo = new ProgressDialog(getActivity());
+        dialogo.setMessage("Buscando inventarios pendientes al usuario..." + GlobalClass.getInstance().getUserName());
+        dialogo.setIndeterminate(false);
+        dialogo.setCancelable(false);
+        dialogo.show();
+        client.get(url, new TextHttpResponseHandler() {
+                    ArrayList<InventroyHeaderViewModel> listInventroyHeaderViewModels = null;
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        showMessageDialog(res);
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                        dialogo.dismiss();
+
+                        if (listInventroyHeaderViewModels != null && listInventroyHeaderViewModels.size() > 0)
+                            showConfirmInventoryContinueDialog("Inventario pendiente, seleccione una opción?");
+
+                    }
+
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @SuppressLint("RestrictedApi")
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                        try {
+
+                            TypeToken<List<InventroyHeaderViewModel>> token = new TypeToken<List<InventroyHeaderViewModel>>() {
+                            };
+                            Gson gson = new GsonBuilder().create();
+                            // Define Response class to correspond to the JSON response returned
+                            listInventroyHeaderViewModels = gson.fromJson(res, token.getType());
+
+                            if (listInventroyHeaderViewModels.size() > 0) {
+                                GlobalClass.getInstance().setIdSelectedProductionInventory(String.valueOf(listInventroyHeaderViewModels.get(0).getProductionId()));
+                                GlobalClass.getInstance().setIdSelectedResponsibleInventory(listInventroyHeaderViewModels.get(0).getResponsibleId());
+                                GlobalClass.getInstance().setIdSelectedWareHouseInventory(listInventroyHeaderViewModels.get(0).getWarehouseTypeId());
+                                GlobalClass.getInstance().setCurrentproductionName(listInventroyHeaderViewModels.get(0).getProductionName());
+                                setActionBarTittle();
+                            }
+
+                        } catch (JsonSyntaxException e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+                }
+        );
     }
 
     private void asyncListCountMaterialsByProduction() {
@@ -501,6 +705,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private void asyncListMaterialsByProduction() {
 
+        final ProgressDialog dialogo = new ProgressDialog(getActivity());
+        dialogo.setMessage("Cargando elementos...");
+        dialogo.setIndeterminate(false);
+        dialogo.setCancelable(false);
+        dialogo.show();
 
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
         AsyncHttpClient client = new AsyncHttpClient();
@@ -517,7 +726,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                     public void onFinish() {
                         super.onFinish();
                         showProgress(false);
-
+                        dialogo.hide();
                     }
 
                     @SuppressLint("RestrictedApi")
@@ -545,62 +754,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
                             inventory_btn_new_element.setVisibility(View.VISIBLE);
                             setActionBarTittle();
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-                }
-        );
-    }
-
-    private void asyncInconsistencies() {
-
-
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInconsistencies/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(360000);
-        showProgress(true);
-        client.get(url, new TextHttpResponseHandler() {
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-
-                    @SuppressLint("RestrictedApi")
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
-                            GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
-
-                            if (dataMaterial != null)
-                                GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
-                            else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-                            showProgress(false);
-                            mnuReview.setVisible(true);
-                            mnuSave.setVisible(true);
-                            mnuCancel.setVisible(true);
-                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
-                            inventory_btn_new_element.setVisibility(View.VISIBLE);
-                            setActionBarTittle();
+                            inventory_element.setVisibility(View.VISIBLE);
+                            inventory_data.setVisibility(View.GONE);
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
@@ -639,15 +794,33 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         builder.setCancelable(true);
         builder.setTitle(getString(R.string.app_name));
         builder.setMessage(getString(R.string.message_confirm_save));
-        builder.setPositiveButton(getString(R.string.btn_confirm),
+        builder.setPositiveButton(getString(R.string.btn_finalize),
                 new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                         if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
+                            LoadElements(1);
+                        else {
+                            showMessageDialog("No se han agregado elementos");
                             InitializeNewInventroyProcess();
-                        else
-                            showMessageDialog(getString(R.string.message_not_elements_inventory));
+                        }
+
+                    }
+                });
+        builder.setNeutralButton(getString(R.string.btn_continue_later),
+                new DialogInterface.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
+                            LoadElements(0);
+                        else {
+                            showMessageDialog("No se han agregado elementos");
+                            InitializeNewInventroyProcess();
+                        }
                     }
                 });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -735,10 +908,10 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void setActionBarTittle() {
 
 
-        if (selectedProductionName == null)
-            selectedProductionName = "";
+        if (GlobalClass.getInstance().getCurrentproductionName() == null)
+            GlobalClass.getInstance().setCurrentproductionName("");
 
-        inventory_element_prod.setText(selectedProductionName);
+        inventory_element_prod.setText(GlobalClass.getInstance().getCurrentproductionName());
         dateTimeUtilities = new DateTimeUtilities(getActivity());
 
     }
@@ -764,6 +937,45 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         createBitMapFromString(data);
         setListImagesAdapter();
 
+    }
+
+    public void showAlertDialogButtonClicked(View view) {
+
+        // setup the alert builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Notice");
+        builder.setMessage("Launching this missile will destroy the entire universe. Is this what you intended to do?");
+
+        // add the buttons
+        builder.setPositiveButton("Launch missile", null);
+        builder.setNeutralButton("Remind me later", null);
+        builder.setNegativeButton("Cancel", null);
+
+        // create and show the alert dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showConfirmInventoryContinueDialog(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton("Realizar inventario nuevo", new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            public void onClick(DialogInterface dialog, int id) {
+
+            }
+        });
+        dlgAlert.setNegativeButton("Continuar inventario", new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            public void onClick(DialogInterface dialog, int id) {
+                LoadElements(false);
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
     }
 
     private void showMessageDialog(String res) {
@@ -852,9 +1064,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (cancel) {
             focusView.requestFocus();
             return false;
-        } else {
-            inventory_element.setVisibility(View.VISIBLE);
-            inventory_data.setVisibility(View.GONE);
         }
         return true;
     }
@@ -904,7 +1113,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 String result = data.getStringExtra("productionName");
                 GlobalClass.getInstance().setIdSelectedProductionInventory(data.getStringExtra("productionId"));
                 this.inventory_program_option.setText(result);
-                selectedProductionName = result;
+                GlobalClass.getInstance().setCurrentproductionName(result);
 
             }
         }
@@ -976,10 +1185,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (!validateInventoryProcess()) {
             inventory_element.setVisibility(View.GONE);
             inventory_data.setVisibility(View.VISIBLE);
+
+            if (GlobalClass.getInstance().isNetworkAvailable())
+                asyncInventoryPending();
         } else {
             inventory_element.setVisibility(View.VISIBLE);
             inventory_data.setVisibility(View.GONE);
-
+            setActionBarTittle();
         }
         showProgress(false);
         return view;

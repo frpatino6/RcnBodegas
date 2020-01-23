@@ -38,9 +38,10 @@
     <string name="title_inventory_fragment">Inventario</string>
     <string name="title_element_legalization">Ingreso</string>
     <string name="title_bar_review">Inconsistencias</string>
-    <string name="btn_confirm">Aceptar</string>
+    <string name="btn_finalize">Finalizar</string>
+    <string name="btn_continue_later">Guardar</string>
     <string name="message_not_elements_inventory">No hay elementos agregados para revisar</string>
-    <string name="message_confirm_save">Está seguro de  finalizar el inventario y enviar el reporte de inconsistencias ?</string>
+    <string name="message_confirm_save">Desea finalizar o guardar y continuar despues?</string>
     <string name="message_confirm_cancel">Está seguro de  cancelar el proceso de inventario?</string>
     <string name="message_confirm_cancel_legalization">Está seguro de  cancelar el proceso de legalización de elementos?</string>
     <string name="option1">Agregar foto</string>
@@ -50,5 +51,6 @@
     <string name="no_internet_for_sync">No hay conexión a internet disponible para la sincronización.</string>
     <string name="message_not_sync_data">No hay información, sincronice el dispositivo e intente de nuevo</string>
     <string name="title_list_last_documents_created">Ultimos docs creados</string>
+    <string name="btn_confirm">Aceptar</string>
 
 </resources>
