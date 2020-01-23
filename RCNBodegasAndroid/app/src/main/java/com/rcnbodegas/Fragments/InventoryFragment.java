@@ -335,6 +335,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     @SuppressLint("RestrictedApi")
     private void InitializeNewInventroyProcess() {
         GlobalClass.getInstance().setCurrentInventoryActiveProcess(false);
+        inventoryId = 0;
+
         inventory_element.setVisibility(View.GONE);
         inventory_data.setVisibility(View.VISIBLE);
         GlobalClass.getInstance().setIdSelectedProductionInventory("");
@@ -361,7 +363,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             if (createHeader)
                 asyncInventoryHeader();
             else
-                asyncListMaterialsByProduction();
+                asyncListMaterialsByProduction(createHeader);
         else {
             new asyncGetCountMaterial().execute();
 
@@ -372,7 +374,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private void LoadElements(int finalize) {
 
 
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryDetail/" + finalize;
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryDetail/" + finalize + "/" + inventoryId;
 
         try {
             final ProgressDialog dialogo = new ProgressDialog(getActivity());
@@ -525,7 +527,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 @SuppressLint("RestrictedApi")
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    asyncListMaterialsByProduction();
+                    asyncListMaterialsByProduction(false);
                     inventoryId = Integer.valueOf(responseString);
 
                 }
@@ -580,11 +582,12 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             // Define Response class to correspond to the JSON response returned
                             listInventroyHeaderViewModels = gson.fromJson(res, token.getType());
 
-                            if (listInventroyHeaderViewModels.size() > 0) {
+                            if (listInventroyHeaderViewModels != null && listInventroyHeaderViewModels.size() > 0) {
                                 GlobalClass.getInstance().setIdSelectedProductionInventory(String.valueOf(listInventroyHeaderViewModels.get(0).getProductionId()));
                                 GlobalClass.getInstance().setIdSelectedResponsibleInventory(listInventroyHeaderViewModels.get(0).getResponsibleId());
                                 GlobalClass.getInstance().setIdSelectedWareHouseInventory(listInventroyHeaderViewModels.get(0).getWarehouseTypeId());
                                 GlobalClass.getInstance().setCurrentproductionName(listInventroyHeaderViewModels.get(0).getProductionName());
+                                inventoryId = listInventroyHeaderViewModels.get(0).getId();
                                 setActionBarTittle();
                             }
 
@@ -703,7 +706,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         );
     }
 
-    private void asyncListMaterialsByProduction() {
+    private void asyncListMaterialsByProduction(boolean createHeader) {
 
         final ProgressDialog dialogo = new ProgressDialog(getActivity());
         dialogo.setMessage("Cargando elementos...");
@@ -711,7 +714,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         dialogo.setCancelable(false);
         dialogo.show();
 
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" +
+                GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" +
+                GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" +
+                GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" +
+                GlobalClass.getInstance().getIdSelectedTypeElementHeader() + "/" + (createHeader == true ? "0" : "1" + "/" + inventoryId);
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(360000);
         showProgress(true);
@@ -800,12 +807,12 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
-                            LoadElements(1);
-                        else {
-                            showMessageDialog("No se han agregado elementos");
-                            InitializeNewInventroyProcess();
-                        }
+                        //if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
+                        LoadElements(1);
+                        // else {
+                        //      showMessageDialog("No se han agregado elementos");
+                        InitializeNewInventroyProcess();
+                        //}
 
                     }
                 });
