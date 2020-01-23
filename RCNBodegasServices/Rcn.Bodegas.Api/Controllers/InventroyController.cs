@@ -134,12 +134,12 @@ namespace Rcn.Bodegas.Api.Controllers
             }
         }
 
-        [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}")]
-        public async Task<IActionResult> GetMaterialByProduction(string wareHouseType, int production, int responsible, int type_element)
+        [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}/{continueInventory}/{inventoryId}")]
+        public async Task<IActionResult> GetMaterialByProduction(string wareHouseType, int production, int responsible, int type_element, int continueInventory, int inventoryId)
         {
             try
             {
-                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = await _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element);
+                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = await _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId);
                 return Ok(result);
             }
 
@@ -192,8 +192,8 @@ namespace Rcn.Bodegas.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPost("/Inventory/CreateInventoryDetail/{status}")]
-        public async Task<IActionResult> CreateInventoryDetail([FromBody] List<InventoryDetailViewModel> inventoryDetailViewModel, int status)
+        [HttpPost("/Inventory/CreateInventoryDetail/{status}/{inventoryId}")]
+        public async Task<IActionResult> CreateInventoryDetail([FromBody] List<InventoryDetailViewModel> inventoryDetailViewModel, int status, int inventoryId)
         {
             try
             {
@@ -201,7 +201,10 @@ namespace Rcn.Bodegas.Api.Controllers
                 {
                     _IInventroy.CreateInventoryDetail(item, status);
                 }
-
+                if (inventoryDetailViewModel.Count == 0)
+                {
+                    _IInventroy.UpdateStateInventory(inventoryId, status);
+                }
                 return Ok();
             }
 
