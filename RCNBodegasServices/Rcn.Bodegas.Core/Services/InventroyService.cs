@@ -423,7 +423,7 @@ namespace Rcn.Bodegas.Core.Services
             List<OracleParameter> parameters = new List<OracleParameter>();
             string query = @"SELECT I.* , u.NOMBRE AS NOMBRE_PRODUCCION FROM BD_INVENTARIO I
                             INNER JOIN BD_UBICACION U ON I.CODIGO_PRODUCCION =U.CODIGO
-                            WHERE USUARIO_LOGUIN=:USUARIO_LOGUIN AND I.ESTADO=0 ORDER BY I.CODIGO";
+                            WHERE USUARIO_LOGUIN=:USUARIO_LOGUIN AND I.ESTADO=0 ORDER BY I.CODIGO DESC";
 
             OracleParameter opwareHouse = new OracleParameter
             {
@@ -532,7 +532,7 @@ namespace Rcn.Bodegas.Core.Services
         /// <param name="idResponsible"></param>
         /// <param name="type_element"></param>
         /// <returns></returns>
-        public async Task<List<MaterialViewModel>> GetMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element)
+        public async Task<List<MaterialViewModel>> GetMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element, int continueInventory, int inventoryId)
         {
             _logger.LogInformation($"GetMaterialsForProduction");
             string marca = string.Empty;
@@ -569,6 +569,11 @@ namespace Rcn.Bodegas.Core.Services
             {
                 where += " AND CODIGO_TIPO_ELEMENTO=:TIPO_ELEMENTO_HEADER";
             }
+            if (continueInventory == 1)
+            {
+                where += $@" AND CODIGO NOT IN (SELECT BD_MTRIAL_CODIGO FROM bd_detalle_inventario WHERE codigo_inventario= {inventoryId})";
+            }
+
             query = query + where + orderby;
 
             OracleParameter OpCodProduction = new OracleParameter
@@ -794,7 +799,7 @@ namespace Rcn.Bodegas.Core.Services
             return result;
         }
 
-        private bool UpdateStateInventory(int inventoryId, int status)
+        public bool UpdateStateInventory(int inventoryId, int status)
         {
             int rowCount = 0;
 
