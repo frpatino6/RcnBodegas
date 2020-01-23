@@ -1,28 +1,25 @@
 ﻿using Rcn.Bodegas.Core.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rcn.Bodegas.Core.Interfaces
 {
-  public interface ISyncronization
-  {
-    Task<List<ProductionViewModel>> GetAllListProductionsAsync();
+    public interface ISyncronization
+    {
+        List<ProductionViewModel> GetAllListProductions();
 
+        List<ResponsibleViewModel> GetListAllResponsible();
 
-    Task<List<ResponsibleViewModel>> GetListAllResponsibleAsync();
+        List<TipoElementoViewModel> GetAllListTipoElemento();
 
-    Task<List<TipoElementoViewModel>> GetAllListTipoElementoAsync();
+        List<TipoElementoViewModel> GetAllListTipoPrenda();
 
-    Task<List<TipoElementoViewModel>> GetAllListTipoPrendaAsync();
+        List<WareHouseViewModel> GetListAllWarehouseUser();
 
-    Task<List<WareHouseViewModel>> GetListAllWarehouseUserAsync();
+        Int64 GetCountMaterial(string warehouseType);
 
-    Task<Int64> GetCountMaterialAsync();
+        List<MaterialViewModel> GetListAllMaterial(Int64 offSet, string warehouseType);
 
-    Task<List<MaterialViewModel>> GetListAllMaterialAsync(Int64 offSet);
-
-    Task<List<ResponsibleViewModel>> GetAllListWarehouseUserAsync();
-  }
+        List<ResponsibleViewModel> GetAllListWarehouseUser();
+    }
 }
