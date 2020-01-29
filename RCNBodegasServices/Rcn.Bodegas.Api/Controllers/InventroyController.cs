@@ -139,7 +139,7 @@ namespace Rcn.Bodegas.Api.Controllers
         {
             try
             {
-                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = await _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId);
+                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId);
                 return Ok(result);
             }
 

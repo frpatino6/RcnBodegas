@@ -22,5 +22,7 @@
         public string InventoryUser { get; set; }
 
         public string productionName { get; set; }
+
+        public int TypeElement { get; set; }
     }
 }
