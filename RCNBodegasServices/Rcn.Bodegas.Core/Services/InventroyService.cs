@@ -534,6 +534,106 @@ namespace Rcn.Bodegas.Core.Services
             return result;
         }
 
+        public async Task<List<InvetoryHeaderViewModel>> GetPendingInventoryById(int id)
+        {
+            _logger.LogInformation("GetPendingInventoryByUser");
+
+            List<InvetoryHeaderViewModel> result = null;
+            List<OracleParameter> parameters = new List<OracleParameter>();
+            string query = @"SELECT I.* , u.NOMBRE AS NOMBRE_PRODUCCION FROM BD_INVENTARIO I
+                            INNER JOIN BD_UBICACION U ON I.CODIGO_PRODUCCION =U.CODIGO
+                            WHERE I.CODIGO=:CODIGO AND I.ESTADO=0 ORDER BY I.CODIGO DESC";
+
+            OracleParameter opwareHouse = new OracleParameter
+            {
+                DbType = DbType.Int32,
+                Value = id,
+                ParameterName = "CODIGO"
+            };
+            parameters.Add(opwareHouse);
+
+            DataSet records = _IOracleManagment.GetDataSet(parameters, query);
+            foreach (DataTable table in records.Tables)
+            {
+                foreach (DataRow dr in table.Rows)
+                {
+                    int empresa = Convert.ToInt32(dr["AD_EMPRESA_CODIGO"].ToString());
+                    string nombre_produccion = dr["NOMBRE_PRODUCCION"].ToString();
+                    int codigo = Convert.ToInt32(dr["CODIGO"].ToString());
+                    string tipo_bodega = dr["CODIGO_TIPO_BODEGA"].ToString();
+                    int produccion = Convert.ToInt32(dr["CODIGO_PRODUCCION"].ToString());
+                    int responsable = Convert.ToInt32(dr["CODIGO_RESPONSABLE"].ToString());
+                    string fecha_inventario = dr["FECHA_INICIAL"].ToString();
+                    int estado = Convert.ToInt32(dr["ESTADO"].ToString());
+                    InvetoryHeaderViewModel invetoryHeaderViewModel = new InvetoryHeaderViewModel
+                    {
+                        Company = empresa,
+                        Id = codigo,
+                        InitDate = fecha_inventario,
+                        ProductionId = produccion,
+                        ResponsibleId = responsable,
+                        WarehouseTypeId = tipo_bodega,
+                        State = estado,
+                        productionName = nombre_produccion
+                    };
+
+                    if (result == null)
+                    {
+                        result = new List<InvetoryHeaderViewModel>();
+                    }
+                    result.Add(invetoryHeaderViewModel);
+                }
+            }
+            _logger.LogInformation($"result for GetListProductions {result}");
+            return result;
+        }
+
+        public async Task<List<InvetoryHeaderViewModel>> GetPendingInventory()
+        {
+            _logger.LogInformation("GetPendingInventoryByUser");
+
+            List<InvetoryHeaderViewModel> result = null;
+
+            string query = @"SELECT I.* , u.NOMBRE AS NOMBRE_PRODUCCION FROM BD_INVENTARIO I
+                            INNER JOIN BD_UBICACION U ON I.CODIGO_PRODUCCION =U.CODIGO
+                            WHERE  I.ESTADO=0 ORDER BY I.CODIGO DESC";
+
+            DataSet records = _IOracleManagment.GetDataSet(null, query);
+            foreach (DataTable table in records.Tables)
+            {
+                foreach (DataRow dr in table.Rows)
+                {
+                    int empresa = Convert.ToInt32(dr["AD_EMPRESA_CODIGO"].ToString());
+                    string nombre_produccion = dr["NOMBRE_PRODUCCION"].ToString();
+                    int codigo = Convert.ToInt32(dr["CODIGO"].ToString());
+                    string tipo_bodega = dr["CODIGO_TIPO_BODEGA"].ToString();
+                    int produccion = Convert.ToInt32(dr["CODIGO_PRODUCCION"].ToString());
+                    int responsable = Convert.ToInt32(dr["CODIGO_RESPONSABLE"].ToString());
+                    string fecha_inventario = dr["FECHA_INICIAL"].ToString();
+                    int estado = Convert.ToInt32(dr["ESTADO"].ToString());
+                    InvetoryHeaderViewModel invetoryHeaderViewModel = new InvetoryHeaderViewModel
+                    {
+                        Company = empresa,
+                        Id = codigo,
+                        InitDate = fecha_inventario,
+                        ProductionId = produccion,
+                        ResponsibleId = responsable,
+                        WarehouseTypeId = tipo_bodega,
+                        State = estado,
+                        productionName = nombre_produccion
+                    };
+
+                    if (result == null)
+                    {
+                        result = new List<InvetoryHeaderViewModel>();
+                    }
+                    result.Add(invetoryHeaderViewModel);
+                }
+            }
+            _logger.LogInformation($"result for GetListProductions {result}");
+            return result;
+        }
+
         /// <summary>
         /// Get list material by barcode
         /// </summary>
@@ -737,6 +837,16 @@ namespace Rcn.Bodegas.Core.Services
             return result;
         }
 
+        /// <summary>
+        /// Construye el select con base en los parametros enviados desde la aplicación
+        /// </summary>
+        /// <param name="warehouseType"></param>
+        /// <param name="idProdction"></param>
+        /// <param name="idResponsible"></param>
+        /// <param name="type_element"></param>
+        /// <param name="continueInventory"></param>
+        /// <param name="inventoryId"></param>
+        /// <returns></returns>
         private string GetQueryMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element, int continueInventory, int inventoryId)
         {
             _logger.LogInformation($"GetMaterialsForProduction");
@@ -914,6 +1024,8 @@ namespace Rcn.Bodegas.Core.Services
             }
             return result;
         }
+
+
 
         public bool UpdateStateInventory(int inventoryId, int status)
         {

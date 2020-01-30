@@ -24,6 +24,10 @@ namespace Rcn.Bodegas.Core.Interfaces
 
         Task<List<InvetoryHeaderViewModel>> GetPendingInventoryByUser(string userName);
 
+        Task<List<InvetoryHeaderViewModel>> GetPendingInventoryById(int id);
+
+        Task<List<InvetoryHeaderViewModel>> GetPendingInventory();
+
         int CreateInventoryHeader(InvetoryHeaderViewModel invetoryViewModel);
 
         int CreateInventoryDetail(InventoryDetailViewModel inventoryDetailViewModel, int status);

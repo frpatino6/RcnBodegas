@@ -239,6 +239,53 @@ namespace Rcn.Bodegas.Api.Controllers
             }
         }
 
+        [HttpGet("/Inventory/GetPendingInventoryById/{id}")]
+        public async Task<IActionResult> GetPendingInventoryById(int id)
+        {
+            try
+            {
+                List<InvetoryHeaderViewModel> result = await _IInventroy.GetPendingInventoryById(id);
+
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound($@"No se pudo recuperar elementos para el código de inventario {id}");
+                }
+            }
+            catch (WareHouseExceptions ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("/Inventory/GetPendingInventory")]
+        public async Task<IActionResult> GetPendingInventory()
+        {
+            try
+            {
+                List<InvetoryHeaderViewModel> result = await _IInventroy.GetPendingInventory();
+
+                return Ok(result);
+            }
+            catch (WareHouseExceptions ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }
