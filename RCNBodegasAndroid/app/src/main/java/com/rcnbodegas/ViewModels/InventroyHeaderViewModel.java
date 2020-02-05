@@ -12,9 +12,18 @@ public class InventroyHeaderViewModel {
     private int responsibleId;
     private int state;
     private int typeELement;
+    private String fechaMovimiento;
     private String warehouseTypeId;
 
     public InventroyHeaderViewModel() {
+    }
+
+    public String getFechaMovimiento() {
+        return fechaMovimiento;
+    }
+
+    public void setFechaMovimiento(String fechaMovimiento) {
+        this.fechaMovimiento = fechaMovimiento;
     }
 
     public int getCompanyId() {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class MaterialViewModel {
 
     private String barCode;
+    private String foundDate;
     private int id;
     private Boolean isAdmin;
     private boolean isReview;
@@ -28,7 +29,6 @@ public class MaterialViewModel {
     private Double unitPrice;
     private String wareHouseId;
     private String wareHouseName;
-
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
@@ -66,6 +66,14 @@ public class MaterialViewModel {
 
     public void setBarCode(String barCode) {
         this.barCode = barCode;
+    }
+
+    public String getFoundDate() {
+        return foundDate;
+    }
+
+    public void setFoundDate(String foundDate) {
+        this.foundDate = foundDate;
     }
 
     public int getId() {

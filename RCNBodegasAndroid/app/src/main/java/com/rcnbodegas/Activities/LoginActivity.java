@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,6 +41,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class LoginActivity extends AppCompatActivity {
 
+    TextView txtVersion;
     private Button btn_login;
     private Context context;
     private UserViewModel data;
@@ -57,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void InitializaControls() {
         input_email = findViewById(R.id.input_email);
+        txtVersion = findViewById(R.id.txtVersion);
         input_password = findViewById(R.id.input_password);
         btn_login = findViewById(R.id.btn_login);
         mLoginFormView = findViewById(R.id.login_form);
@@ -71,6 +74,8 @@ public class LoginActivity extends AppCompatActivity {
             input_email.setText("");
             input_password.setText("");
         }
+
+        txtVersion.setText(BuildConfig.VERSION_NAME);
         //globalVariable = (GlobalClass) getApplicationContext();
 
     }

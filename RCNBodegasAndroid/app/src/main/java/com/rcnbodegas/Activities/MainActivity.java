@@ -674,6 +674,7 @@ public class MainActivity extends AppCompatActivity
 
                 break;
             case R.id.navInventario:
+                GlobalClass.getInstance().setContinueInventory(false);
                 fragment = new InventoryFragment();
 
                 break;
@@ -694,6 +695,12 @@ public class MainActivity extends AppCompatActivity
             case R.id.navVerDocumentosGenerados:
                 fragment = new ListDocumentsFragment();
                 break;
+            case R.id.navInventarioContinue:
+                GlobalClass.getInstance().setContinueInventory(true);
+                fragment = new InventoryFragment();
+                break;
+
+
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

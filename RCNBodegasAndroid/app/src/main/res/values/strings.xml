@@ -27,9 +27,12 @@
     <string name="error_barcode_empty">Código de barras requerido</string>
     <string name="error_description_empty">Descripción es requerido</string>
     <string name="error_type_empty">Tipo elemento es requerido</string>
-    <string name="message_resume_review_list">Cantidad de elementos faltantes:</string>
-    <string name="message_resume_review_list_added">Cantidad de elementos agregados:</string>
-    <string name="message_not_find_element">No se encontró el elemento</string>
+    <string name="message_resume_review_list">Cant de elementos asignados:</string>
+    <string name="message_resume_review_list_added">Cant de elementos inventariados:</string>
+    <string name="message_resume_review_list_by_add">Cant de elementos por inventariar:</string>
+
+
+    <string name="message_not_find_element">EL elemento no fué econtrado dentro del inventario, por favor revise las características del elemento</string>
     <string name="message_element_exist">Ya se reviso el elemento</string>
     <string name="search_hint">Buscar</string>
     <string name="message_not_barcode">Ingrese el código de barras</string>
@@ -41,7 +44,7 @@
     <string name="btn_finalize">Finalizar</string>
     <string name="btn_continue_later">Guardar</string>
     <string name="message_not_elements_inventory">No hay elementos agregados para revisar</string>
-    <string name="message_confirm_save">Desea finalizar o guardar y continuar despues?</string>
+    <string name="message_confirm_save">Desea guardar y continuar despues?</string>
     <string name="message_confirm_cancel">Está seguro de  cancelar el proceso de inventario?</string>
     <string name="message_confirm_cancel_legalization">Está seguro de  cancelar el proceso de legalización de elementos?</string>
     <string name="option1">Agregar foto</string>
@@ -52,5 +55,6 @@
     <string name="message_not_sync_data">No hay información, sincronice el dispositivo e intente de nuevo</string>
     <string name="title_list_last_documents_created">Ultimos docs creados</string>
     <string name="btn_confirm">Aceptar</string>
+    <string name="hint_inventory_code">Código inventario</string>
 
 </resources>

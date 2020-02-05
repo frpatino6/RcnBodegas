@@ -26,14 +26,14 @@
                 android:layout_marginTop="2dp">
 
                 <EditText
-                    android:textSize="@dimen/abc_text_view_text_size"
                     android:id="@+id/inventory_warehouse_option"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:focusable="false"
                     android:hint="Bodega"
                     android:text=""
-                    android:textColor="#333" />
+                    android:textColor="#333"
+                    android:textSize="@dimen/abc_text_view_text_size" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -42,14 +42,14 @@
                 android:layout_marginTop="2dp">
 
                 <EditText
-                    android:textSize="@dimen/abc_text_view_text_size"
                     android:id="@+id/inventory_program_option"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:focusable="false"
                     android:hint="Programa"
                     android:text=""
-                    android:textColor="#333" />
+                    android:textColor="#333"
+                    android:textSize="@dimen/abc_text_view_text_size" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -58,44 +58,62 @@
                 android:layout_marginTop="2dp">
 
                 <EditText
-                    android:textSize="@dimen/abc_text_view_text_size"
                     android:id="@+id/inventory_responsible_option"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:focusable="false"
                     android:hint="Responsable"
                     android:text=""
-                    android:textColor="#333" />
+                    android:textColor="#333"
+                    android:textSize="@dimen/abc_text_view_text_size" />
             </android.support.design.widget.TextInputLayout>
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
 
                 <EditText
-                    android:textSize="@dimen/abc_text_view_text_size"
                     android:id="@+id/inventory_type_element_option"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:focusable="false"
                     android:hint="Tipo elemento"
                     android:text=""
-                    android:textColor="#333" />
+                    android:textColor="#333"
+                    android:textSize="@dimen/abc_text_view_text_size" />
             </android.support.design.widget.TextInputLayout>
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
 
                 <EditText
-                    android:textSize="@dimen/abc_text_view_text_size"
                     android:id="@+id/inventory_date_option"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:focusable="false"
                     android:hint="Fecha de Inventario"
                     android:text=""
-                    android:textColor="#333" />
+                    android:textColor="#333"
+                    android:textSize="@dimen/abc_text_view_text_size" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp">
+
+                <EditText
+                    android:id="@+id/inventory_date_option2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:hint="Consultar inventario hasta"
+                    android:text=""
+                    android:textColor="#333"
+                    android:textSize="@dimen/abc_text_view_text_size" />
             </android.support.design.widget.TextInputLayout>
 
             <Button
@@ -105,7 +123,7 @@
                 android:layout_gravity="end"
                 android:layout_margin="8dp"
                 android:background="@color/primaryColor"
-                android:text="OK"
+                android:text="Cargar material"
                 android:textColor="@color/primaryTextColor" />
 
         </LinearLayout>
@@ -137,12 +155,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/colorPrimary"
-                    android:textColor="#fff"
                     android:capitalize="characters"
                     android:clickable="false"
-                    android:textAlignment="center"
                     android:editable="false"
+                    android:textAlignment="center"
+                    android:textColor="#fff"
                     tools:text="" />
+
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -155,13 +174,13 @@
                         android:weightSum="12">
 
                         <EditText
-                            android:textSize="@dimen/abc_text_view_text_size"
                             android:id="@+id/inventory_element_barcode_edit"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="10"
                             android:hint="Ingrese el código de barras"
-                            android:text="" />
+                            android:text=""
+                            android:textSize="@dimen/abc_text_view_text_size" />
 
                         <ImageButton
                             android:id="@+id/btnSearch"
@@ -185,10 +204,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
-                        android:textSize="@dimen/abc_text_view_text_size"
                         android:hint="Descripción"
                         android:text=""
-                        android:textColor="#333" />
+                        android:textColor="#333"
+                        android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -197,14 +216,14 @@
                     android:layout_marginTop="2dp">
 
                     <EditText
-                        android:textSize="@dimen/abc_text_view_text_size"
                         android:id="@+id/inventory_element_type_edit"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
                         android:focusable="false"
                         android:hint="Tipo de Elemento"
-                        android:textColor="#333" />
+                        android:textColor="#333"
+                        android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -213,13 +232,13 @@
                     android:layout_marginTop="2dp">
 
                     <EditText
-                        android:textSize="@dimen/abc_text_view_text_size"
                         android:id="@+id/inventory_element_brand_edit"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
                         android:hint="Marca"
-                        android:textColor="#333" />
+                        android:textColor="#333"
+                        android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -228,13 +247,13 @@
                     android:layout_marginTop="2dp">
 
                     <EditText
-                        android:textSize="@dimen/abc_text_view_text_size"
                         android:id="@+id/inventory_element_price_edit"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
                         android:hint="Precio"
-                        android:textColor="#333" />
+                        android:textColor="#333"
+                        android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -243,14 +262,15 @@
                     android:layout_marginTop="2dp">
 
                     <EditText
-                        android:textSize="@dimen/abc_text_view_text_size"
                         android:id="@+id/inventory_element_value_edit"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:enabled="false"
                         android:hint="Valor materia"
-                        android:textColor="#333" />
+                        android:textColor="#333"
+                        android:textSize="@dimen/abc_text_view_text_size" />
                 </android.support.design.widget.TextInputLayout>
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/photos_recycler_view"
                     android:layout_width="match_parent"
@@ -267,17 +287,18 @@
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
+
     <android.support.design.widget.FloatingActionButton
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:id="@+id/inventory_btn_new_element"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="20dp"
         android:src="@mipmap/ic_add_material"
-        app:elevation="6dp"
         android:visibility="gone"
+        app:elevation="6dp"
         app:fabSize="normal"
         app:pressedTranslationZ="12dp" />
 
