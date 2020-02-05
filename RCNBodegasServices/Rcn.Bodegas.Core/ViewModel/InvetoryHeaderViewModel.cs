@@ -24,5 +24,7 @@
         public string productionName { get; set; }
 
         public int TypeElement { get; set; }
+
+        public string FechaMovimiento { get; set; }
     }
 }

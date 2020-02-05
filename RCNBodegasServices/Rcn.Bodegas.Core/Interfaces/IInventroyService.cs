@@ -16,7 +16,7 @@ namespace Rcn.Bodegas.Core.Interfaces
 
         Task<MaterialViewModel> GetMaterialByBarCode(string barcode);
 
-        List<MaterialViewModel> GetMaterialsForProduction(string warehouseType, int productionId, int responsibleId, int type_element, int continueInventory, int inventoryId);
+        List<MaterialViewModel> GetMaterialsForProduction(string warehouseType, int productionId, int responsibleId, int type_element, int continueInventory, int inventoryId, string fechaMovimiento);
 
         Task<System.Int64> GetMaterialsCountForProduction(string warehouseType, int idProdction, int idResponsible, int type_element);
 

@@ -134,12 +134,12 @@ namespace Rcn.Bodegas.Api.Controllers
             }
         }
 
-        [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}/{continueInventory}/{inventoryId}")]
-        public async Task<IActionResult> GetMaterialByProduction(string wareHouseType, int production, int responsible, int type_element, int continueInventory, int inventoryId)
+        [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}/{continueInventory}/{inventoryId}/{fechaMovimiento}")]
+        public async Task<IActionResult> GetMaterialByProduction(string wareHouseType, int production, int responsible, int type_element, int continueInventory, int inventoryId, string fechaMovimiento)
         {
             try
             {
-                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId);
+                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId, fechaMovimiento);
                 return Ok(result);
             }
 

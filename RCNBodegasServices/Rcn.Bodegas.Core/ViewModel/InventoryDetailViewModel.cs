@@ -13,7 +13,11 @@
 
         public string DeliveryDate { get; set; }
 
+        public string FoundDate { get; set; }
+
         public int ElementType { get; set; }
+
+        public string InventoryUser { get; set; }
 
     }
 }

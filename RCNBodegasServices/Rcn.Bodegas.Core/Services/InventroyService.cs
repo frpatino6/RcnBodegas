@@ -165,8 +165,10 @@ namespace Rcn.Bodegas.Core.Services
 
             OracleParameter OraMaterilCodigo = new OracleParameter(":BD_MTRIAL_CODIGO", OracleDbType.Int32, ParameterDirection.Input);
             OracleParameter OraCodigo = new OracleParameter(":CODIGO_INVENTARIO", OracleDbType.Int32, 20, ParameterDirection.Input);
+            OracleParameter OraUser = new OracleParameter(":USUARIO_LOGUIN", OracleDbType.Varchar2, 20, ParameterDirection.Input);
 
-            string query = $@" UPDATE BD_DETALLE_INVENTARIO SET ENCONTRADO = 1, FECHA_ENTREGA=TO_DATE('" + inventoryDetailViewModel.DeliveryDate + "', 'YYYY-MM-DD HH24:mi:ss') " +
+
+            string query = $@" UPDATE BD_DETALLE_INVENTARIO SET ENCONTRADO = 1, FECHA_ENTREGA=TO_DATE('" + inventoryDetailViewModel.DeliveryDate + "', 'YYYY-MM-DD HH24:mi:ss'), USUARIO_LOGUIN=:USUARIO_LOGUIN,FECHA_ENCONTRADO=TO_DATE('" + inventoryDetailViewModel.FoundDate + "', 'YYYY-MM-DD HH24:mi:ss') " +
                 "WHERE BD_MTRIAL_CODIGO=:BD_MTRIAL_CODIGO AND CODIGO_INVENTARIO=:CODIGO_INVENTARIO";
 
             using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
@@ -180,13 +182,14 @@ namespace Rcn.Bodegas.Core.Services
                         try
                         {
                             oraUpdate.CommandText = query;
+                            oraUpdate.Parameters.Add(OraUser);
                             oraUpdate.Parameters.Add(OraMaterilCodigo);
                             oraUpdate.Parameters.Add(OraCodigo);
 
 
                             OraMaterilCodigo.Value = inventoryDetailViewModel.ElementId;
                             OraCodigo.Value = inventoryDetailViewModel.InventoryId;
-
+                            OraUser.Value = inventoryDetailViewModel.InventoryUser;
                             rowCount = oraUpdate.ExecuteNonQuery();
                             transaction.Commit();
                         }
@@ -233,9 +236,12 @@ namespace Rcn.Bodegas.Core.Services
                 ParameterName = "TIPO_ELEMENTO_HEADER"
             };
 
-            string queryDetail = GetQueryMaterialsForProduction(invetoryHeaderViewModel.WarehouseTypeId, invetoryHeaderViewModel.ProductionId, invetoryHeaderViewModel.ResponsibleId, invetoryHeaderViewModel.TypeElement, 0, inventoryId);
+            string queryDetail = GetQueryMaterialsForProduction(
+                invetoryHeaderViewModel.WarehouseTypeId,
+                invetoryHeaderViewModel.ProductionId,
+                invetoryHeaderViewModel.ResponsibleId, invetoryHeaderViewModel.TypeElement, 0, inventoryId, invetoryHeaderViewModel.InventoryUser, invetoryHeaderViewModel.FechaMovimiento);
 
-            string query = $@" INSERT INTO BD_DETALLE_INVENTARIO (BD_MTRIAL_CODIGO,CODIGO_INVENTARIO,CODIGO_RESPONSABLE,DESCRIPCION_ESTADO,ENCONTRADO,TIPO_ELEMENTO)
+            string query = $@" INSERT INTO BD_DETALLE_INVENTARIO (BD_MTRIAL_CODIGO,CODIGO_INVENTARIO,CODIGO_RESPONSABLE,DESCRIPCION_ESTADO,ENCONTRADO,TIPO_ELEMENTO,FECHA_ENTREGA,USUARIO_LOGUIN)
                                         {queryDetail} ";
 
             using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
@@ -697,12 +703,14 @@ namespace Rcn.Bodegas.Core.Services
         /// <param name="idResponsible"></param>
         /// <param name="type_element"></param>
         /// <returns></returns>
-        public List<MaterialViewModel> GetMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element, int continueInventory, int inventoryId)
+        public List<MaterialViewModel> GetMaterialsForProduction(string warehouseType, int idProdction, int idResponsible,
+            int type_element, int continueInventory, int inventoryId, string fechaMovimiento = "")
         {
             _logger.LogInformation($"GetMaterialsForProduction");
             string marca = string.Empty;
             string materialName = string.Empty;
             string typeElement = string.Empty;
+            int responsable_material = -1;
             string barCode = string.Empty;
             int codigo = 0;
             int produccion = -1;
@@ -734,6 +742,12 @@ namespace Rcn.Bodegas.Core.Services
             if (type_element != -1)
             {
                 where += " AND V.CODIGO_TIPO_ELEMENTO=:TIPO_ELEMENTO_HEADER";
+            }
+
+
+            if (!String.IsNullOrEmpty(fechaMovimiento))
+            {
+                where += " AND FECHA_MOVIMIENTO <= TO_DATE('" + fechaMovimiento + "', 'YYYY-MM-DD HH24:mi:ss')";
             }
             if (continueInventory == 1)
             {
@@ -774,7 +788,6 @@ namespace Rcn.Bodegas.Core.Services
             };
             parameters.Add(OpCodTypeElement);
 
-
             IEnumerable<IDataRecord> records = _IOracleManagment.GetData(parameters, query);
 
             foreach (IDataRecord rec in records)
@@ -792,6 +805,7 @@ namespace Rcn.Bodegas.Core.Services
 
                 if (!rec.IsDBNull(rec.GetOrdinal("MARCA")))
                 {
+
                     marca = rec.GetString(rec.GetOrdinal("MARCA"));
                 }
 
@@ -818,6 +832,10 @@ namespace Rcn.Bodegas.Core.Services
                 {
                     encontrado = rec.GetInt32(rec.GetOrdinal("ENCONTRADO"));
                 }
+                if (!rec.IsDBNull(rec.GetOrdinal("CODIGO_RESPONSABLE")))
+                {
+                    responsable_material = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
+                }
 
                 result.Add(new MaterialViewModel
                 {
@@ -829,6 +847,7 @@ namespace Rcn.Bodegas.Core.Services
                     unitPrice = unitPrice,
                     productionId = produccion,
                     isReview = encontrado == 1 ? true : false,
+                    ResponsableMaterial = responsable_material,
                     ListaImagenesStr = new List<string>() //getImagesByMaterial(barcode)
 
                 });
@@ -847,7 +866,8 @@ namespace Rcn.Bodegas.Core.Services
         /// <param name="continueInventory"></param>
         /// <param name="inventoryId"></param>
         /// <returns></returns>
-        private string GetQueryMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element, int continueInventory, int inventoryId)
+        private string GetQueryMaterialsForProduction(string warehouseType, int idProdction, int idResponsible, int type_element, int continueInventory, int inventoryId,
+            string username, string fechaMovimiento = "")
         {
             _logger.LogInformation($"GetMaterialsForProduction");
             string marca = string.Empty;
@@ -870,7 +890,7 @@ namespace Rcn.Bodegas.Core.Services
                 from = "v_bd_materiales_ambientacion";
             }
 
-            string query = $"select  codigo, {inventoryId} as CODIGO_INVENTARIO,CODIGO_RESPONSABLE,'' as  DESCRIPCION_ESTADO, 0 as ENCONTRADO, CODIGO_TIPO_ELEMENTO  from {from} ";
+            string query = $"select  codigo, {inventoryId} as CODIGO_INVENTARIO,CODIGO_RESPONSABLE,'' as  DESCRIPCION_ESTADO, 0 as ENCONTRADO, CODIGO_TIPO_ELEMENTO, FECHA_MOVIMIENTO, '{username}' as USUARIO_LOGUIN from {from} ";
 
             if (idResponsible != -1)
             {
@@ -886,6 +906,10 @@ namespace Rcn.Bodegas.Core.Services
                 where += $@" AND CODIGO NOT IN (SELECT BD_MTRIAL_CODIGO FROM bd_detalle_inventario WHERE codigo_inventario= {inventoryId})";
             }
 
+            if (!String.IsNullOrEmpty(fechaMovimiento))
+            {
+                where += " AND FECHA_MOVIMIENTO <= TO_DATE('" + fechaMovimiento + "', 'YYYY-MM-DD HH24:mi:ss')";
+            }
             query = query + where + orderby;
 
             return query;
@@ -1024,8 +1048,6 @@ namespace Rcn.Bodegas.Core.Services
             }
             return result;
         }
-
-
 
         public bool UpdateStateInventory(int inventoryId, int status)
         {
