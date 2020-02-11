@@ -1261,7 +1261,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         return GlobalClass.getInstance().getCurrentInventoryActiveProcess();
     }
 
-    public void DataRecived(String BarcodeData) {
+    public void DataRecived(String BarcodeData)  {
         final String _barcodeData = BarcodeData;
         getActivity().runOnUiThread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
