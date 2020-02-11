@@ -138,7 +138,7 @@ namespace Rcn.Bodegas.Core.Services
 
                             rowCount = oraUpdate.ExecuteNonQuery();
 
-                            CreateInventoryDetail(invetoryViewModel, Convert.ToInt32(OraCodigoElemento.Value.ToString()), invetoryViewModel.TypeElement);
+                            CreateInventoryDetail(transaction, invetoryViewModel, Convert.ToInt32(OraCodigoElemento.Value.ToString()), invetoryViewModel.TypeElement);
 
                             transaction.Commit();
                         }
@@ -205,7 +205,7 @@ namespace Rcn.Bodegas.Core.Services
             return inventoryDetailViewModel.InventoryId;
         }
 
-        private int CreateInventoryDetail(InvetoryHeaderViewModel invetoryHeaderViewModel, int inventoryId, int typeElementId)
+        private int CreateInventoryDetail(OracleTransaction transaction, InvetoryHeaderViewModel invetoryHeaderViewModel, int inventoryId, int typeElementId)
         {
 
             OracleParameter OpCodProduction = new OracleParameter
@@ -249,35 +249,33 @@ namespace Rcn.Bodegas.Core.Services
                 con.Open();
                 using (OracleCommand oraUpdate = con.CreateCommand())
                 {
-                    using (OracleTransaction transaction = con.BeginTransaction(IsolationLevel.ReadCommitted))
+
+                    oraUpdate.Transaction = transaction;
+                    try
                     {
-                        oraUpdate.Transaction = transaction;
-                        try
+                        oraUpdate.CommandText = query;
+                        oraUpdate.Parameters.Add(OpwarehouseType);
+                        oraUpdate.Parameters.Add(OpCodProduction);
+
+                        if (invetoryHeaderViewModel.ResponsibleId != -1)
                         {
-                            oraUpdate.CommandText = query;
-                            oraUpdate.Parameters.Add(OpwarehouseType);
-                            oraUpdate.Parameters.Add(OpCodProduction);
-
-                            if (invetoryHeaderViewModel.ResponsibleId != -1)
-                            {
-                                oraUpdate.Parameters.Add(OpCodResponsible);
-                            }
-
-                            if (typeElementId != -1)
-                            {
-                                oraUpdate.Parameters.Add(OpCodTypeElement);
-                            }
-
-                            int rowCount = oraUpdate.ExecuteNonQuery();
-
-                            transaction.Commit();
+                            oraUpdate.Parameters.Add(OpCodResponsible);
                         }
-                        catch (System.Exception)
+
+                        if (typeElementId != -1)
                         {
-                            transaction.Rollback();
-                            throw;
+                            oraUpdate.Parameters.Add(OpCodTypeElement);
                         }
+
+                        int rowCount = oraUpdate.ExecuteNonQuery();
+
                     }
+                    catch (System.Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+
                 }
 
                 return 0;
@@ -358,8 +356,7 @@ namespace Rcn.Bodegas.Core.Services
                           Select NOMBRE 
                           From BD_UBICACION 
                           Where Codigo = M.bd_ubccion_codigo) Produccion 
-                    FROM bd_movimiento_material M
-                    WHERE M.BD_Ubccion_Codigo  =:production
+                    FROM bd_movimiento_material M                  
                     GROUP BY M.pa_tercero_codigo, M.BD_Ubccion_Codigo";
 
             _logger.LogInformation("Query " + query);
