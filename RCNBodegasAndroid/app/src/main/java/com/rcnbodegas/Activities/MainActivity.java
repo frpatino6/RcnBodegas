@@ -44,6 +44,7 @@ import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.NetworkStateReceiver;
 import com.rcnbodegas.Global.SyncService;
 import com.rcnbodegas.R;
+import com.rcnbodegas.Repository.MaterialRepository;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity
     private String lastCreatedNUmberDocument;
     private View mLoginFormView;
     private View mProgressView;
+    private MaterialRepository materialRepository;
     private NetworkStateReceiver networkStateReceiver;
     private SharedPreferences pref;
     private TextView txtUser;
@@ -630,6 +632,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //materialRepository = new MaterialRepository(getApplicationContext());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

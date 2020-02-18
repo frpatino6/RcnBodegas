@@ -1,7 +1,13 @@
 package com.rcnbodegas.ViewModels;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity
 public class InventroyHeaderViewModel {
 
+    @PrimaryKey
+    private int codigo;
     private int companyId;
     private String endDate;
     private int id;
@@ -14,6 +20,7 @@ public class InventroyHeaderViewModel {
     private int typeELement;
     private String fechaMovimiento;
     private String warehouseTypeId;
+
 
     public InventroyHeaderViewModel() {
     }

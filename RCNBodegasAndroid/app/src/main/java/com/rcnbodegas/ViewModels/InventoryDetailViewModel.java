@@ -1,5 +1,8 @@
 package com.rcnbodegas.ViewModels;
 
+import androidx.room.Entity;
+
+@Entity
 public class InventoryDetailViewModel {
     private String DeliveryDate;
     private int ElementId;

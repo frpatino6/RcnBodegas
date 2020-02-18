@@ -67,6 +67,7 @@ import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.TScanner;
 import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.Repository.MaterialRepository;
 import com.rcnbodegas.ViewModels.InventoryDetailViewModel;
 import com.rcnbodegas.ViewModels.InventroyHeaderViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
@@ -112,6 +113,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private ProgressDialog dialogo;
     private int inventoryId;
     private Button inventory_btn_find;
+    private MaterialRepository materialRepository;
     private FloatingActionButton inventory_btn_new_element;
     private Button inventory_btn_ok;
     private LinearLayout inventory_data;
@@ -203,6 +205,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     @SuppressLint("CutPasteId")
     private void InitializeControls(View v) {
+
+
 
         btnSearch = v.findViewById(R.id.btnSearch);
 
