@@ -10,27 +10,27 @@ public class InventroyHeaderViewModel {
     private int codigo;
     private int companyId;
     private String endDate;
+    private String fechaMovimiento;
     private int id;
     private String initDate;
     private String inventoryUser;
     private int productionId;
     private String productionName;
     private int responsibleId;
+    private boolean sincronized=false;
     private int state;
     private int typeELement;
-    private String fechaMovimiento;
     private String warehouseTypeId;
-
 
     public InventroyHeaderViewModel() {
     }
 
-    public String getFechaMovimiento() {
-        return fechaMovimiento;
+    public int getCodigo() {
+        return codigo;
     }
 
-    public void setFechaMovimiento(String fechaMovimiento) {
-        this.fechaMovimiento = fechaMovimiento;
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
     }
 
     public int getCompanyId() {
@@ -47,6 +47,14 @@ public class InventroyHeaderViewModel {
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    public String getFechaMovimiento() {
+        return fechaMovimiento;
+    }
+
+    public void setFechaMovimiento(String fechaMovimiento) {
+        this.fechaMovimiento = fechaMovimiento;
     }
 
     public int getId() {
@@ -119,5 +127,13 @@ public class InventroyHeaderViewModel {
 
     public void setWarehouseTypeId(String warehouseTypeId) {
         this.warehouseTypeId = warehouseTypeId;
+    }
+
+    public boolean isSincronized() {
+        return sincronized;
+    }
+
+    public void setSincronized(boolean sincronized) {
+        this.sincronized = sincronized;
     }
 }

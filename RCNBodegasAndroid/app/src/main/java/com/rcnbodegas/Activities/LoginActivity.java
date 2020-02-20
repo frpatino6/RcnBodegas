@@ -11,7 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -67,8 +67,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
         if (BuildConfig.DEBUG) {
-            input_email.setText("jsierra");
-            input_password.setText("rcntv2020-01");
+            input_email.setText("jicastaneda");
+            input_password.setText("juanjoseluciana-2019");
             // do something for a debug build
         } else {
             input_email.setText("");

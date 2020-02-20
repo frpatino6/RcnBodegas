@@ -1,4 +1,4 @@
-package com.rcnbodegas.Global;
+package com.rcnbodegas.CustomEvents;
 
 
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;

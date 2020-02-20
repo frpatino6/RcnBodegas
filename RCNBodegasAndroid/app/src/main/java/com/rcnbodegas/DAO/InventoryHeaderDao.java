@@ -1,7 +1,6 @@
 package com.rcnbodegas.DAO;
 
-import android.arch.lifecycle.LiveData;
-
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -13,9 +12,12 @@ import java.util.List;
 @Dao
 public interface InventoryHeaderDao {
 
-    @Insert
-    Long insertCustomer(InventroyHeaderViewModel inventroyHeaderViewModel);
-
     @Query("SELECT * FROM InventroyHeaderViewModel")
     LiveData<List<InventroyHeaderViewModel>> geHeaderByDocumentNUmber();
+
+    @Query("SELECT * FROM InventroyHeaderViewModel where sincronized= 0")
+    InventroyHeaderViewModel getInventoryHeader();
+
+    @Insert
+    Long insert(InventroyHeaderViewModel inventroyHeaderViewModel);
 }

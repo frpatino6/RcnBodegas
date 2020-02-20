@@ -3,6 +3,7 @@ package com.rcnbodegas.ViewModels;
 import android.graphics.Bitmap;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.ArrayList;
@@ -12,12 +13,14 @@ public class MaterialViewModel {
     private String barCode;
     private String foundDate;
     private int id;
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     private int idDetail;
     private Boolean isAdmin;
     private boolean isReview;
     private String legalizedBy;
+    @Ignore
     private ArrayList<Bitmap> listaImagenesBmp;
+    @Ignore
     private ArrayList<String> listaImagenesStr;
     private String marca;
     private String materialName;
@@ -34,7 +37,7 @@ public class MaterialViewModel {
     private Double unitPrice;
     private String wareHouseId;
     private String wareHouseName;
-    private int IdHeader;
+    private int idHeader;
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
@@ -59,11 +62,11 @@ public class MaterialViewModel {
     }
 
     public int getIdHeader() {
-        return IdHeader;
+        return idHeader;
     }
 
     public void setIdHeader(int idHeader) {
-        IdHeader = idHeader;
+        this.idHeader = idHeader;
     }
 
     public int getIdDetail() {

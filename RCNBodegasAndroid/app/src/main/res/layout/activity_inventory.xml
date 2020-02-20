@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
@@ -34,9 +34,9 @@
                     android:text=""
                     android:textColor="#333"
                     android:textSize="@dimen/abc_text_view_text_size" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
@@ -50,9 +50,9 @@
                     android:text=""
                     android:textColor="#333"
                     android:textSize="@dimen/abc_text_view_text_size" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
@@ -66,9 +66,9 @@
                     android:text=""
                     android:textColor="#333"
                     android:textSize="@dimen/abc_text_view_text_size" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
@@ -82,9 +82,9 @@
                     android:text=""
                     android:textColor="#333"
                     android:textSize="@dimen/abc_text_view_text_size" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
@@ -98,9 +98,9 @@
                     android:text=""
                     android:textColor="#333"
                     android:textSize="@dimen/abc_text_view_text_size" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp">
@@ -114,7 +114,7 @@
                     android:text=""
                     android:textColor="#333"
                     android:textSize="@dimen/abc_text_view_text_size" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/inventory_btn_ok"
@@ -162,7 +162,7 @@
                     android:textColor="#fff"
                     tools:text="" />
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -192,9 +192,9 @@
 
                     </LinearLayout>
 
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -208,9 +208,9 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -224,9 +224,9 @@
                         android:hint="Tipo de Elemento"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -239,9 +239,9 @@
                         android:hint="Marca"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -254,9 +254,9 @@
                         android:hint="Precio"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -269,9 +269,9 @@
                         android:hint="Valor materia"
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/photos_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -288,7 +288,7 @@
         </ScrollView>
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/inventory_btn_new_element"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

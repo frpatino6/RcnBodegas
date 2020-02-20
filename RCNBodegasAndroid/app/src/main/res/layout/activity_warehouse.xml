@@ -26,7 +26,7 @@
                 android:visibility="gone">
 
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -40,9 +40,9 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -56,9 +56,9 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -72,9 +72,9 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -88,7 +88,7 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
 
                 <View
@@ -96,7 +96,7 @@
                     android:layout_height="1dp"
                     android:background="#ddd" />
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -110,7 +110,7 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
 
                 <View
@@ -151,7 +151,7 @@
                     android:editable="false"
                     tools:text="" />
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -163,9 +163,9 @@
                         android:hint="Código de Barras"
                         android:text=""
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -180,7 +180,7 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -189,7 +189,7 @@
                     android:weightSum="10">
 
 
-                    <android.support.design.widget.TextInputLayout
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
@@ -205,7 +205,7 @@
                             android:textColor="#333"
                             android:textSize="@dimen/abc_text_view_text_size" />
 
-                    </android.support.design.widget.TextInputLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <CheckBox
                         android:id="@+id/chkIsAdmin"
@@ -216,7 +216,7 @@
                         android:layout_weight="3"></CheckBox>
                 </LinearLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -231,9 +231,9 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -248,9 +248,9 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp">
@@ -265,12 +265,12 @@
                         android:text=""
                         android:textColor="#333"
                         android:textSize="@dimen/abc_text_view_text_size" />
-                </android.support.design.widget.TextInputLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
 
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/photos_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -297,7 +297,7 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/warehouse_btn_camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -308,7 +308,7 @@
         app:fabSize="normal"
         app:pressedTranslationZ="12dp" />
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/warehouse_btn_new_element"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -12,17 +12,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -30,6 +19,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -37,6 +39,8 @@ import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
+import com.rcnbodegas.CustomEvents.onHttpRequestError;
+import com.rcnbodegas.CustomEvents.onHttpRequestSuccess;
 import com.rcnbodegas.Fragments.InventoryFragment;
 import com.rcnbodegas.Fragments.ListDocumentsFragment;
 import com.rcnbodegas.Fragments.WarehouseFragment;
@@ -44,7 +48,9 @@ import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.NetworkStateReceiver;
 import com.rcnbodegas.Global.SyncService;
 import com.rcnbodegas.R;
+import com.rcnbodegas.Repository.InventoryHeaderRepository;
 import com.rcnbodegas.Repository.MaterialRepository;
+import com.rcnbodegas.ViewModels.InventroyHeaderViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 import com.rcnbodegas.ViewModels.ResponsibleViewModel;
@@ -52,7 +58,9 @@ import com.rcnbodegas.ViewModels.TypeElementViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -76,7 +84,8 @@ public class MainActivity extends AppCompatActivity
     private ProgressDialog dialog;
     private ProgressDialog dialogo;
     private SharedPreferences.Editor editor;
-    private android.support.v4.app.FragmentManager fragmentManager;
+    private FragmentManager fragmentManager;
+    private InventroyHeaderViewModel inventroyHeaderViewModel;
     private boolean isOk;
     private String lastCreatedNUmberDocument;
     private View mLoginFormView;
@@ -105,6 +114,34 @@ public class MainActivity extends AppCompatActivity
             materialSync.clear();
         warehouseType = "V";
         new asyncBasicTables().execute();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void SendPendingInventory() {
+
+        //Carga el encabezado del inventario
+        InventoryHeaderRepository inventoryHeaderRepository = new InventoryHeaderRepository(getApplicationContext());
+        inventroyHeaderViewModel = inventoryHeaderRepository.getInventoryHeader();
+
+        if (inventroyHeaderViewModel != null)
+            GlobalClass.getInstance().asyncUpdateElements(0, inventroyHeaderViewModel.getCodigo(), getDate(),
+                    getApplicationContext(), false, new onHttpRequestSuccess() {
+                        @Override
+                        public void onSuccess(boolean result) {
+                            GlobalClass.getInstance().setIdSelectedProductionInventory("");
+                            GlobalClass.getInstance().setIdSelectedResponsibleInventory(-1);
+                            GlobalClass.getInstance().setIdSelectedTypeElementInventory(-1);
+
+                            GlobalClass.getInstance().setDataMaterialInventory(new ArrayList<MaterialViewModel>());
+                            GlobalClass.getInstance().setListMaterialBYProduction(new ArrayList<MaterialViewModel>());
+                            GlobalClass.getInstance().setDataReviewMaterial(new ArrayList<MaterialViewModel>());
+                        }
+                    }, new onHttpRequestError() {
+                        @Override
+                        public void onError(String responseBody) {
+
+                        }
+                    });
     }
 
     private void SendPendingMaterials(boolean showMessage) {
@@ -530,6 +567,14 @@ public class MainActivity extends AppCompatActivity
         );
     }
 
+    private String getDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String fechaActual = sdf.format(new Date());
+
+        return fechaActual;
+
+    }
+
     private void parseArrayMaterial(ArrayList<String> materialSync) {
         SharedPreferences pref = getApplicationContext().getSharedPreferences("materialbodegasPreferences", 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
@@ -610,12 +655,15 @@ public class MainActivity extends AppCompatActivity
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void networkAvailable() {
+        //Genera documentos de legalización en background
         SendPendingMaterials(false);
+        SendPendingInventory();
+
     }
 
     @Override
     public void networkUnavailable() {
-        Log.d("tommydevall", "I'm dancing with myself");
+        Log.d("Network", "Sin conexión a internet");
         /* TODO: Your disconnection-oriented stuff here */
     }
 
@@ -632,7 +680,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //materialRepository = new MaterialRepository(getApplicationContext());
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

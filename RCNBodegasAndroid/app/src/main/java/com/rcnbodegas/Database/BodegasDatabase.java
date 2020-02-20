@@ -10,10 +10,11 @@ import com.rcnbodegas.ViewModels.InventroyHeaderViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 
 @Database(entities =
-        {MaterialViewModel.class },
+        {MaterialViewModel.class, InventroyHeaderViewModel.class },
         version = 1, exportSchema = false)
 public abstract class BodegasDatabase extends RoomDatabase {
     public abstract MaterialDao materialDao();
+    public abstract InventoryHeaderDao inventoryHeaderDao();
 
 
 }
