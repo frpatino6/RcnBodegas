@@ -8,6 +8,8 @@ namespace Rcn.Bodegas.Core.ViewModel
         {
             numero_doc_recepcion = 0;
         }
+
+        public int IdHeader { get; set; }
         public int Id { get; set; }
         public string wareHouseId { get; set; }
         public string wareHouseName { get; set; }

@@ -729,7 +729,7 @@ namespace Rcn.Bodegas.Core.Services
                 from = "v_bd_materiales_ambientacion  v inner join BD_DETALLE_INVENTARIO D ON V.CODIGO=D.BD_MTRIAL_CODIGO";
             }
 
-            string query = $"select v.*,d.ENCONTRADO from {from} ";
+            string query = $"select v.MATERIAL,V.TIPO_ELEMENTO,V.MARCA,V.CODIGO_BARRAS,V.PRECIO_UNITARIO,V.CODIGO,V.CODIGO_PRODUCCION, V.CODIGO_RESPONSABLE , d.ENCONTRADO  from {from} ";
 
             if (idResponsible != -1)
             {
@@ -836,6 +836,7 @@ namespace Rcn.Bodegas.Core.Services
 
                 result.Add(new MaterialViewModel
                 {
+                    IdHeader = inventoryId,
                     Id = codigo,
                     materialName = materialName,
                     typeElementName = typeElement,
@@ -852,6 +853,125 @@ namespace Rcn.Bodegas.Core.Services
             _logger.LogInformation($"result for GetListProductions {result.Count}");
             return result;
         }
+
+        /// <summary>
+        /// Get list material 
+        /// </summary>
+        /// <param name="warehouseType"></param>
+        /// <param name="idProdction"></param>
+        /// <param name="idResponsible"></param>
+        /// <param name="type_element"></param>
+        /// <returns></returns>
+        public List<MaterialViewModel> GetMaterialsByHeader(int inventoryId)
+        {
+            _logger.LogInformation($"GetMaterialsByHeader");
+            string marca = string.Empty;
+            string materialName = string.Empty;
+            string typeElement = string.Empty;
+            int responsable_material = -1;
+            string barCode = string.Empty;
+            int codigo = 0;
+            int produccion = -1;
+            int encontrado = 0;
+            string where = "  WHERE DI.CODIGO_INVENTARIO = :CODIGO_INVENTARIO  ";
+            string orderby = " ORDER BY  M.DESCRIPCION";
+            string from = string.Empty;
+            decimal unitPrice = 0;
+
+            List<MaterialViewModel> result = new List<MaterialViewModel>();
+            List<OracleParameter> parameters = new List<OracleParameter>();
+
+
+            string query = $@"  select  M.DESCRIPCION AS MATERIAL, DI.TIPO_ELEMENTO,M.MARCA,M.CODIGO_BARRAS,M.VALOR_COMPRA as PRECIO_UNITARIO,DI.BD_MTRIAL_CODIGO AS CODIGO, 
+                                I.CODIGO_PRODUCCION, DI.ENCONTRADO,I.CODIGO_RESPONSABLE
+                                from bd_detalle_inventario DI
+                                INNER JOIN BD_MATERIAL M on DI.BD_MTRIAL_CODIGO = M.CODIGO
+                                INNER JOIN BD_INVENTARIO I ON DI.CODIGO_INVENTARIO = I.CODIGO";
+
+
+
+            query = query + where + orderby;
+
+            OracleParameter OpCodInventario = new OracleParameter
+            {
+                DbType = DbType.Int32,
+                Value = inventoryId,
+                ParameterName = "CODIGO_INVENTARIO"
+            };
+            parameters.Add(OpCodInventario);
+
+
+            IEnumerable<IDataRecord> records = _IOracleManagment.GetData(parameters, query);
+
+            foreach (IDataRecord rec in records)
+            {
+
+                if (!rec.IsDBNull(rec.GetOrdinal("MATERIAL")))
+                {
+                    materialName = rec.GetString(rec.GetOrdinal("MATERIAL"));
+                }
+
+                if (!rec.IsDBNull(rec.GetOrdinal("TIPO_ELEMENTO")))
+                {
+                    typeElement = Convert.ToString(rec.GetInt32(rec.GetOrdinal("TIPO_ELEMENTO")));
+                }
+
+                if (!rec.IsDBNull(rec.GetOrdinal("MARCA")))
+                {
+
+                    marca = rec.GetString(rec.GetOrdinal("MARCA"));
+                }
+
+                if (!rec.IsDBNull(rec.GetOrdinal("CODIGO_BARRAS")))
+                {
+                    barCode = rec.GetString(rec.GetOrdinal("CODIGO_BARRAS"));
+                }
+
+                if (!rec.IsDBNull(rec.GetOrdinal("PRECIO_UNITARIO")))
+                {
+                    unitPrice = rec.GetDecimal(rec.GetOrdinal("PRECIO_UNITARIO"));
+                }
+
+                if (!rec.IsDBNull(rec.GetOrdinal("CODIGO")))
+                {
+                    codigo = rec.GetInt32(rec.GetOrdinal("CODIGO"));
+                }
+
+                if (!rec.IsDBNull(rec.GetOrdinal("CODIGO_PRODUCCION")))
+                {
+                    produccion = rec.GetInt32(rec.GetOrdinal("CODIGO_PRODUCCION"));
+                }
+                if (!rec.IsDBNull(rec.GetOrdinal("ENCONTRADO")))
+                {
+                    encontrado = rec.GetInt32(rec.GetOrdinal("ENCONTRADO"));
+                }
+                if (!rec.IsDBNull(rec.GetOrdinal("CODIGO_RESPONSABLE")))
+                {
+                    responsable_material = rec.GetInt32(rec.GetOrdinal("CODIGO_RESPONSABLE"));
+                }
+
+                result.Add(new MaterialViewModel
+                {
+                    IdHeader = inventoryId,
+                    Id = codigo,
+                    materialName = materialName,
+                    typeElementName = typeElement,
+                    marca = marca,
+                    barCode = barCode,
+                    unitPrice = unitPrice,
+                    productionId = produccion,
+                    isReview = encontrado == 1 ? true : false,
+                    ResponsableMaterial = responsable_material,
+                    ListaImagenesStr = new List<string>() //getImagesByMaterial(barcode)
+
+                });
+            }
+            _logger.LogInformation($"result for GetListProductions {result.Count}");
+            return result;
+        }
+
+
+
 
         /// <summary>
         /// Construye el select con base en los parametros enviados desde la aplicación

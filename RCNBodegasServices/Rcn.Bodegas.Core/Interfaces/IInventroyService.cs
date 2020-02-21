@@ -34,6 +34,8 @@ namespace Rcn.Bodegas.Core.Interfaces
 
         List<string> getImagesByMaterial(int idMaterial);
 
+        List<MaterialViewModel> GetMaterialsByHeader(int inventoryId);
+
         bool UpdateStateInventory(int inventoryId, int status);
 
     }
