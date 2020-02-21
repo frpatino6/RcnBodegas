@@ -2,6 +2,10 @@ package com.rcnbodegas.Global;
 
 import android.view.KeyEvent;
 
+import com.rcnbodegas.Interfaces.IObserver;
+import com.rcnbodegas.Interfaces.IScanner;
+import com.rcnbodegas.Interfaces.ISubject;
+
 import java.util.List;
 
 /**

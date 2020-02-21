@@ -1,11 +1,11 @@
 package com.rcnbodegas.Activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +34,7 @@ public class ListItemReviewActivity extends AppCompatActivity {
     private ArrayList<MaterialViewModel> sortEmpList;
     private TextView txtAdded;
     private TextView txtResumen;
+    private TextView txtDiference;
     private TextView txtTotal;
 
     private void FilterListView(String query) {
@@ -75,6 +76,8 @@ public class ListItemReviewActivity extends AppCompatActivity {
     private void InitializeControls() {
         txtResumen = findViewById(R.id.txtResumen);
         txtAdded = findViewById(R.id.txtAdded);
+        txtDiference= findViewById(R.id.txtDiference);
+
         mIncidenciasFormView = findViewById(R.id.review_recycler_view);
         mProgressView = findViewById(R.id.review_progress);
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
@@ -118,7 +121,7 @@ public class ListItemReviewActivity extends AppCompatActivity {
                 listMaterialByReview.add(materialViewModel);
         }
 
-        txtResumen.setText(getString(R.string.message_resume_review_list) + listMaterialByReview.size());
+        txtResumen.setText(getString(R.string.message_resume_review_list) + " " + GlobalClass.getInstance().getListMaterialBYProduction().size());
 
         SumPurchaseValue();
     }
@@ -133,7 +136,8 @@ public class ListItemReviewActivity extends AppCompatActivity {
                 listMaterialAdded.add(materialViewModel);
         }
 
-        txtAdded.setText(getString(R.string.message_resume_review_list_added) + listMaterialAdded.size());
+        txtAdded.setText(getString(R.string.message_resume_review_list_added) + " " + listMaterialAdded.size());
+        txtDiference.setText(getString(R.string.message_resume_review_list_by_add) + " " + String.valueOf(listMaterialByReview.size()));
 
 
     }

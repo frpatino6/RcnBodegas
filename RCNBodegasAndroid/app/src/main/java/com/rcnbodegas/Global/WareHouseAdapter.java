@@ -1,13 +1,14 @@
 package com.rcnbodegas.Global;
 
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.rcnbodegas.CustomEvents.onRecyclerWarehouseListItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 

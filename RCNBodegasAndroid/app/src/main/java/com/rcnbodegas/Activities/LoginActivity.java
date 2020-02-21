@@ -11,11 +11,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,6 +41,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class LoginActivity extends AppCompatActivity {
 
+    TextView txtVersion;
     private Button btn_login;
     private Context context;
     private UserViewModel data;
@@ -57,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void InitializaControls() {
         input_email = findViewById(R.id.input_email);
+        txtVersion = findViewById(R.id.txtVersion);
         input_password = findViewById(R.id.input_password);
         btn_login = findViewById(R.id.btn_login);
         mLoginFormView = findViewById(R.id.login_form);
@@ -64,13 +67,15 @@ public class LoginActivity extends AppCompatActivity {
 
 
         if (BuildConfig.DEBUG) {
-            input_email.setText("jsierra");
-            input_password.setText("rcntv2020-01");
+            input_email.setText("jicastaneda");
+            input_password.setText("juanjoseluciana-2019");
             // do something for a debug build
         } else {
             input_email.setText("");
             input_password.setText("");
         }
+
+        txtVersion.setText(BuildConfig.VERSION_NAME);
         //globalVariable = (GlobalClass) getApplicationContext();
 
     }

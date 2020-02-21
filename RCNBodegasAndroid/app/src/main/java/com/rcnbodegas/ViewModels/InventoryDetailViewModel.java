@@ -1,13 +1,50 @@
 package com.rcnbodegas.ViewModels;
 
+import androidx.room.Entity;
+
+@Entity
 public class InventoryDetailViewModel {
-    private int InventoryId ;
-    private int ElementId ;
-    private int ResponsibleId ;
-    private String StateDescription ;
-    private int Found ;
-    private String DeliveryDate ;
-    private String ElementType ;
+    private String DeliveryDate;
+    private int ElementId;
+    private String ElementType;
+    private int Found;
+    private String FoundDate;
+    private int InventoryId;
+    private int ResponsibleId;
+    private String StateDescription;
+    private String inventoryUser;
+
+    public String getDeliveryDate() {
+        return DeliveryDate;
+    }
+
+    public void setDeliveryDate(String deliveryDate) {
+        DeliveryDate = deliveryDate;
+    }
+
+    public int getElementId() {
+        return ElementId;
+    }
+
+    public void setElementId(int elementId) {
+        ElementId = elementId;
+    }
+
+    public String getElementType() {
+        return ElementType;
+    }
+
+    public void setElementType(String elementType) {
+        ElementType = elementType;
+    }
+
+    public int getFound() {
+        return Found;
+    }
+
+    public void setFound(int found) {
+        Found = found;
+    }
 
     public int getInventoryId() {
         return InventoryId;
@@ -17,12 +54,12 @@ public class InventoryDetailViewModel {
         InventoryId = inventoryId;
     }
 
-    public int getElementId() {
-        return ElementId;
+    public String getInventoryUser() {
+        return inventoryUser;
     }
 
-    public void setElementId(int elementId) {
-        ElementId = elementId;
+    public void setInventoryUser(String inventoryUser) {
+        this.inventoryUser = inventoryUser;
     }
 
     public int getResponsibleId() {
@@ -41,27 +78,11 @@ public class InventoryDetailViewModel {
         StateDescription = stateDescription;
     }
 
-    public int getFound() {
-        return Found;
+    public String getFoundDate() {
+        return FoundDate;
     }
 
-    public void setFound(int found) {
-        Found = found;
-    }
-
-    public String getDeliveryDate() {
-        return DeliveryDate;
-    }
-
-    public void setDeliveryDate(String deliveryDate) {
-        DeliveryDate = deliveryDate;
-    }
-
-    public String getElementType() {
-        return ElementType;
-    }
-
-    public void setElementType(String elementType) {
-        ElementType = elementType;
+    public void setFoundDate(String foundDate) {
+        FoundDate = foundDate;
     }
 }

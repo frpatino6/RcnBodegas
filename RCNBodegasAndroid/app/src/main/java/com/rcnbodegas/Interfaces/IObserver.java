@@ -1,4 +1,4 @@
-package com.rcnbodegas.Global;
+package com.rcnbodegas.Interfaces;
 
 /**
  * Created by ixnet on 17/03/2015.

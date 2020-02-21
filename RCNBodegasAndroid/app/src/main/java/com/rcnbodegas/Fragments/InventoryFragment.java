@@ -20,13 +20,6 @@ import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,13 +36,21 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.Base64;
-import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Activities.CustomActivity;
 import com.rcnbodegas.Activities.Filter;
@@ -59,22 +60,27 @@ import com.rcnbodegas.Activities.ProductionListActivity;
 import com.rcnbodegas.Activities.ResponsibleListActivity;
 import com.rcnbodegas.Activities.TypeElementListActivity;
 import com.rcnbodegas.Activities.WareHouseListActivity;
+import com.rcnbodegas.CustomEvents.onHttpRequestError;
+import com.rcnbodegas.CustomEvents.onHttpRequestSuccess;
+import com.rcnbodegas.CustomEvents.onRecyclerProductionListItemClick;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.IObserver;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.TScanner;
-import com.rcnbodegas.Global.onRecyclerProductionListItemClick;
+import com.rcnbodegas.Interfaces.IObserver;
 import com.rcnbodegas.R;
-import com.rcnbodegas.ViewModels.InventoryDetailViewModel;
+import com.rcnbodegas.Repository.InventoryHeaderRepository;
+import com.rcnbodegas.Repository.MaterialRepository;
 import com.rcnbodegas.ViewModels.InventroyHeaderViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -108,11 +114,14 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private ArrayList<MaterialViewModel> dataMaterial;
     private DateTimeUtilities dateTimeUtilities;
     private ProgressDialog dialogo;
+    private InventoryHeaderRepository inventoryHeaderRepository;
     private int inventoryId;
+    private Button inventory_btn_find;
     private FloatingActionButton inventory_btn_new_element;
     private Button inventory_btn_ok;
     private LinearLayout inventory_data;
     private EditText inventory_date_option;
+    private EditText inventory_date_option2;
     private LinearLayout inventory_element;
     private EditText inventory_element_barcode_edit;
     private EditText inventory_element_brand_edit;
@@ -125,25 +134,30 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private EditText inventory_responsible_option;
     private EditText inventory_type_element_option;
     private EditText inventory_warehouse_option;
+    private InventroyHeaderViewModel inventroyHeaderViewModel;
     private MaterialViewModel itemMaterialAdded;
     private View mIncidenciasFormView;
     private View mProgressView;
+    private String m_Text;
+    private MaterialRepository materialRepository;
     private MenuItem mnuCancel;
     private MenuItem mnuReview;
     private MenuItem mnuSave;
     private RecyclerView photos_recycler_view;
 
-
     public InventoryFragment() {
-        // Required empty public constructor
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void AddElementToReview() {
 
-
         GlobalClass.getInstance().getDataReviewMaterial().add(itemMaterialAdded);
         itemMaterialAdded.setReview(true);
+        itemMaterialAdded.setFoundDate(getDate());
+        itemMaterialAdded.setIdHeader(inventoryId);
+        materialRepository.update(itemMaterialAdded);
 
         hideKeyboard(Objects.requireNonNull(getActivity()));
     }
@@ -190,6 +204,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     @SuppressLint("CutPasteId")
     private void InitializeControls(View v) {
 
+        materialRepository = new MaterialRepository(getActivity());
+
         btnSearch = v.findViewById(R.id.btnSearch);
 
         inventory_btn_new_element = v.findViewById(R.id.inventory_btn_new_element);
@@ -199,6 +215,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_program_option = v.findViewById(R.id.inventory_program_option);
         inventory_type_element_option = v.findViewById(R.id.inventory_type_element_option);
         inventory_date_option = v.findViewById(R.id.inventory_date_option);
+        inventory_date_option2 = v.findViewById(R.id.inventory_date_option2);
         inventory_responsible_option = v.findViewById(R.id.inventory_responsible_option);
         inventory_element_type_edit = v.findViewById(R.id.inventory_element_type_edit);
         inventory_element_barcode_edit = v.findViewById(R.id.inventory_element_barcode_edit);
@@ -210,6 +227,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         inventory_btn_ok = v.findViewById(R.id.inventory_btn_ok);
 
         inventory_date_option.setText(dateTimeUtilities.parseDateTurno());
+        inventory_date_option2.setText(dateTimeUtilities.parseDateTurno());
+
         inventory_warehouse_option.setText(GlobalClass.getInstance().getNameSelectedWareHouseInventory());
 
         mIncidenciasFormView = v.findViewById(R.id.inventory_element);
@@ -233,15 +252,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 itemMaterialAdded = findElementByBarCode();
 
                 if (itemMaterialAdded == null) {
-                    showMessageDialog(getString(R.string.message_not_find_element));
+                    showMessageDialogError(getString(R.string.message_not_find_element));
                     return;
                 }
-                if (!validaIsAddeddElement(inventory_element_barcode_edit.getText().toString())) {
+                if (!itemMaterialAdded.isReview()) {
                     setMaterialData(itemMaterialAdded);
                 } else
-                    showMessageDialog(getString(R.string.message_element_exist) + itemMaterialAdded.getBarCode());
-
-
+                    showMessageDialogError(getString(R.string.message_element_exist) + " " + itemMaterialAdded.getBarCode());
             }
         });
 
@@ -287,6 +304,17 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 newFragment.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "datePicker");
             }
         });
+        inventory_date_option2.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View v) {
+                DatePickerFragment newFragment = new DatePickerFragment();
+                newFragment.txtDate = inventory_date_option2;
+                newFragment.dateTimeUtilities = dateTimeUtilities;
+
+                newFragment.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "datePicker");
+            }
+        });
 
         inventory_responsible_option.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -323,6 +351,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 }
             }
         });
+
+
         inventory_warehouse_option.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -333,9 +363,8 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     }
 
     @SuppressLint("RestrictedApi")
-    private void InitializeNewInventroyProcess() {
+    private void InitializeNewInventroyProcess(boolean cancel) {
         GlobalClass.getInstance().setCurrentInventoryActiveProcess(false);
-        inventoryId = 0;
 
         inventory_element.setVisibility(View.GONE);
         inventory_data.setVisibility(View.VISIBLE);
@@ -354,87 +383,32 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
         if (ListaImagenes != null)
             ListaImagenes.clear();
+
+        //if (!cancel)
+        //  showMessageDialog("Inventario guardado correctamente. CONSECUTIVO: " + inventoryId);
+        inventoryId = 0;
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void LoadElements(boolean createHeader) {
         if (GlobalClass.getInstance().isNetworkAvailable())
-
             if (createHeader)
                 asyncInventoryHeader();
-            else
-                asyncListMaterialsByProduction(createHeader);
+            else {
+                materialRepository.geDetailByDocumentNumber(inventoryId).observe(getActivity(), new Observer<List<MaterialViewModel>>() {
+                    @Override
+                    public void onChanged(List<MaterialViewModel> materialViewModels) {
+                        GlobalClass.getInstance().setDataMaterialInventory((ArrayList<MaterialViewModel>) materialViewModels);
+                        GlobalClass.getInstance().setListMaterialBYProduction((ArrayList<MaterialViewModel>) materialViewModels);
+                        showElementInput();
+                    }
+                });
+            }
         else {
             new asyncGetCountMaterial().execute();
 
         }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void LoadElements(int finalize) {
-
-
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryDetail/" + finalize + "/" + inventoryId;
-
-        try {
-            final ProgressDialog dialogo = new ProgressDialog(getActivity());
-            dialogo.setMessage("Enviando inventario...");
-            dialogo.setIndeterminate(false);
-            dialogo.setCancelable(false);
-            dialogo.show();
-
-            AsyncHttpClient client = new AsyncHttpClient();
-            client.setTimeout(60000);
-            String tipo = "application/json";
-
-            StringEntity entity;
-            Gson json = new Gson();
-            ArrayList<InventoryDetailViewModel> listInventoryDetailViewModels = new ArrayList<>();
-
-            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataReviewMaterial()) {
-                InventoryDetailViewModel inventoryDetailViewModel = new InventoryDetailViewModel();
-
-                inventoryDetailViewModel.setElementId(materialViewModel.getId());
-                inventoryDetailViewModel.setResponsibleId(-1);
-                inventoryDetailViewModel.setInventoryId(inventoryId);
-                inventoryDetailViewModel.setFound(1);
-                inventoryDetailViewModel.setElementType(materialViewModel.getTypeElementId());
-                inventoryDetailViewModel.setDeliveryDate(inventory_date_option.getText().toString());
-                inventoryDetailViewModel.setStateDescription("");
-                listInventoryDetailViewModels.add(inventoryDetailViewModel);
-            }
-            String resultJson = json.toJson(listInventoryDetailViewModels);
-
-            entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
-
-            client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
-
-                    showMessageDialog(responseBody);
-                }
-
-                @SuppressLint("RestrictedApi")
-                @Override
-                public void onFinish() {
-                    super.onFinish();
-
-                    dialogo.dismiss();
-                }
-
-                @SuppressLint("RestrictedApi")
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    InitializeNewInventroyProcess();
-
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-
-        }
-
     }
 
     private void OpenListWareHouse() {
@@ -480,13 +454,16 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void asyncInventoryHeader() {
 
-        InventroyHeaderViewModel inventroyHeaderViewModel = new InventroyHeaderViewModel();
+        inventroyHeaderViewModel = new InventroyHeaderViewModel();
         inventroyHeaderViewModel.setCompanyId(1);
         inventroyHeaderViewModel.setProductionId(Integer.valueOf(GlobalClass.getInstance().getIdSelectedProductionInventory()));
         inventroyHeaderViewModel.setWarehouseTypeId(GlobalClass.getInstance().getIdSelectedWareHouseInventory());
         inventroyHeaderViewModel.setResponsibleId(GlobalClass.getInstance().getIdSelectedResponsibleInventory());
         inventroyHeaderViewModel.setInventoryUser(GlobalClass.getInstance().getUserName());
         inventroyHeaderViewModel.setInitDate(inventory_date_option.getText().toString());
+        inventroyHeaderViewModel.setTypeELement(GlobalClass.getInstance().getIdSelectedTypeElementHeader());
+        inventroyHeaderViewModel.setFechaMovimiento(inventory_date_option2.getText().toString());
+
 
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryHeader/";
 
@@ -508,12 +485,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
             entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
 
+
             client.post(Objects.requireNonNull(getActivity()).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
 
-                    showMessageDialog(responseBody);
+                    showMessageDialogError(responseBody);
                 }
 
                 @SuppressLint("RestrictedApi")
@@ -527,9 +505,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 @SuppressLint("RestrictedApi")
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    asyncListMaterialsByProduction(false);
                     inventoryId = Integer.valueOf(responseString);
+                    showMessageDialog("Usted va a iniciar el inventario de " + getTypewarehouseName() + " número " + inventoryId);
 
+                    inventroyHeaderViewModel.setCodigo(inventoryId);
+                    insertHeaderLocal(inventroyHeaderViewModel);
                 }
             });
         } catch (Exception e) {
@@ -541,7 +521,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private void asyncInventoryPending() {
 
-
+        final boolean isOk = false;
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetPendingInventoryByUser/" + GlobalClass.getInstance().getUserName();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(30000);
@@ -555,7 +535,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
+                        showMessageDialogError(res);
 
                     }
 
@@ -563,9 +543,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                     public void onFinish() {
                         super.onFinish();
                         dialogo.dismiss();
-
-                        if (listInventroyHeaderViewModels != null && listInventroyHeaderViewModels.size() > 0)
-                            showConfirmInventoryContinueDialog("Inventario pendiente, seleccione una opción?");
 
                     }
 
@@ -591,6 +568,9 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                                 setActionBarTittle();
                             }
 
+                            if (listInventroyHeaderViewModels != null && listInventroyHeaderViewModels.size() > 0)
+                                showConfirmInventoryContinueDialog("Inventario pendiente, seleccione una opción?");
+
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
 
@@ -600,102 +580,58 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         );
     }
 
-    private void asyncListCountMaterialsByProduction() {
+    private void asyncInventoryPendingById(int id) {
 
 
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" + GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" + GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" + GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" + GlobalClass.getInstance().getIdSelectedTypeElementHeader();
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetPendingInventoryById/" + id;
         AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(360000);
-        showProgress(true);
+        client.setTimeout(30000);
+        final ProgressDialog dialogo = new ProgressDialog(getActivity());
+        dialogo.setMessage("Buscando inventarios con el código " + id);
+        dialogo.setIndeterminate(false);
+        dialogo.setCancelable(false);
+        dialogo.show();
         client.get(url, new TextHttpResponseHandler() {
+                    ArrayList<InventroyHeaderViewModel> listInventroyHeaderViewModels = null;
+
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
+                        showMessageDialogError(res);
 
                     }
 
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onFinish() {
                         super.onFinish();
-                        showProgress(false);
+                        dialogo.dismiss();
+
 
                     }
 
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @SuppressLint("RestrictedApi")
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, String res) {
                         // called when response HTTP status is "200 OK"
                         try {
 
-                            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
+                            TypeToken<List<InventroyHeaderViewModel>> token = new TypeToken<List<InventroyHeaderViewModel>>() {
                             };
                             Gson gson = new GsonBuilder().create();
                             // Define Response class to correspond to the JSON response returned
-                            ArrayList<MaterialViewModel> dataMaterial = gson.fromJson(res, token.getType());
-                            GlobalClass.getInstance().setDataMaterialInventory(dataMaterial);
+                            listInventroyHeaderViewModels = gson.fromJson(res, token.getType());
 
-                            if (dataMaterial != null)
-                                GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
-                            else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-                            showProgress(false);
-                            mnuReview.setVisible(true);
-                            mnuSave.setVisible(true);
-                            mnuCancel.setVisible(true);
-                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
-                            inventory_btn_new_element.setVisibility(View.VISIBLE);
-                            setActionBarTittle();
-
-                        } catch (JsonSyntaxException e) {
-                            e.printStackTrace();
-
-                        }
-                    }
-                }
-        );
-    }
-
-    private void asyncListMaterialsByBarCode() {
-
-
-        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByBarcode/" + inventory_element_barcode_edit.getText().toString();
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setTimeout(60000);
-        RequestParams params = new RequestParams();
-        showProgress(true);
-        client.get(url, new TextHttpResponseHandler() {
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        showProgress(false);
-
-                    }
-
-                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, String res) {
-                        // called when response HTTP status is "200 OK"
-                        try {
-
-                            TypeToken<MaterialViewModel> token = new TypeToken<MaterialViewModel>() {
-                            };
-                            Gson gson = new GsonBuilder().create();
-                            // Define Response class to correspond to the JSON response returned
-                            itemMaterialAdded = gson.fromJson(res, token.getType());
-
-                            if (itemMaterialAdded != null)
-                                setMaterialData(itemMaterialAdded);
-                            else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
-
-                            showProgress(false);
+                            if (listInventroyHeaderViewModels != null && listInventroyHeaderViewModels.size() > 0) {
+                                GlobalClass.getInstance().setIdSelectedProductionInventory(String.valueOf(listInventroyHeaderViewModels.get(0).getProductionId()));
+                                GlobalClass.getInstance().setIdSelectedResponsibleInventory(listInventroyHeaderViewModels.get(0).getResponsibleId());
+                                GlobalClass.getInstance().setIdSelectedWareHouseInventory(listInventroyHeaderViewModels.get(0).getWarehouseTypeId());
+                                GlobalClass.getInstance().setCurrentproductionName(listInventroyHeaderViewModels.get(0).getProductionName());
+                                inventoryId = listInventroyHeaderViewModels.get(0).getId();
+                                setActionBarTittle();
+                            }
+                            GlobalClass.getInstance().setContinueInventory(false);
+                            showConfirmContinueDialog(listInventroyHeaderViewModels);
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
@@ -718,14 +654,14 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" +
                 GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" +
                 GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" +
-                GlobalClass.getInstance().getIdSelectedTypeElementHeader() + "/" + (createHeader == true ? "0" : "1" + "/" + inventoryId);
+                GlobalClass.getInstance().getIdSelectedTypeElementHeader() + "/" + (createHeader == true ? "0" : "1" + "/" + inventoryId) + "/" + inventory_date_option2.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(360000);
         showProgress(true);
         client.get(url, new TextHttpResponseHandler() {
                     @Override
                     public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
-                        showMessageDialog(res);
+                        showMessageDialogError(res);
 
                     }
 
@@ -752,17 +688,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                             if (dataMaterial != null)
                                 GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
                             else
-                                showMessageDialog("No se encontró elemento con el código de barras ingresado");
+                                showMessageDialogError("No se encontró elemento con el código de barras ingresado");
 
-                            showProgress(false);
-                            mnuReview.setVisible(true);
-                            mnuSave.setVisible(true);
-                            mnuCancel.setVisible(true);
-                            GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
-                            inventory_btn_new_element.setVisibility(View.VISIBLE);
-                            setActionBarTittle();
-                            inventory_element.setVisibility(View.VISIBLE);
-                            inventory_data.setVisibility(View.GONE);
+                            materialRepository.insertAllOElements(dataMaterial);
+
+                            showElementInput();
 
                         } catch (JsonSyntaxException e) {
                             e.printStackTrace();
@@ -782,7 +712,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        InitializeNewInventroyProcess();
+                        InitializeNewInventroyProcess(true);
                     }
                 });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -801,32 +731,27 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         builder.setCancelable(true);
         builder.setTitle(getString(R.string.app_name));
         builder.setMessage(getString(R.string.message_confirm_save));
-        builder.setPositiveButton(getString(R.string.btn_finalize),
+        builder.setPositiveButton(getString(R.string.btn_confirm),
                 new DialogInterface.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        //if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
-                        LoadElements(1);
-                        // else {
-                        //      showMessageDialog("No se han agregado elementos");
-                        InitializeNewInventroyProcess();
-                        //}
-
-                    }
-                });
-        builder.setNeutralButton(getString(R.string.btn_continue_later),
-                new DialogInterface.OnClickListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        if (GlobalClass.getInstance().getDataReviewMaterial().size() > 0)
-                            LoadElements(0);
+                        if (GlobalClass.getInstance().isNetworkAvailable())
+                            GlobalClass.getInstance().asyncUpdateElements(0, inventoryId, inventory_date_option.getText().toString(),
+                                    getActivity(), true, new onHttpRequestSuccess() {
+                                        @Override
+                                        public void onSuccess(boolean result) {
+                                            InitializeNewInventroyProcess(false);
+                                        }
+                                    }, new onHttpRequestError() {
+                                        @Override
+                                        public void onError(String responseBody) {
+                                            showMessageDialogError(responseBody);
+                                        }
+                                    });
                         else {
-                            showMessageDialog("No se han agregado elementos");
-                            InitializeNewInventroyProcess();
+                            showMessageDialog("No hay conexión a internet");
                         }
                     }
                 });
@@ -861,12 +786,15 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     }
 
     private MaterialViewModel findElementByBarCode() {
+        return materialRepository.getMaterialByBarcode(inventory_element_barcode_edit.getText().toString());
+    }
 
-        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterialInventory()) {
-            if (materialViewModel.getBarCode().equals(inventory_element_barcode_edit.getText().toString()))
-                return materialViewModel;
-        }
-        return null;
+    private String getDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String fechaActual = sdf.format(new Date());
+
+        return fechaActual;
+
     }
 
     @SuppressLint("RestrictedApi")
@@ -881,7 +809,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (dataMaterial != null)
             GlobalClass.getInstance().setListMaterialBYProduction(dataMaterial);
         else
-            showMessageDialog("No se encontró elemento con el código de barras ingresado");
+            showMessageDialogError("No se encontró elemento con el código de barras ingresado");
 
         showProgress(false);
         mnuReview.setVisible(true);
@@ -889,7 +817,17 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         mnuCancel.setVisible(true);
         GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
         inventory_btn_new_element.setVisibility(View.VISIBLE);
+        inventory_element.setVisibility(View.VISIBLE);
+        inventory_data.setVisibility(View.GONE);
         setActionBarTittle();
+    }
+
+    private String getTypewarehouseName() {
+
+        if (GlobalClass.getInstance().getIdSelectedWareHouseInventory().toString().equals("V"))
+            return "Vestuario";
+        else
+            return "Ambientación";
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -901,6 +839,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             view = new View(activity);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void insertHeaderLocal(InventroyHeaderViewModel inventroyHeaderViewModel) {
+        inventoryHeaderRepository = new InventoryHeaderRepository(getActivity());
+        inventoryHeaderRepository.insert(inventroyHeaderViewModel);
     }
 
     public static InventoryFragment newInstance(String param1, String param2) {
@@ -946,21 +889,33 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     }
 
-    public void showAlertDialogButtonClicked(View view) {
+    private void showConfirmContinueDialog(final ArrayList<InventroyHeaderViewModel> listInventroyHeaderViewModels) {
 
-        // setup the alert builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Notice");
-        builder.setMessage("Launching this missile will destroy the entire universe. Is this what you intended to do?");
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
 
-        // add the buttons
-        builder.setPositiveButton("Launch missile", null);
-        builder.setNeutralButton("Remind me later", null);
-        builder.setNegativeButton("Cancel", null);
+        dlgAlert.setMessage("Usted va a continuar el inventario para el Programa: " +
+                listInventroyHeaderViewModels.get(0).getProductionName() +
+                " ,Fecha inventario: " + listInventroyHeaderViewModels.get(0).getInitDate() + " ¿Desea continuar?");
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            public void onClick(DialogInterface dialog, int id) {
+                if (listInventroyHeaderViewModels != null && listInventroyHeaderViewModels.size() > 0)
+                    LoadElements(false);
+            }
+        });
+        dlgAlert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            public void onClick(DialogInterface dialog, int id) {
 
-        // create and show the alert dialog
-        AlertDialog dialog = builder.create();
-        dialog.show();
+
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
+
+
     }
 
     private void showConfirmInventoryContinueDialog(String res) {
@@ -985,6 +940,51 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         dlgAlert.create().show();
     }
 
+    private void showElementInput() {
+        showProgress(false);
+        mnuReview.setVisible(true);
+        mnuSave.setVisible(true);
+        mnuCancel.setVisible(true);
+        GlobalClass.getInstance().setCurrentInventoryActiveProcess(true);
+        inventory_btn_new_element.setVisibility(View.VISIBLE);
+        setActionBarTittle();
+        inventory_element.setVisibility(View.VISIBLE);
+        inventory_data.setVisibility(View.GONE);
+    }
+
+    private void showInputInventoryCode() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("RCN Bodegas");
+// I'm using fragment here so I'm using getView() to provide ViewGroup
+// but you can provide here any other instance of ViewGroup from your Fragment / Activity
+        View viewInflated = LayoutInflater.from(getContext()).inflate(R.layout.input_inventory_code, (ViewGroup) getView(), false);
+// Set up the input
+        final EditText input = (EditText) viewInflated.findViewById(R.id.input);
+// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        builder.setView(viewInflated);
+
+// Set up the buttons
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                m_Text = input.getText().toString();
+                inventoryId = Integer.valueOf(m_Text.toString());
+                asyncInventoryPendingById(inventoryId);
+
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
     private void showMessageDialog(String res) {
         AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
 
@@ -993,14 +993,30 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
         dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // if this button is clicked, close
-                // current activity
+                asyncListMaterialsByProduction(false);
 
             }
         });
-        dlgAlert.setCancelable(true);
+        dlgAlert.setCancelable(false);
         dlgAlert.create().show();
     }
+
+    private void showMessageDialogError(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+
+            }
+        });
+        dlgAlert.setCancelable(false);
+        dlgAlert.create().show();
+    }
+
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
@@ -1037,10 +1053,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     private boolean validaIsAddeddElement(String barcode) {
 
-        if (GlobalClass.getInstance().getDataReviewMaterial() != null)
-            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataReviewMaterial()) {
+        if (GlobalClass.getInstance().getDataMaterialInventory() != null)
+            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterialInventory()) {
                 if (materialViewModel.getBarCode().equals(barcode))
-                    return true;
+                    if (materialViewModel.isReview())
+                        return true;
             }
         return false;
     }
@@ -1089,18 +1106,16 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             public void run() {
                 inventory_element_barcode_edit.setText(_barcodeData);
 
-                if (itemMaterialAdded != null) {
-                }
                 itemMaterialAdded = findElementByBarCode();
 
                 if (itemMaterialAdded == null) {
-                    showMessageDialog(getString(R.string.message_not_find_element));
+                    showMessageDialogError(getString(R.string.message_not_find_element));
                     return;
                 }
                 if (!validaIsAddeddElement(inventory_element_barcode_edit.getText().toString())) {
                     setMaterialData(itemMaterialAdded);
                 } else
-                    showMessageDialog(getString(R.string.message_element_exist) + itemMaterialAdded.getBarCode());
+                    showMessageDialogError("El elemento - " + itemMaterialAdded.getBarCode() + " ya fue inventariado");
             }
         });
 
@@ -1167,6 +1182,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         dialogo = new ProgressDialog(getActivity());
         dialogo.setMessage("Sincronizando...");
 
+
     }
 
     @Override
@@ -1189,16 +1205,20 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         InitializeControls(view);
         InitializeEvents();
 
-        if (!validateInventoryProcess()) {
-            inventory_element.setVisibility(View.GONE);
-            inventory_data.setVisibility(View.VISIBLE);
+        if (GlobalClass.getInstance().isContinueInventory())
+            showInputInventoryCode();
+        else {
+            if (!validateInventoryProcess()) {
+                inventory_element.setVisibility(View.GONE);
+                inventory_data.setVisibility(View.VISIBLE);
 
-            if (GlobalClass.getInstance().isNetworkAvailable())
-                asyncInventoryPending();
-        } else {
-            inventory_element.setVisibility(View.VISIBLE);
-            inventory_data.setVisibility(View.GONE);
-            setActionBarTittle();
+                if (GlobalClass.getInstance().isNetworkAvailable())
+                    asyncInventoryPending();
+            } else {
+                inventory_element.setVisibility(View.VISIBLE);
+                inventory_data.setVisibility(View.GONE);
+                setActionBarTittle();
+            }
         }
         showProgress(false);
         return view;
@@ -1276,6 +1296,13 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     }
 
+    @Override
+    public void onStart() {
+
+        super.onStart();
+
+    }
+
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
@@ -1331,7 +1358,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
             if (countMaterialIndex > 1)
                 new asyncGetMaterial().execute();
             else
-                showMessageDialog("No existen elementos, conectese a internet y sincronice los datos básicos");
+                showMessageDialogError("No existen elementos, conectese a internet y sincronice los datos básicos");
 
 
             super.onPostExecute(o);
@@ -1366,7 +1393,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
                 if (materialViewModel != null)
                     for (MaterialViewModel viewModel : materialViewModel) {
-
                         if (dataMaterial == null)
                             dataMaterial = new ArrayList<>();
                         dataMaterial.add(viewModel);
@@ -1374,8 +1400,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
             }
 
-            TypeToken<List<MaterialViewModel>> token = new TypeToken<List<MaterialViewModel>>() {
-            };
             return null;
         }
 

@@ -1,31 +1,48 @@
 package com.rcnbodegas.Global;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
-import android.arch.lifecycle.ProcessLifecycleOwner;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
+import com.google.gson.Gson;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.TextHttpResponseHandler;
+import com.rcnbodegas.CustomEvents.onHttpRequestError;
+import com.rcnbodegas.CustomEvents.onHttpRequestSuccess;
+import com.rcnbodegas.Repository.MaterialRepository;
+import com.rcnbodegas.ViewModels.InventoryDetailViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 import com.rcnbodegas.ViewModels.WareHouseViewModel;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class GlobalClass extends Application implements LifecycleObserver {
 
     private static GlobalClass instance;
     private String AdminTypeElementId;
+    private boolean continueInventory = false;
     private String currentproductionName; //Persiste en memoria el nombre de la producci[on de un inventario pendiente por finalizar
     private ArrayList<MaterialViewModel> dataMaterial;
     private ArrayList<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
-    //private String urlServices = "http://solpe.rcntv.com.co:8083/";
     private Integer idSelectedCompanyInventory;
     private Integer idSelectedCompanyWarehouse;
     private String idSelectedProductionInventory;
@@ -52,9 +69,89 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private SharedPreferences pref;
     private Boolean queryByInventory = false;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private String urlServices = "http://192.168.0.7/bodegas/";
+    private String urlServices = "http://solpe.rcntv.com.co:8083/";
+    //private String urlServices = "http://192.168.43.215/bodegas/";
     private String userName;
     private String userRole;
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void asyncUpdateElements(int finalize, int inventoryId, String deliveryDate, Context context,boolean showProgresdialog,
+                                    final onHttpRequestSuccess _onHttpRequestSuccess, final onHttpRequestError _onHttpRequestError) {
+
+
+        String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryDetail/" + finalize + "/" + inventoryId;
+
+        try {
+            final ProgressDialog dialogo = new ProgressDialog(context);
+
+            if(showProgresdialog) {
+                dialogo.setMessage("Enviando inventario...");
+                dialogo.setIndeterminate(false);
+                dialogo.setCancelable(false);
+                dialogo.show();
+            }
+
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.setTimeout(60000);
+            String tipo = "application/json";
+
+            StringEntity entity;
+            Gson json = new Gson();
+            ArrayList<InventoryDetailViewModel> listInventoryDetailViewModels = new ArrayList<>();
+
+            MaterialRepository materialRepository = new MaterialRepository(getApplicationContext());
+
+            for (MaterialViewModel materialViewModel : materialRepository.getReviewDetail(inventoryId)) {
+                InventoryDetailViewModel inventoryDetailViewModel = new InventoryDetailViewModel();
+
+                inventoryDetailViewModel.setElementId(materialViewModel.getId());
+                inventoryDetailViewModel.setResponsibleId(-1);
+                inventoryDetailViewModel.setInventoryId(inventoryId);
+                inventoryDetailViewModel.setFound(1);
+                inventoryDetailViewModel.setElementType(materialViewModel.getTypeElementId());
+                //inventoryDetailViewModel.setDeliveryDate(inventory_date_option.getText().toString());
+                inventoryDetailViewModel.setDeliveryDate(deliveryDate);
+                inventoryDetailViewModel.setStateDescription("");
+                inventoryDetailViewModel.setInventoryUser(GlobalClass.getInstance().getUserName());
+                inventoryDetailViewModel.setFoundDate(materialViewModel.getFoundDate());
+
+                listInventoryDetailViewModels.add(inventoryDetailViewModel);
+            }
+            String resultJson = json.toJson(listInventoryDetailViewModels);
+
+            entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
+
+            client.post(Objects.requireNonNull(context).getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+                    if (_onHttpRequestError != null)
+                        _onHttpRequestError.onError(responseBody);
+
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onFinish() {
+                    super.onFinish();
+
+                    dialogo.dismiss();
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    if (_onHttpRequestSuccess != null)
+                        _onHttpRequestSuccess.onSuccess(false);
+
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+    }
 
     public String getAdminTypeElementId() {
         return AdminTypeElementId;
@@ -88,8 +185,6 @@ public class GlobalClass extends Application implements LifecycleObserver {
         this.currentproductionName = currentproductionName;
     }
 
-    //<editor-fold desc="Custom object">
-
     public ArrayList<MaterialViewModel> getDataMaterial() {
 
         if (dataMaterial == null) dataMaterial = new ArrayList<>();
@@ -99,6 +194,8 @@ public class GlobalClass extends Application implements LifecycleObserver {
     public void setDataMaterial(ArrayList<MaterialViewModel> dataMaterial) {
         this.dataMaterial = dataMaterial;
     }
+
+    //<editor-fold desc="Custom object">
 
     public List<MaterialViewModel> getDataMaterialInventory() {
         if (dataMaterialInventory == null) dataMaterialInventory = new ArrayList<>();
@@ -318,6 +415,14 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
     public void setmCurrentPhotoPath(String mCurrentPhotoPath) {
         this.mCurrentPhotoPath = mCurrentPhotoPath;
+    }
+
+    public boolean isContinueInventory() {
+        return continueInventory;
+    }
+
+    public void setContinueInventory(boolean continueInventory) {
+        this.continueInventory = continueInventory;
     }
 
     public boolean isNetworkAvailable() {

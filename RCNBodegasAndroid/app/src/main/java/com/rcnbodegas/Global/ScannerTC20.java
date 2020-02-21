@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.KeyEvent;
 
+import com.rcnbodegas.Interfaces.IObserver;
+import com.rcnbodegas.Interfaces.ISubject;
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.EMDKManager.EMDKListener;
 import com.symbol.emdk.EMDKResults;

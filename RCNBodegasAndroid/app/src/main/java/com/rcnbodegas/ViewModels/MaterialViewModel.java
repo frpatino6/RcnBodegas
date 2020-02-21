@@ -2,16 +2,25 @@ package com.rcnbodegas.ViewModels;
 
 import android.graphics.Bitmap;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import java.util.ArrayList;
 
+@Entity
 public class MaterialViewModel {
-
     private String barCode;
+    private String foundDate;
     private int id;
+    @PrimaryKey(autoGenerate = true)
+    private int idDetail;
     private Boolean isAdmin;
     private boolean isReview;
     private String legalizedBy;
+    @Ignore
     private ArrayList<Bitmap> listaImagenesBmp;
+    @Ignore
     private ArrayList<String> listaImagenesStr;
     private String marca;
     private String materialName;
@@ -28,7 +37,7 @@ public class MaterialViewModel {
     private Double unitPrice;
     private String wareHouseId;
     private String wareHouseName;
-
+    private int idHeader;
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
@@ -52,6 +61,22 @@ public class MaterialViewModel {
         listaImagenesStr = new ArrayList<>();
     }
 
+    public int getIdHeader() {
+        return idHeader;
+    }
+
+    public void setIdHeader(int idHeader) {
+        this.idHeader = idHeader;
+    }
+
+    public int getIdDetail() {
+        return idDetail;
+    }
+
+    public void setIdDetail(int idDetail) {
+        this.idDetail = idDetail;
+    }
+
     public Boolean getAdmin() {
         return isAdmin;
     }
@@ -66,6 +91,14 @@ public class MaterialViewModel {
 
     public void setBarCode(String barCode) {
         this.barCode = barCode;
+    }
+
+    public String getFoundDate() {
+        return foundDate;
+    }
+
+    public void setFoundDate(String foundDate) {
+        this.foundDate = foundDate;
     }
 
     public int getId() {

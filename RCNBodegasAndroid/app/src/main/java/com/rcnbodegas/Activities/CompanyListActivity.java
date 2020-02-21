@@ -7,11 +7,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -23,7 +23,7 @@ import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.rcnbodegas.Global.CompanyAdapter;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.onRecyclerCompanyItemClick;
+import com.rcnbodegas.CustomEvents.onRecyclerCompanyItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.CompanyViewModel;
 

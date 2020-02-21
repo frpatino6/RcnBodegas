@@ -7,5 +7,5 @@
         android:id="@+id/search_warehouse"
         android:title=""
         app:showAsAction="ifRoom"
-        app:actionViewClass="android.support.v7.widget.SearchView"/>
+        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 </menu>

@@ -2,27 +2,25 @@ package com.rcnbodegas.Activities;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.rcnbodegas.Fragments.WarehouseFragment;
 import com.rcnbodegas.Global.AddedElementListAdapter;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Global.NumberTextWatcher;
-import com.rcnbodegas.Global.onRecyclerReviewListDeleteItemClick;
-import com.rcnbodegas.Global.onRecyclerReviewListEditItemClick;
+import com.rcnbodegas.CustomEvents.onRecyclerReviewListDeleteItemClick;
+import com.rcnbodegas.CustomEvents.onRecyclerReviewListEditItemClick;
 import com.rcnbodegas.R;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 

@@ -23,7 +23,13 @@
                 android:id="@+id/navInventario"
                 android:icon="@drawable/baseline_style_24"
                 android:title="Realizar Inventario" />
+            <item
+                android:id="@+id/navInventarioContinue"
+                android:icon="@drawable/baseline_style_24"
+                android:title="Continuar inventario" />
+
         </menu>
+
     </item>
     <item android:title="Procesos">
         <menu>
