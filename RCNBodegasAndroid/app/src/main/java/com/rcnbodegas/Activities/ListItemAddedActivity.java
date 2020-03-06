@@ -44,7 +44,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_item_review);
+        setContentView(R.layout.activity_list_item_legalization);
 
         InitializeControls();
         InitializeEvents();
@@ -57,7 +57,6 @@ public class ListItemAddedActivity extends AppCompatActivity {
     private void InitializeControls() {
 
         txtResumen = findViewById(R.id.txtResumen);
-        txtResumen.setVisibility(View.GONE);
         mIncidenciasFormView = findViewById(R.id.review_recycler_view);
         mProgressView = findViewById(R.id.review_progress);
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
@@ -86,6 +85,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
 
         txtTotal.setText("Total valor compra: " + currency);
     }
+
     private void InitializeEvents() {
 
     }
@@ -112,7 +112,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
                 listMaterialByReview.add(materialViewModel);
         }
 
-        txtResumen.setText(getString(R.string.message_resume_review_list) + listMaterialByReview.size());
+        txtResumen.setText(getString(R.string.message_resume_legalization_list) + listMaterialByReview.size());
         SumPurchaseValue();
 
     }

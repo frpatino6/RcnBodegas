@@ -27,6 +27,7 @@
     <string name="error_barcode_empty">Código de barras requerido</string>
     <string name="error_description_empty">Descripción es requerido</string>
     <string name="error_type_empty">Tipo elemento es requerido</string>
+    <string name="message_resume_legalization_list">Cant de elementos agregados:</string>
     <string name="message_resume_review_list">Cant de elementos asignados:</string>
     <string name="message_resume_review_list_added">Cant de elementos inventariados:</string>
     <string name="message_resume_review_list_by_add">Cant de elementos por inventariar:</string>

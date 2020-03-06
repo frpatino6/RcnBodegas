@@ -21,15 +21,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -49,6 +40,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.AsyncHttpClient;
@@ -60,18 +61,23 @@ import com.rcnbodegas.Activities.ResponsibleListActivity;
 import com.rcnbodegas.Activities.TypeElementListActivity;
 import com.rcnbodegas.Activities.WareHouseListActivity;
 import com.rcnbodegas.Activities.WarehouseUserActivity;
+import com.rcnbodegas.CustomEvents.onRecyclerProductionListItemClick;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
-import com.rcnbodegas.Interfaces.IObserver;
 import com.rcnbodegas.Global.NumberTextWatcher;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.SyncService;
 import com.rcnbodegas.Global.TScanner;
 import com.rcnbodegas.Global.Utils;
-import com.rcnbodegas.CustomEvents.onRecyclerProductionListItemClick;
+import com.rcnbodegas.Interfaces.IObserver;
 import com.rcnbodegas.R;
+import com.rcnbodegas.Repository.MaterialHeaderRepository;
+import com.rcnbodegas.Repository.MaterialImagesRepository;
+import com.rcnbodegas.Repository.MaterialRepository;
+import com.rcnbodegas.ViewModels.MaterialImagesViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.MaterialViewmodelHeader;
 import com.rcnbodegas.ViewModels.ProductionViewModel;
 
 import java.io.ByteArrayOutputStream;
@@ -117,6 +123,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private int mMonth;
     private View mProgressView;
     private int mYear;
+    private MaterialHeaderRepository materialHeaderRepository;
+    private MaterialImagesRepository materialImagesRepository;
+    private MaterialRepository materialRepository;
+    private MaterialViewmodelHeader materialViewmodelHeader;
     private MenuItem menuReview;
     private MenuItem menuSave;
     private MenuItem mnuCancel;
@@ -194,7 +204,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         photos_recycler_view = v.findViewById(R.id.photos_recycler_view);
         photos_recycler_view.setHasFixedSize(true);
 
-        warehouse_element_value_edit.setText("$0.0");
         warehouse_element_price_edit.addTextChangedListener(new NumberTextWatcher(warehouse_element_price_edit, "#,###"));
         warehouse_element_value_edit.addTextChangedListener(new NumberTextWatcher(warehouse_element_value_edit, "#,###"));
 
@@ -324,6 +333,23 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             }
         });
 
+        warehouse_element_price_edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus)
+                    warehouse_element_price_edit.setText("");
+            }
+        });
+
+        warehouse_element_value_edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus)
+                    warehouse_element_value_edit.setText("");
+            }
+        });
+
+
         chkIsAdmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -356,6 +382,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
         if (ListFotos != null) ListFotos.clear();
         if (ListaImagenes != null) ListaImagenes.clear();
+
+        materialViewmodelHeader.setStatus(2);
+
+        if (materialViewmodelHeader == null)
+            materialViewmodelHeader = materialHeaderRepository.getLegalizationPendingProcess();
+
+        materialViewmodelHeader.setStatus(2);
+        materialHeaderRepository.update(materialViewmodelHeader);
     }
 
     private void LoadPhoto(Bitmap photo, String nombreFichero) {
@@ -365,10 +399,13 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                 ListaImagenes = new ArrayList<>();
                 listaNombresImagenes = new ArrayList<>();
                 ListaImagenes.add(photo);
-                listaNombresImagenes.add(nombreFichero);
+                if (listaNombresImagenes != null)
+                    listaNombresImagenes.add(nombreFichero);
             } else {
                 ListaImagenes.add(photo);
-                listaNombresImagenes.add(nombreFichero);
+
+                if (listaNombresImagenes != null)
+                    listaNombresImagenes.add(nombreFichero);
             }
 
             setListImagesAdapter();
@@ -411,7 +448,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         } else {
             warehouse_element_layout.setVisibility(View.VISIBLE);
             warehouse_data.setVisibility(View.GONE);
-
+            getLegalizationMaterialDetail();
+            setActionBarTittle();
         }
         return view;
     }
@@ -486,12 +524,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             dialogo.setMessage("Enviando...");
             MaterialViewModel newElement = new MaterialViewModel();
             newElement.setBarCode(warehouse_element_barcode_edit.getText().toString());
-            newElement.setWareHouseId(GlobalClass.getInstance().getIdSelectedWareHouseWarehouse());
-            newElement.setProductionId(Integer.valueOf(GlobalClass.getInstance().getIdSelectedProductionWarehouse()));
-            newElement.setResponsibleId(GlobalClass.getInstance().getIdSelectedResponsibleWarehouse());
+            newElement.setWareHouseId(materialViewmodelHeader.getWarehouseId());
+            newElement.setProductionId(Integer.valueOf(materialViewmodelHeader.getProductionId()));
+            newElement.setResponsibleId(materialViewmodelHeader.getResponsibleId());
             newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
             newElement.setMarca(warehouse_element_edit.getText().toString());
-            newElement.setLegalizedBy(String.valueOf(GlobalClass.getInstance().getIdSelectedResponsibleWarehouse()));
+            newElement.setLegalizedBy(String.valueOf(materialViewmodelHeader.getResponsibleId()));
 
 
             String currencyUnitPriceString;
@@ -510,21 +548,21 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             newElement.setTypeElementName(warehouse_element_type_edit.getText().toString());
             newElement.setPurchaseValue(Double.valueOf(currencyPurchaseString));
             newElement.setSaleDate(dateTimeUtilities.parseDateTurno(mYear, mMonth - 1, mDay));
-            newElement.setTerceroActual(GlobalClass.getInstance().getIdSelectedUserWarehouse());
+            newElement.setTerceroActual(materialViewmodelHeader.getUserserWarehouse());
             newElement.setAdmin(chkIsAdmin.isChecked());
+            newElement.setIdHeaderLegalization(materialViewmodelHeader.getId());
 
+
+            long idMaterial = materialRepository.insert(newElement);
 
             if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
+            long id = 0;
 
             for (Bitmap photo : ListaImagenes) {
                 newElement.getListaImagenesBmp().add(photo);
-            }
-
-            if (ListFotos != null) {
-                for (String photo : ListFotos) {
-                    newElement.getListaImagenesStr().add(parseImage(photo));
-
-                }
+                byte[] byteArray = getByteArrayFromBitmap(photo);
+                String str = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                materialImagesRepository.insert(new MaterialImagesViewModel(byteArray, idMaterial, str));
             }
 
             if (GlobalClass.getInstance().getDataMaterial() == null)
@@ -533,10 +571,8 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             menuReview.setVisible(true);
             menuSave.setVisible(true);
 
-
             GlobalClass.getInstance().getDataMaterial().add(newElement);
             clearFields();
-            //loadTest(newElement);//Metodo para emular la carga de N elemntos
             PrintCountElementes();
             dialogo.dismiss();
         } catch (NumberFormatException e) {
@@ -561,7 +597,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             dialogo.setCancelable(false);
             dialogo.show();
 
-            String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
+            String wareHouse = materialViewmodelHeader.getWarehouseId();//GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
             String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
             AsyncHttpClient client = new AsyncHttpClient();
@@ -574,7 +610,9 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
                 materialViewModel.getListaImagenesBmp().clear();
             }
+
             String resultJson = json.toJson(GlobalClass.getInstance().getDataMaterial());
+
 
             entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
 
@@ -610,12 +648,16 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                     Gson gson = new GsonBuilder().create();
                     // Define Response class to correspond to the JSON response returned
                     lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
+                    materialViewmodelHeader.setStatus(2);
+                    materialHeaderRepository.update(materialViewmodelHeader);
+                    materialImagesRepository.deleteALl();
+
 
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
-            confirmAddForSyncAfterByGenerateError(e.getMessage());
+            //confirmAddForSyncAfterByGenerateError(e.getMessage());
         }
     }
 
@@ -755,6 +797,17 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         return image;
     }
 
+    private void createLegalizationHeader() {
+
+        materialViewmodelHeader = new MaterialViewmodelHeader(GlobalClass.getInstance().getIdSelectedWareHouseWarehouse(),
+                Integer.valueOf(GlobalClass.getInstance().getIdSelectedProductionWarehouse()),
+                GlobalClass.getInstance().getIdSelectedResponsibleWarehouse(), GlobalClass.getInstance().getIdSelectedUserWarehouse(), this.warehouse_program_option.getText().toString());
+
+        long materialViewmodelHeaderId = materialHeaderRepository.insert(materialViewmodelHeader);
+        materialViewmodelHeader = materialHeaderRepository.getLegalizationById(materialViewmodelHeaderId);
+
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -785,15 +838,43 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
+    private byte[] getByteArrayFromBitmap(Bitmap photo) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
+    private void getImagesByMaterial(long idMaterialDetail) {
+        _MaterialViewModel.getListaImagenesBmp().clear();
+        List<MaterialImagesViewModel> materialImagesViewModels = materialImagesRepository.getByMaterialDetailId(idMaterialDetail);
+        for (MaterialImagesViewModel materialImagesViewModel : materialImagesViewModels) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(materialImagesViewModel.getImage(), 0, materialImagesViewModel.getImage().length);
+            _MaterialViewModel.getListaImagenesBmp().add(bitmap);
+        }
+    }
+
+    private void getLegalizationMaterialDetail() {
+
+        GlobalClass.getInstance().setDataMaterial((ArrayList<MaterialViewModel>) materialRepository.getMaterialLegalizationDetail(materialViewmodelHeader.getId()));
+
+        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
+
+            List<MaterialImagesViewModel> materialImagesViewModels = materialImagesRepository.getByMaterialDetailId(materialViewModel.getIdDetail());
+            for (MaterialImagesViewModel materialImagesViewModel : materialImagesViewModels) {
+                materialViewModel.getListaImagenesStr().add(materialImagesViewModel.getParsePhoto());
+            }
+        }
+    }
+
     private void loadEditData() {
-        int indexMaterilForEdit = GlobalClass.getInstance().getDataMaterial().indexOf(_MaterialViewModel);
-        _MaterialViewModel = GlobalClass.getInstance().getDataMaterial().get(indexMaterilForEdit);
+
         this.warehouse_element_barcode_edit.setText(_MaterialViewModel.getBarCode());
         this.warehouse_element_desc_edit.setText(_MaterialViewModel.getMaterialName());
         this.warehouse_element_type_edit.setText(_MaterialViewModel.getTypeElementName());
         this.warehouse_element_edit.setText(_MaterialViewModel.getMarca());
         this.warehouse_element_price_edit.setText(_MaterialViewModel.getUnitPrice().toString());
         this.warehouse_element_value_edit.setText(_MaterialViewModel.getPurchaseValue().toString());
+        getImagesByMaterial(_MaterialViewModel.getIdDetail());
 
     }
 
@@ -875,11 +956,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     private void setActionBarTittle() {
 
-
-        if (selectedProductionName == null)
-            selectedProductionName = "";
-
-        warehouse_element_prod.setText(selectedProductionName);
+        warehouse_element_prod.setText(materialViewmodelHeader.getSelectedProductionName());
         dateTimeUtilities = new DateTimeUtilities(getActivity());
 
     }
@@ -970,7 +1047,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         dlgAlert.setCancelable(true);
         dlgAlert.create().show();
     }
-
 
     private void validateFields() {
         warehouse_element_barcode_edit.setError(null);
@@ -1068,6 +1144,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             menuSave.setVisible(true);
             menuReview.setVisible(true);
             mnuCancel.setVisible(true);
+            createLegalizationHeader();
             PrintCountElementes();
             setActionBarTittle();
         }
@@ -1076,7 +1153,11 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     //Valida si hay un proceso de inventario en proceso
     private boolean validateInventoryProcess() {
 
-        return GlobalClass.getInstance().getCurrentAddElementActiveProcess();
+        MaterialHeaderRepository materialHeaderRepository = new MaterialHeaderRepository(getActivity());
+        materialViewmodelHeader = materialHeaderRepository.getLegalizationPendingProcess();
+
+
+        return materialViewmodelHeader == null ? false : true;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -1171,6 +1252,10 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle(getString(R.string.title_element_legalization));
+        materialRepository = new MaterialRepository(getActivity());
+        materialHeaderRepository = new MaterialHeaderRepository(getActivity());
+        materialImagesRepository = new MaterialImagesRepository(getActivity());
+
         dateTimeUtilities = new DateTimeUtilities(getActivity());
         setHasOptionsMenu(true);
     }
@@ -1219,10 +1304,13 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
                 _MaterialViewModel.setUnitPrice(Double.valueOf(currencyUnitPriceString));
                 _MaterialViewModel.setPurchaseValue(Double.valueOf(currencyPurchaseString));
+                materialRepository.update(_MaterialViewModel);
 
                 if (ListFotos != null) {
                     for (String photo : ListFotos) {
-                        _MaterialViewModel.getListaImagenesStr().add(parseImage(photo));
+                        String photoParsed = parseImage(photo);
+                        _MaterialViewModel.getListaImagenesStr().add(photoParsed);
+
 
                     }
                 }
@@ -1263,6 +1351,12 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        _MaterialViewModel = null;
     }
 
     @Override

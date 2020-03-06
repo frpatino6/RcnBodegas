@@ -1193,6 +1193,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -1208,17 +1209,12 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (GlobalClass.getInstance().isContinueInventory())
             showInputInventoryCode();
         else {
-            if (!validateInventoryProcess()) {
-                inventory_element.setVisibility(View.GONE);
-                inventory_data.setVisibility(View.VISIBLE);
+            inventory_element.setVisibility(View.GONE);
+            inventory_data.setVisibility(View.VISIBLE);
 
-                if (GlobalClass.getInstance().isNetworkAvailable())
-                    asyncInventoryPending();
-            } else {
-                inventory_element.setVisibility(View.VISIBLE);
-                inventory_data.setVisibility(View.GONE);
-                setActionBarTittle();
-            }
+            if (GlobalClass.getInstance().isNetworkAvailable())
+                asyncInventoryPending();
+
         }
         showProgress(false);
         return view;

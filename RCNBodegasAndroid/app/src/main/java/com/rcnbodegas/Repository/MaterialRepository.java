@@ -58,19 +58,6 @@ public class MaterialRepository {
         return result;
     }
 
-    public List<MaterialViewModel> getReviewDetail(int docNumber) {
-        List<MaterialViewModel> result = null;
-
-        try {
-            result = bodegasDatabase.materialDao().getReviewDetail(docNumber);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-        }
-        return result;
-    }
-
-
     public MaterialViewModel getMaterialByBarcode(String barcode) {
         MaterialViewModel result = null;
 
@@ -84,18 +71,44 @@ public class MaterialRepository {
         return result;
     }
 
-    public void insert(MaterialViewModel materialViewModel) {
+    public List<MaterialViewModel> getMaterialLegalizationDetail(long docNumber) {
+        List<MaterialViewModel> result = null;
 
         try {
-
-            bodegasDatabase.materialDao().insert(materialViewModel);
+            result = bodegasDatabase.materialDao().getMaterialLegalizationDetail(docNumber);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
         }
+        return result;
     }
 
-    public void insertAllOElements(List<MaterialViewModel> materialViewModels){
+    public List<MaterialViewModel> getReviewDetail(int docNumber) {
+        List<MaterialViewModel> result = null;
+
+        try {
+            result = bodegasDatabase.materialDao().getReviewDetail(docNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        }
+        return result;
+    }
+
+    public long insert(MaterialViewModel materialViewModel) {
+
+        long id = 0;
+        try {
+
+            id = bodegasDatabase.materialDao().insert(materialViewModel);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        }
+        return id;
+    }
+
+    public void insertAllOElements(List<MaterialViewModel> materialViewModels) {
         try {
 
             bodegasDatabase.materialDao().insertAllOElements(materialViewModels);

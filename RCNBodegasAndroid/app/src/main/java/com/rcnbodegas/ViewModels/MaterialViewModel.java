@@ -2,6 +2,7 @@ package com.rcnbodegas.ViewModels;
 
 import android.graphics.Bitmap;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -10,11 +11,14 @@ import java.util.ArrayList;
 
 @Entity
 public class MaterialViewModel {
+
     private String barCode;
     private String foundDate;
     private int id;
     @PrimaryKey(autoGenerate = true)
     private int idDetail;
+    private int idHeader;
+    private long idHeaderLegalization;
     private Boolean isAdmin;
     private boolean isReview;
     private String legalizedBy;
@@ -37,7 +41,6 @@ public class MaterialViewModel {
     private Double unitPrice;
     private String wareHouseId;
     private String wareHouseName;
-    private int idHeader;
 
     public MaterialViewModel(String wareHouseId, String wareHouseName, Integer productionId, String productionName, Integer responsibleId, String responsibleName, String typeElementId, String typeElementName, String marca, String barCode, String materialName) {
         this.wareHouseId = wareHouseId;
@@ -55,26 +58,11 @@ public class MaterialViewModel {
 
     }
 
+
     public MaterialViewModel() {
         this.isReview = false;
         listaImagenesBmp = new ArrayList<>();
         listaImagenesStr = new ArrayList<>();
-    }
-
-    public int getIdHeader() {
-        return idHeader;
-    }
-
-    public void setIdHeader(int idHeader) {
-        this.idHeader = idHeader;
-    }
-
-    public int getIdDetail() {
-        return idDetail;
-    }
-
-    public void setIdDetail(int idDetail) {
-        this.idDetail = idDetail;
     }
 
     public Boolean getAdmin() {
@@ -107,6 +95,30 @@ public class MaterialViewModel {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getIdDetail() {
+        return idDetail;
+    }
+
+    public void setIdDetail(int idDetail) {
+        this.idDetail = idDetail;
+    }
+
+    public int getIdHeader() {
+        return idHeader;
+    }
+
+    public void setIdHeader(int idHeader) {
+        this.idHeader = idHeader;
+    }
+
+    public long getIdHeaderLegalization() {
+        return idHeaderLegalization;
+    }
+
+    public void setIdHeaderLegalization(long idHeaderLegalization) {
+        this.idHeaderLegalization = idHeaderLegalization;
     }
 
     public String getLegalizedBy() {

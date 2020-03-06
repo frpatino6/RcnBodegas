@@ -27,6 +27,9 @@ public interface MaterialDao {
     @Query("SELECT * FROM MaterialViewModel where idHeader = :headerId and isReview=1")
     List<MaterialViewModel> getReviewDetail(int headerId);
 
+    @Query("SELECT * FROM MaterialViewModel where idHeaderLegalization = :idHeaderLegalization")
+    List<MaterialViewModel> getMaterialLegalizationDetail(long idHeaderLegalization);
+
 
     @Query("SELECT * FROM MaterialViewModel where barCode = :barcode")
     MaterialViewModel getMaterialByBarcode(String barcode);
@@ -35,7 +38,7 @@ public interface MaterialDao {
     void insertAllOElements(List<MaterialViewModel> materialViewModels);
 
     @Insert
-    Long insert(MaterialViewModel materialViewModel);
+    long insert(MaterialViewModel materialViewModel);
 
     @Update
     void update(MaterialViewModel materialViewModel);

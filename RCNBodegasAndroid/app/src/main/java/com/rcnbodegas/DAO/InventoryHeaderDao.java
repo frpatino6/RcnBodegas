@@ -19,5 +19,5 @@ public interface InventoryHeaderDao {
     InventroyHeaderViewModel getInventoryHeader();
 
     @Insert
-    Long insert(InventroyHeaderViewModel inventroyHeaderViewModel);
+    void insert(InventroyHeaderViewModel inventroyHeaderViewModel);
 }

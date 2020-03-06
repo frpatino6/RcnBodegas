@@ -70,7 +70,7 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private Boolean queryByInventory = false;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
     private String urlServices = "http://solpe.rcntv.com.co:8083/";
-    //private String urlServices = "http://192.168.43.215/bodegas/";
+    //private String urlServices = "http://192.168.0.6/bodegas/";
     private String userName;
     private String userRole;
 
