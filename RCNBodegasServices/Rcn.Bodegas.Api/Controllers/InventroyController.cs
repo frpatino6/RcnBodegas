@@ -134,12 +134,22 @@ namespace Rcn.Bodegas.Api.Controllers
             }
         }
 
-        [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}/{continueInventory}/{inventoryId}")]
-        public async Task<IActionResult> GetMaterialByProduction(string wareHouseType, int production, int responsible, int type_element, int continueInventory, int inventoryId)
+        [HttpGet("/Inventory/GetMaterialByProduction/{wareHouseType}/{production}/{responsible}/{type_element}/{continueInventory}/{inventoryId}/{fechaMovimiento}")]
+        public async Task<IActionResult> GetMaterialByProduction(string wareHouseType, int production, int responsible, int type_element, int continueInventory, int inventoryId, string fechaMovimiento)
         {
+            System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = null;
             try
             {
-                System.Collections.Generic.List<Core.ViewModel.MaterialViewModel> result = await _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId);
+
+                if (inventoryId == 0)
+                {
+                    result = _IInventroy.GetMaterialsForProduction(wareHouseType, production, responsible, type_element, continueInventory, inventoryId, fechaMovimiento);
+                }
+                else
+                {
+                    result = _IInventroy.GetMaterialsByHeader(inventoryId);
+                }
+
                 return Ok(result);
             }
 
@@ -225,6 +235,53 @@ namespace Rcn.Bodegas.Api.Controllers
             try
             {
                 List<InvetoryHeaderViewModel> result = await _IInventroy.GetPendingInventoryByUser(user);
+
+                return Ok(result);
+            }
+            catch (WareHouseExceptions ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("/Inventory/GetPendingInventoryById/{id}")]
+        public async Task<IActionResult> GetPendingInventoryById(int id)
+        {
+            try
+            {
+                List<InvetoryHeaderViewModel> result = await _IInventroy.GetPendingInventoryById(id);
+
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return NotFound($@"No se pudo recuperar elementos para el código de inventario {id}");
+                }
+            }
+            catch (WareHouseExceptions ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("/Inventory/GetPendingInventory")]
+        public async Task<IActionResult> GetPendingInventory()
+        {
+            try
+            {
+                List<InvetoryHeaderViewModel> result = await _IInventroy.GetPendingInventory();
 
                 return Ok(result);
             }

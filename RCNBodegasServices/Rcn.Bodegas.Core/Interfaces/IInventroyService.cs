@@ -16,7 +16,7 @@ namespace Rcn.Bodegas.Core.Interfaces
 
         Task<MaterialViewModel> GetMaterialByBarCode(string barcode);
 
-        Task<List<MaterialViewModel>> GetMaterialsForProduction(string warehouseType, int productionId, int responsibleId, int type_element, int continueInventory, int inventoryId);
+        List<MaterialViewModel> GetMaterialsForProduction(string warehouseType, int productionId, int responsibleId, int type_element, int continueInventory, int inventoryId, string fechaMovimiento);
 
         Task<System.Int64> GetMaterialsCountForProduction(string warehouseType, int idProdction, int idResponsible, int type_element);
 
@@ -24,11 +24,17 @@ namespace Rcn.Bodegas.Core.Interfaces
 
         Task<List<InvetoryHeaderViewModel>> GetPendingInventoryByUser(string userName);
 
+        Task<List<InvetoryHeaderViewModel>> GetPendingInventoryById(int id);
+
+        Task<List<InvetoryHeaderViewModel>> GetPendingInventory();
+
         int CreateInventoryHeader(InvetoryHeaderViewModel invetoryViewModel);
 
         int CreateInventoryDetail(InventoryDetailViewModel inventoryDetailViewModel, int status);
 
         List<string> getImagesByMaterial(int idMaterial);
+
+        List<MaterialViewModel> GetMaterialsByHeader(int inventoryId);
 
         bool UpdateStateInventory(int inventoryId, int status);
 
