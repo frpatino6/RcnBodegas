@@ -336,16 +336,16 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         warehouse_element_price_edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
-                    warehouse_element_price_edit.setText("");
+                //if (hasFocus)
+                    //warehouse_element_price_edit.setText("");
             }
         });
 
         warehouse_element_value_edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus)
-                    warehouse_element_value_edit.setText("");
+                //if (hasFocus)
+                    //warehouse_element_value_edit.setText("");
             }
         });
 
@@ -517,6 +517,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     @SuppressLint("RestrictedApi")
     private void addElement() {
+
         ProgressDialog dialogo = new ProgressDialog(getActivity());
         try {
             new DecimalFormat("0.00");
@@ -530,7 +531,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             newElement.setMaterialName(warehouse_element_desc_edit.getText().toString());
             newElement.setMarca(warehouse_element_edit.getText().toString());
             newElement.setLegalizedBy(String.valueOf(materialViewmodelHeader.getResponsibleId()));
-
 
             String currencyUnitPriceString;
             currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
@@ -558,13 +558,24 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
             long id = 0;
 
-            for (Bitmap photo : ListaImagenes) {
+            /*for (Bitmap photo : ListaImagenes) {
                 newElement.getListaImagenesBmp().add(photo);
                 byte[] byteArray = getByteArrayFromBitmap(photo);
                 String str = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                newElement.getListaImagenesStr().add(parseImage(str));
                 materialImagesRepository.insert(new MaterialImagesViewModel(byteArray, idMaterial, str));
+                materialRepository.update(newElement);
+            }*/
+            for (Bitmap photo : ListaImagenes) {
+                newElement.getListaImagenesBmp().add(photo);
             }
 
+            if (ListFotos != null) {
+                for (String photo : ListFotos) {
+                    newElement.getListaImagenesStr().add(parseImage(photo));
+                }
+            }
+            materialRepository.update(newElement);
             if (GlobalClass.getInstance().getDataMaterial() == null)
                 GlobalClass.getInstance().setDataMaterial(new ArrayList<MaterialViewModel>());
 
@@ -607,11 +618,19 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             StringEntity entity;
             Gson json = new Gson();
 
-            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
-                materialViewModel.getListaImagenesBmp().clear();
+            int idHeader = materialViewmodelHeader.getId();
+            List<MaterialViewModel>materialViewModels = materialRepository.getMaterialLegalizationDetail(idHeader);
+
+            for (MaterialViewModel materialViewModel : materialViewModels) {
+                MaterialImagesRepository materialImagesRepository = new MaterialImagesRepository(getActivity().getApplicationContext());
+                List<MaterialImagesViewModel> materialImagesViewModels = materialImagesRepository.getByMaterialDetailId(materialViewModel.getIdDetail());
+
+                for (MaterialImagesViewModel materialImagesViewModel : materialImagesViewModels) {
+                    materialViewModel.getListaImagenesStr().add(materialImagesViewModel.getParsePhoto());
+                }
             }
 
-            String resultJson = json.toJson(GlobalClass.getInstance().getDataMaterial());
+            String resultJson = json.toJson(materialViewModels);
 
 
             entity = new StringEntity(resultJson, StandardCharsets.UTF_8);

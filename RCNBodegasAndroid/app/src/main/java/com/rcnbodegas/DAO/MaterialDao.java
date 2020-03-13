@@ -24,14 +24,20 @@ public interface MaterialDao {
     @Query("SELECT * FROM MaterialViewModel where idHeader = :headerId and isReview=0")
     LiveData<List<MaterialViewModel>> geDetailByDocumentNumber(int headerId);
 
+    @Query("SELECT count(*) as MaterialViewModel FROM MaterialViewModel where idHeader = :headerId ")
+    int geAllDetailByDocumentNumber(int headerId);
+
     @Query("SELECT * FROM MaterialViewModel where idHeader = :headerId and isReview=1")
     List<MaterialViewModel> getReviewDetail(int headerId);
+
+    @Query("SELECT count(*) FROM MaterialViewModel where idHeader = :headerId and isReview=1")
+    int getCountReviewDetail(int headerId);
 
     @Query("SELECT * FROM MaterialViewModel where idHeaderLegalization = :idHeaderLegalization")
     List<MaterialViewModel> getMaterialLegalizationDetail(long idHeaderLegalization);
 
 
-    @Query("SELECT * FROM MaterialViewModel where barCode = :barcode")
+    @Query("SELECT * FROM MaterialViewModel where barCode = :barcode ")
     MaterialViewModel getMaterialByBarcode(String barcode);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

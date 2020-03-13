@@ -1,11 +1,14 @@
 package com.rcnbodegas.Activities;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,10 +17,12 @@ import android.widget.TextView;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.ReviewListAdapter;
 import com.rcnbodegas.R;
+import com.rcnbodegas.Repository.MaterialRepository;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class ListItemReviewActivity extends AppCompatActivity {
@@ -76,7 +81,7 @@ public class ListItemReviewActivity extends AppCompatActivity {
     private void InitializeControls() {
         txtResumen = findViewById(R.id.txtResumen);
         txtAdded = findViewById(R.id.txtAdded);
-        txtDiference= findViewById(R.id.txtDiference);
+        txtDiference = findViewById(R.id.txtDiference);
 
         mIncidenciasFormView = findViewById(R.id.review_recycler_view);
         mProgressView = findViewById(R.id.review_progress);
@@ -112,34 +117,49 @@ public class ListItemReviewActivity extends AppCompatActivity {
     }
 
     private void filterListByNotReview() {
+        MaterialRepository materialRepository = new MaterialRepository(getApplicationContext());
 
-        if (listMaterialByReview == null)
-            listMaterialByReview = new ArrayList<>();
+        int idInventory = 0;
+        if (GlobalClass.getInstance().getListMaterialBYProduction().size() > 0)
+            idInventory = GlobalClass.getInstance().getListMaterialBYProduction().get(0).getIdHeader();
 
-        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getListMaterialBYProduction()) {
-            if (!materialViewModel.isReview())
-                listMaterialByReview.add(materialViewModel);
+        final int countALlItems = materialRepository.geAllDetailByDocumentNumber(idInventory);
+
+        if (GlobalClass.getInstance().getListMaterialBYProduction() != null) {
+            listMaterialByReview = (ArrayList<MaterialViewModel>) GlobalClass.getInstance().getListMaterialBYProduction();
+            txtResumen.setText(getString(R.string.message_resume_review_list) + " " + countALlItems);
+            SumPurchaseValue();
+            filterListByReview(countALlItems);
+            setRecyclerViewData();
+        } else {
+            materialRepository.geDetailByDocumentNumber(idInventory).observe(this, new Observer<List<MaterialViewModel>>() {
+                @Override
+                public void onChanged(List<MaterialViewModel> materialViewModels) {
+
+                    listMaterialByReview = (ArrayList<MaterialViewModel>) materialViewModels;
+                    txtResumen.setText(getString(R.string.message_resume_review_list) + " " + countALlItems);
+                    SumPurchaseValue();
+                    filterListByReview(countALlItems);
+                    setRecyclerViewData();
+                }
+            });
         }
 
-        txtResumen.setText(getString(R.string.message_resume_review_list) + " " + GlobalClass.getInstance().getListMaterialBYProduction().size());
-
-        SumPurchaseValue();
     }
 
-    private void filterListByReview() {
+    private void filterListByReview(int notReviewed) {
+        MaterialRepository materialRepository = new MaterialRepository(getApplicationContext());
+        List<MaterialViewModel> materialViewModels = null;
+        int idInventory = 0;
+        if (GlobalClass.getInstance().getListMaterialBYProduction().size() > 0)
+            idInventory = GlobalClass.getInstance().getListMaterialBYProduction().get(0).getIdHeader();
 
-        if (listMaterialAdded == null)
-            listMaterialAdded = new ArrayList<>();
-
-        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getListMaterialBYProduction()) {
-            if (materialViewModel.isReview())
-                listMaterialAdded.add(materialViewModel);
-        }
-
-        txtAdded.setText(getString(R.string.message_resume_review_list_added) + " " + listMaterialAdded.size());
-        txtDiference.setText(getString(R.string.message_resume_review_list_by_add) + " " + String.valueOf(listMaterialByReview.size()));
+        int countMaterialReview = materialRepository.getCountReviewDetail(idInventory);
+        int diference = notReviewed - countMaterialReview;
 
 
+        txtAdded.setText(getString(R.string.message_resume_review_list_added) + " " + countMaterialReview);
+        txtDiference.setText(getString(R.string.message_resume_review_list_by_add) + " " + String.valueOf(diference));
     }
 
     private void setRecyclerViewData() {
@@ -159,8 +179,7 @@ public class ListItemReviewActivity extends AppCompatActivity {
 //        selectedOption = extras.getString("Inventory");
         InitializeControls();
         filterListByNotReview();
-        filterListByReview();
-        setRecyclerViewData();
+        //setRecyclerViewData();
 
     }
 

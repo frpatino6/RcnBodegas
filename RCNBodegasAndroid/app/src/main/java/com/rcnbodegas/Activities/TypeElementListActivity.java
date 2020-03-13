@@ -158,6 +158,7 @@ public class TypeElementListActivity extends AppCompatActivity {
         try {
             String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
+            if(wareHouse ==null) return;
             SharedPreferences pref = getApplicationContext().getSharedPreferences("bodegasPreferences", 0); // 0 - for private mode
             String res = "";
             if (wareHouse.toString().equals("V"))

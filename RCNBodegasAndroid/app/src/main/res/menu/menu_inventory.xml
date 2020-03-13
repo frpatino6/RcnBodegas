@@ -2,9 +2,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/mnu_review"
-        android:icon="@mipmap/ic_review"
-        android:title="Revisar"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        android:icon="@drawable/ic_list_review"
+        android:title="Agregados"/>
     <item
         android:id="@+id/mnu_save"
         android:icon="@android:drawable/ic_menu_save"

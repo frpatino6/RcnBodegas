@@ -143,6 +143,7 @@ public class MaterialViewModel {
     public ArrayList<String> getListaImagenesStr() {
 
         if (listaImagenesStr == null) listaImagenesStr = new ArrayList<>();
+
         return listaImagenesStr;
     }
 

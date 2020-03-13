@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -68,6 +69,7 @@ import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.PhotosAdapter;
 import com.rcnbodegas.Global.ScannerFactory;
 import com.rcnbodegas.Global.TScanner;
+import com.rcnbodegas.Global.Utils;
 import com.rcnbodegas.Interfaces.IObserver;
 import com.rcnbodegas.R;
 import com.rcnbodegas.Repository.InventoryHeaderRepository;
@@ -144,6 +146,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     private MenuItem mnuReview;
     private MenuItem mnuSave;
     private RecyclerView photos_recycler_view;
+    private MenuItem iconScanMenu;
 
     public InventoryFragment() {
 
@@ -384,8 +387,6 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         if (ListaImagenes != null)
             ListaImagenes.clear();
 
-        //if (!cancel)
-        //  showMessageDialog("Inventario guardado correctamente. CONSECUTIVO: " + inventoryId);
         inventoryId = 0;
 
     }
@@ -402,6 +403,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
                         GlobalClass.getInstance().setDataMaterialInventory((ArrayList<MaterialViewModel>) materialViewModels);
                         GlobalClass.getInstance().setListMaterialBYProduction((ArrayList<MaterialViewModel>) materialViewModels);
                         showElementInput();
+                        PrintCountElementes();
                     }
                 });
             }
@@ -650,10 +652,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         dialogo.setCancelable(false);
         dialogo.show();
 
+        int responsible = inventory_responsible_option.getText().toString().equals("") ? -1 : GlobalClass.getInstance().getIdSelectedResponsibleInventory();
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/GetMaterialByProduction/" +
                 GlobalClass.getInstance().getIdSelectedWareHouseInventory() + "/" +
                 GlobalClass.getInstance().getIdSelectedProductionInventory() + "/" +
-                GlobalClass.getInstance().getIdSelectedResponsibleInventory() + "/" +
+                responsible + "/" +
                 GlobalClass.getInstance().getIdSelectedTypeElementHeader() + "/" + (createHeader == true ? "0" : "1" + "/" + inventoryId) + "/" + inventory_date_option2.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(360000);
@@ -940,6 +943,15 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         dlgAlert.create().show();
     }
 
+    private void PrintCountElementes() {
+        int idInventory = 0;
+        if (GlobalClass.getInstance().getListMaterialBYProduction().size() > 0)
+            idInventory = GlobalClass.getInstance().getListMaterialBYProduction().get(0).getIdHeader();
+        int count_items = materialRepository.getCountReviewDetail(idInventory);
+        LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
+        Utils.setBadgeCount(getActivity(), icon, count_items);
+    }
+
     private void showElementInput() {
         showProgress(false);
         mnuReview.setVisible(true);
@@ -1188,6 +1200,7 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_inventory, menu);
+        iconScanMenu = menu.findItem(R.id.mnu_review);
         super.onCreateOptionsMenu(menu, inflater);
 
 

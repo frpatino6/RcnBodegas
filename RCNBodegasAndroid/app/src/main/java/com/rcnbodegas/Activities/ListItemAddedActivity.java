@@ -2,6 +2,7 @@ package com.rcnbodegas.Activities;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.AlertDialog;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
+
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,10 +24,16 @@ import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.CustomEvents.onRecyclerReviewListDeleteItemClick;
 import com.rcnbodegas.CustomEvents.onRecyclerReviewListEditItemClick;
 import com.rcnbodegas.R;
+import com.rcnbodegas.Repository.MaterialHeaderRepository;
+import com.rcnbodegas.Repository.MaterialImagesRepository;
+import com.rcnbodegas.Repository.MaterialRepository;
+import com.rcnbodegas.ViewModels.MaterialImagesViewModel;
 import com.rcnbodegas.ViewModels.MaterialViewModel;
+import com.rcnbodegas.ViewModels.MaterialViewmodelHeader;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class ListItemAddedActivity extends AppCompatActivity {
@@ -33,7 +41,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private ArrayList<MaterialViewModel> listMaterialByReview;
     private ArrayList<MaterialViewModel> sortEmpList;
-
+    private MaterialHeaderRepository materialHeaderRepository;
     private AddedElementListAdapter adapter;
     private View mIncidenciasFormView;
     private View mProgressView;
@@ -60,7 +68,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
         mIncidenciasFormView = findViewById(R.id.review_recycler_view);
         mProgressView = findViewById(R.id.review_progress);
         recyclerView = (RecyclerView) findViewById(R.id.review_recycler_view);
-        txtTotal=findViewById(R.id.txtTotal);
+        txtTotal = findViewById(R.id.txtTotal);
 
         recyclerView.setHasFixedSize(true);
 
@@ -72,10 +80,10 @@ public class ListItemAddedActivity extends AppCompatActivity {
 
     }
 
-    private void SumPurchaseValue(){
-        Double result=0.0;
+    private void SumPurchaseValue() {
+        Double result = 0.0;
         for (MaterialViewModel materialViewModel : listMaterialByReview) {
-            result+=materialViewModel.getUnitPrice();
+            result += materialViewModel.getUnitPrice();
         }
 
 
@@ -92,6 +100,14 @@ public class ListItemAddedActivity extends AppCompatActivity {
 
     private void OpenEditDialog(MaterialViewModel wareHouseViewModel) {
         try {
+            MaterialImagesRepository materialImagesRepository = new MaterialImagesRepository(getApplicationContext());
+            List<MaterialImagesViewModel> materialImagesViewModels = materialImagesRepository.getByMaterialDetailId(wareHouseViewModel.getIdDetail());
+            wareHouseViewModel.setListaImagenesStr(null);
+
+            for (MaterialImagesViewModel materialImagesViewModel : materialImagesViewModels) {
+                wareHouseViewModel.getListaImagenesStr().add(materialImagesViewModel.getParsePhoto());
+            }
+
             FragmentManager fm = getSupportFragmentManager();
             DialogFragment warehouseFragment = WarehouseFragment.newInstance(wareHouseViewModel);
             warehouseFragment.show(fm, "Editar");
@@ -104,13 +120,13 @@ public class ListItemAddedActivity extends AppCompatActivity {
 
     private void filterListByNotReview() {
 
-        if (listMaterialByReview == null)
-            listMaterialByReview = new ArrayList<>();
+        materialHeaderRepository = new MaterialHeaderRepository(getApplicationContext());
+        MaterialRepository materialRepository = new MaterialRepository(getApplicationContext());
 
-        for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getListMaterialForAdd()) {
-            if (!materialViewModel.isReview())
-                listMaterialByReview.add(materialViewModel);
-        }
+        MaterialViewmodelHeader materialViewmodelHeader = materialHeaderRepository.getLegalizationPendingProcess();
+
+
+        listMaterialByReview = (ArrayList<MaterialViewModel>) materialRepository.getMaterialLegalizationDetail(materialViewmodelHeader.getId());
 
         txtResumen.setText(getString(R.string.message_resume_legalization_list) + listMaterialByReview.size());
         SumPurchaseValue();
@@ -234,11 +250,10 @@ public class ListItemAddedActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if ((keyCode == KeyEvent.KEYCODE_BACK))
-        {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             setResult(RESULT_OK, null);
             finish();
             return true; //I have tried here true also

@@ -70,12 +70,12 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private Boolean queryByInventory = false;
     private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
     private String urlServices = "http://solpe.rcntv.com.co:8083/";
-    //private String urlServices = "http://192.168.0.6/bodegas/";
+    //private String urlServices = "http://192.168.0.7/bodegas/";
     private String userName;
     private String userRole;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void asyncUpdateElements(int finalize, int inventoryId, String deliveryDate, Context context,boolean showProgresdialog,
+    public void asyncUpdateElements(int finalize, int inventoryId, String deliveryDate, Context context, boolean showProgresdialog,
                                     final onHttpRequestSuccess _onHttpRequestSuccess, final onHttpRequestError _onHttpRequestError) {
 
 
@@ -84,7 +84,7 @@ public class GlobalClass extends Application implements LifecycleObserver {
         try {
             final ProgressDialog dialogo = new ProgressDialog(context);
 
-            if(showProgresdialog) {
+            if (showProgresdialog) {
                 dialogo.setMessage("Enviando inventario...");
                 dialogo.setIndeterminate(false);
                 dialogo.setCancelable(false);
@@ -305,6 +305,12 @@ public class GlobalClass extends Application implements LifecycleObserver {
     }
 
     public String getIdSelectedWareHouseWarehouse() {
+
+        if (idSelectedWareHouseWarehouse == null) {
+            if (GlobalClass.getInstance().getDataMaterial() != null)
+                idSelectedWareHouseWarehouse = GlobalClass.getInstance().getDataMaterial().get(0).getWareHouseId();
+        }
+
         return idSelectedWareHouseWarehouse;
     }
 

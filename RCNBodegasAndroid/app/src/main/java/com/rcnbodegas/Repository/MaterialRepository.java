@@ -95,6 +95,31 @@ public class MaterialRepository {
         return result;
     }
 
+    public int geAllDetailByDocumentNumber(int docNumber) {
+       int result = 0;
+
+        try {
+            result = bodegasDatabase.materialDao().geAllDetailByDocumentNumber(docNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        }
+        return result;
+    }
+
+    public int getCountReviewDetail(int docNumber) {
+        int result = 0;
+
+        try {
+            result = bodegasDatabase.materialDao().getCountReviewDetail(docNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        }
+        return result;
+    }
+
+
     public long insert(MaterialViewModel materialViewModel) {
 
         long id = 0;
