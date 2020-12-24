@@ -19,3 +19,5 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bo
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.csproj.CopyComplete
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.dll
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.pdb
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.csproj.CoreCompileInputs.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Api.genruntimeconfig.cache

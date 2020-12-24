@@ -1,6 +1,5 @@
 package com.rcnbodegas.Fragments;
 
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -62,6 +61,7 @@ import com.rcnbodegas.Activities.TypeElementListActivity;
 import com.rcnbodegas.Activities.WareHouseListActivity;
 import com.rcnbodegas.Activities.WarehouseUserActivity;
 import com.rcnbodegas.CustomEvents.onRecyclerProductionListItemClick;
+import com.rcnbodegas.CustomEvents.onRecyclerProductionListLongItemClick;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.NumberTextWatcher;
@@ -97,18 +97,7 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 
 import static android.app.Activity.RESULT_OK;
 
-
 public class WarehouseFragment extends CustomActivity implements IObserver, DatePickerDialog.OnDateSetListener {
-    private static final int REQUEST_PRODUCTION = 1;
-    private static final int REQUEST_RESPONSIBLE = 2;
-    private static final int REQUEST_TYPE_ELEMENT = 3;
-    private static final int REQUEST_WAREHOUSE = 4;
-    private static final int REQUEST_USER_WAREHOUSE = 5;
-    private static final int CAMERA_REQUEST = 1888;
-    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1900;
-    private static final int REQUEST_REVIEW = 6;
-    private static MaterialViewModel _MaterialViewModel;
-    public String mCurrentPhotoPath;
     private ArrayList<String> ListFotos;
     private ArrayList<Bitmap> ListaImagenes;
     private TScanner Scanner_manager = null;
@@ -149,9 +138,497 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
     private EditText warehouse_option;
     private EditText warehouse_program_option;
     private EditText warehouse_user_option;
+    public String mCurrentPhotoPath;
+    private static final int CAMERA_REQUEST = 1888;
+    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1900;
+    private static final int REQUEST_PRODUCTION = 1;
+    private static final int REQUEST_RESPONSIBLE = 2;
+    private static final int REQUEST_REVIEW = 6;
+    private static final int REQUEST_TYPE_ELEMENT = 3;
+    private static final int REQUEST_USER_WAREHOUSE = 5;
+    private static final int REQUEST_WAREHOUSE = 4;
+    private static MaterialViewModel _MaterialViewModel;
 
-    public WarehouseFragment() {
-        // Required empty public constructor
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void SetImage() {
+
+
+        if (ListFotos == null) {
+            ListFotos = new ArrayList<>();
+        }
+
+        try {
+
+            DisplayMetrics metrics = new DisplayMetrics();
+            Objects.requireNonNull(getActivity()).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            int height = metrics.heightPixels / 2; //dividimos por 2 pues no se ven a pantalla completa.
+            int width = metrics.widthPixels / 2; //dividimos por 2 pues no se ven a pantalla completa.
+            File file = new File(GlobalClass.getInstance().getmCurrentPhotoPath());
+            Bitmap bitmap;
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(GlobalClass.getInstance().getmCurrentPhotoPath(), bmOptions);
+            int photoW = bmOptions.outWidth;
+            int photoH = bmOptions.outHeight;
+
+            int scaleFactor = Math.min(photoW / width, photoH / height);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inPurgeable = true;
+            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
+
+
+            int consecutive = 1;
+            String prefijo = warehouse_element_barcode_edit.getText().toString() + consecutive;
+            prefijo = prefijo.replace(' ', '_');
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String fechaActual = sdf.format(new Date());
+            String nombreFichero = prefijo + "_" + fechaActual;
+            ListFotos.add(GlobalClass.getInstance().getmCurrentPhotoPath());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+            int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
+            bitmap = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
+
+            LoadPhoto(bitmap, nombreFichero);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static WarehouseFragment newInstance(MaterialViewModel param1) {
+        WarehouseFragment fragment = new WarehouseFragment();
+        Bundle args = new Bundle();
+        _MaterialViewModel = param1;
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public void DataRecived(final String BarcodeData) {
+        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (!chkIsAdmin.isChecked()) {
+                    warehouse_element_barcode_edit.setText(BarcodeData);
+                    if (!ValidateBarCode()) {
+                        showMessageDialog("El código de barras " + BarcodeData + " ya ha sido agregado a este documento de legalización");
+                        warehouse_element_barcode_edit.setText("");
+                    } else {
+                        warehouse_element_desc_edit.requestFocus();
+                        showKeyBoard();
+                    }
+                } else {
+                    showMessageDialog("El elemento es administrativo, lo cual no se asignará codigo de barras");
+                    warehouse_element_barcode_edit.setText("");
+                }
+            }
+        });
+
+    }
+
+    private boolean ValidateBarCode() {
+        if (GlobalClass.getInstance().getDataMaterial().size() > 0)
+            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
+                if (materialViewModel.getBarCode().equals(warehouse_element_barcode_edit.getText().toString()))
+                    return false;
+            }
+        return true;
+    }
+
+    private void showMessageDialog(String res) {
+        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
+
+        dlgAlert.setMessage(res);
+        dlgAlert.setTitle(getString(R.string.app_name));
+        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
+        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // if this button is clicked, close
+                // current activity
+
+            }
+        });
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
+    }
+
+    private void showKeyBoard() {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService((Context.INPUT_METHOD_SERVICE));
+        imm.showSoftInput(warehouse_element_desc_edit, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    @Override
+    public void ScannerReady() {
+        Scanner_manager.ScannerON(true);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
+            SetImage();
+        }
+        if (requestCode == REQUEST_PRODUCTION) {
+            if (resultCode == -1) {
+                selectedProductionName = data.getStringExtra("productionName");
+                GlobalClass.getInstance().setIdSelectedProductionWarehouse(data.getStringExtra("productionId"));
+                this.warehouse_program_option.setText(selectedProductionName);
+
+            }
+        }
+        if (requestCode == REQUEST_RESPONSIBLE) {
+            if (resultCode == -1) {
+                String result = data.getStringExtra("responsibleName");
+                GlobalClass.getInstance().setIdSelectedResponsibleWarehouse(Integer.valueOf(data.getStringExtra("responsibleId")));
+                this.warehouse_legalizedBy_option.setText(result);
+
+            }
+        }
+        if (requestCode == REQUEST_TYPE_ELEMENT) {
+            if (resultCode == -1) {
+                String result = data.getStringExtra("typeElementName");
+                GlobalClass.getInstance().setIdSelectedTypeElementWarehouse(Integer.valueOf(data.getStringExtra("typeElementId")));
+                this.warehouse_element_type_edit.setText(result);
+
+                if (GlobalClass.getInstance().getIdSelectedTypeElementWarehouse().toString().equals(GlobalClass.getInstance().getAdminTypeElementId()))
+                    this.warehouse_element_barcode_edit.setText("");
+
+            }
+        }
+        if (requestCode == REQUEST_WAREHOUSE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("wareHouseName");
+                this.warehouse_option.setText(result);
+                GlobalClass.getInstance().setIdSelectedWareHouseWarehouse(data.getStringExtra("wareHouseId"));
+                GlobalClass.getInstance().setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
+            }
+        }
+        if (requestCode == REQUEST_USER_WAREHOUSE) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra("responsibleWarehouseName");
+                GlobalClass.getInstance().setIdSelectedUserWarehouse(Integer.valueOf(data.getStringExtra("responsibleWarehouseId")));
+                this.warehouse_user_option.setText(result);
+            }
+        }
+        if (requestCode == REQUEST_REVIEW) {
+            if (resultCode == RESULT_OK) {
+                PrintCountElementes();
+            }
+        }
+
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+
+        boolean canUseExternalStorage = false;
+
+        if (requestCode == REQUEST_ID_MULTIPLE_PERMISSIONS) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                canUseExternalStorage = true;
+                showCamera();
+            }
+            if (!canUseExternalStorage) {
+                Toast.makeText(getActivity(), "No se puede usar esta función sin el permiso solicitado", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private void showCamera() {
+        try {
+
+            if (!chkIsAdmin.isChecked())
+                if (warehouse_element_barcode_edit.getText().toString().equals("")) {
+                    showMessageDialog(getString(R.string.message_not_barcode));
+                    return;
+                }
+
+            List<String> listPermissionsNeeded = new ArrayList<>();
+            int camera = ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), android.Manifest.permission.CAMERA);
+            int storage = ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+            if (camera != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
+            }
+            if (storage != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+            if (!listPermissionsNeeded.isEmpty()) {
+                ActivityCompat.requestPermissions(getActivity(), listPermissionsNeeded.toArray
+                        (new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
+
+            } else {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                String destination = Environment.getExternalStorageDirectory().getPath() + "/image.jpg";
+                Uri outputUri = Uri.fromFile(new File(destination));
+                // Ensure that there's a camera activity to handle the intent
+                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    // Create the File where the photo should go
+                    File photoFile = null;
+                    try {
+                        photoFile = createImageFile();
+                    } catch (IOException ex) {
+                        // Error occurred while creating the File
+
+                    }
+                    // Continue only if the File was successfully created
+                    if (photoFile != null) {
+
+                        Uri photoURI = FileProvider.getUriForFile(getActivity(),
+                                "com.rcnbodegas.fileprovider",
+                                photoFile);
+                        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                        startActivityForResult(takePictureIntent, CAMERA_REQUEST);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String prefijo = "GENERAL";
+        prefijo = prefijo.replace(' ', '_');
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String fechaActual = sdf.format(new Date());
+        String nombreFichero = prefijo + "_" + fechaActual;
+        File storageDir = Objects.requireNonNull(getActivity()).getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                nombreFichero,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        GlobalClass.getInstance().setmCurrentPhotoPath(mCurrentPhotoPath);
+        return image;
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = null;
+        if (_MaterialViewModel == null) {
+            view = SetDialogConfig(inflater, container);
+
+        }
+
+        return view;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public void onResume() {
+        super.onResume();
+        Objects.requireNonNull(getActivity()).registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
+        Scanner_manager.AddObserver(this);
+        Scanner_manager.ScannerON(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Scanner_manager.ScannerOFF();
+
+    }
+
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+        Scanner_manager.ScannerOFF();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_ingreso_elemento, menu);
+        iconScanMenu = menu.findItem(R.id.menu_review);
+        PrintCountElementes();
+    }
+
+    private void PrintCountElementes() {
+        LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
+        Utils.setBadgeCount(getActivity(), icon, GlobalClass.getInstance().getDataMaterial().size());
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menuReview = menu.findItem(R.id.menu_review);
+        menuSave = menu.findItem(R.id.mnu_save);
+        mnuCancel = menu.findItem(R.id.mnu_cancel);
+        if (_MaterialViewModel == null)
+            if (!validateInventoryProcess()) {
+                menuReview.setVisible(false);
+                menuSave.setVisible(false);
+                mnuCancel.setVisible(false);
+                warehouse_btn_camera.setVisibility(View.GONE);
+                warehouse_btn_new_element.setVisibility(View.GONE);
+
+
+            } else {
+                menuReview.setVisible(true);
+                menuSave.setVisible(true);
+                mnuCancel.setVisible(true);
+                warehouse_btn_camera.setVisibility(View.VISIBLE);
+                warehouse_btn_new_element.setVisibility(View.VISIBLE);
+            }
+
+
+    }
+
+    //Valida si hay un proceso de inventario en proceso
+    private boolean validateInventoryProcess() {
+
+        MaterialHeaderRepository materialHeaderRepository = new MaterialHeaderRepository(getActivity());
+        materialViewmodelHeader = materialHeaderRepository.getLegalizationPendingProcess();
+
+
+        return materialViewmodelHeader == null ? false : true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // handle item selection
+        Intent intent;
+        try {
+            switch (item.getItemId()) {
+                case R.id.menu_review:
+                    GlobalClass.getInstance().setListMaterialForAdd(GlobalClass.getInstance().getDataMaterial());
+                    intent = new Intent(getActivity(), ListItemAddedActivity.class);
+                    intent.putExtra("Inventory", "0");
+                    startActivityForResult(intent, REQUEST_REVIEW);
+                    return true;
+                case R.id.mnu_save:
+                    confirmAddNewELement();
+                    return true;
+                case R.id.mnu_cancel:
+                    confirmCancelProcess();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        } catch (Exception e) {
+            showMessageDialog("Error" + e.getMessage().toString());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getActivity().setTitle(getString(R.string.title_element_legalization));
+        materialRepository = new MaterialRepository(getActivity());
+        materialHeaderRepository = new MaterialHeaderRepository(getActivity());
+        materialImagesRepository = new MaterialImagesRepository(getActivity());
+
+        dateTimeUtilities = new DateTimeUtilities(getActivity());
+        setHasOptionsMenu(true);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @NonNull
+    @SuppressLint("RestrictedApi")
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        View layout = Objects.requireNonNull(getActivity()).getLayoutInflater().inflate(R.layout.activity_warehouse, null, false);
+        assert layout != null;
+        AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
+        b.setView(layout);
+
+        InitializeControls(layout);
+        InitializeEvents();
+
+
+        if (!validateInventoryProcess()) {
+            warehouse_element_layout.setVisibility(View.GONE);
+            warehouse_data.setVisibility(View.VISIBLE);
+        } else {
+            warehouse_element_layout.setVisibility(View.VISIBLE);
+            warehouse_data.setVisibility(View.GONE);
+
+        }
+
+        String title = getArguments().getString("title");
+        b.setTitle(title);
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                _MaterialViewModel.setBarCode(warehouse_element_barcode_edit.getText().toString());
+                _MaterialViewModel.setMaterialName(warehouse_element_desc_edit.getText().toString());
+                _MaterialViewModel.setTypeElementName(warehouse_element_type_edit.getText().toString());
+                _MaterialViewModel.setMarca(warehouse_element_edit.getText().toString());
+                String currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
+                        .replace(",", "")
+                        .replace(".", ".")
+                        .replaceAll("[^\\d.-]", "");
+
+                String currencyPurchaseString = warehouse_element_value_edit.getText().toString()
+                        .replace(",", "")
+                        .replace(".", ".")
+                        .replaceAll("[^\\d.-]", "");
+
+                _MaterialViewModel.setUnitPrice(Double.valueOf(currencyUnitPriceString));
+                _MaterialViewModel.setPurchaseValue(Double.valueOf(currencyPurchaseString));
+                materialRepository.update(_MaterialViewModel);
+
+                if (ListFotos != null) {
+                    for (String photo : ListFotos) {
+                        String photoParsed = parseImage(photo);
+                        _MaterialViewModel.getListaImagenesStr().add(photoParsed);
+
+
+                    }
+                }
+
+
+            }
+        });
+        b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        loadEditData();
+        this.ListaImagenes = _MaterialViewModel.getListaImagenesBmp();
+        setListImagesAdapter();
+        warehouse_btn_new_element.setVisibility(View.GONE);
+        return b.create();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        _MaterialViewModel = null;
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -337,7 +814,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 //if (hasFocus)
-                    //warehouse_element_price_edit.setText("");
+                //warehouse_element_price_edit.setText("");
             }
         });
 
@@ -345,7 +822,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 //if (hasFocus)
-                    //warehouse_element_value_edit.setText("");
+                //warehouse_element_value_edit.setText("");
             }
         });
 
@@ -421,11 +898,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         startActivityForResult(intent, REQUEST_WAREHOUSE);
     }
 
-    private void PrintCountElementes() {
-        LayerDrawable icon = (LayerDrawable) iconScanMenu.getIcon();
-        Utils.setBadgeCount(getActivity(), icon, GlobalClass.getInstance().getDataMaterial().size());
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void SaveDocumentForSync() {
 
@@ -452,67 +924,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             setActionBarTittle();
         }
         return view;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void SetImage() {
-
-
-        if (ListFotos == null) {
-            ListFotos = new ArrayList<>();
-        }
-
-        try {
-
-            DisplayMetrics metrics = new DisplayMetrics();
-            Objects.requireNonNull(getActivity()).getWindowManager().getDefaultDisplay().getMetrics(metrics);
-            int height = metrics.heightPixels / 2; //dividimos por 2 pues no se ven a pantalla completa.
-            int width = metrics.widthPixels / 2; //dividimos por 2 pues no se ven a pantalla completa.
-            File file = new File(GlobalClass.getInstance().getmCurrentPhotoPath());
-            Bitmap bitmap;
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(GlobalClass.getInstance().getmCurrentPhotoPath(), bmOptions);
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
-
-            int scaleFactor = Math.min(photoW / width, photoH / height);
-
-            // Decode the image file into a Bitmap sized to fill the View
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
-            bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
-
-
-            int consecutive = 1;
-            String prefijo = warehouse_element_barcode_edit.getText().toString() + consecutive;
-            prefijo = prefijo.replace(' ', '_');
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String fechaActual = sdf.format(new Date());
-            String nombreFichero = prefijo + "_" + fechaActual;
-            ListFotos.add(GlobalClass.getInstance().getmCurrentPhotoPath());
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
-            bitmap = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
-
-            LoadPhoto(bitmap, nombreFichero);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean ValidateBarCode() {
-        if (GlobalClass.getInstance().getDataMaterial().size() > 0)
-            for (MaterialViewModel materialViewModel : GlobalClass.getInstance().getDataMaterial()) {
-                if (materialViewModel.getBarCode().equals(warehouse_element_barcode_edit.getText().toString()))
-                    return false;
-            }
-        return true;
     }
 
     @SuppressLint("RestrictedApi")
@@ -558,14 +969,14 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             if (ListaImagenes == null) ListaImagenes = new ArrayList<>();
             long id = 0;
 
-            /*for (Bitmap photo : ListaImagenes) {
+            for (Bitmap photo : ListaImagenes) {
                 newElement.getListaImagenesBmp().add(photo);
                 byte[] byteArray = getByteArrayFromBitmap(photo);
                 String str = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                newElement.getListaImagenesStr().add(parseImage(str));
+                // newElement.getListaImagenesStr().add(parseImage(str));
                 materialImagesRepository.insert(new MaterialImagesViewModel(byteArray, idMaterial, str));
                 materialRepository.update(newElement);
-            }*/
+            }
             for (Bitmap photo : ListaImagenes) {
                 newElement.getListaImagenesBmp().add(photo);
             }
@@ -619,7 +1030,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             Gson json = new Gson();
 
             int idHeader = materialViewmodelHeader.getId();
-            List<MaterialViewModel>materialViewModels = materialRepository.getMaterialLegalizationDetail(idHeader);
+            List<MaterialViewModel> materialViewModels = materialRepository.getMaterialLegalizationDetail(idHeader);
 
             for (MaterialViewModel materialViewModel : materialViewModels) {
                 MaterialImagesRepository materialImagesRepository = new MaterialImagesRepository(getActivity().getApplicationContext());
@@ -646,6 +1057,20 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
                 @SuppressLint("RestrictedApi")
                 @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    isOk = true;
+                    Gson gson = new GsonBuilder().create();
+                    // Define Response class to correspond to the JSON response returned
+                    lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
+                    materialViewmodelHeader.setStatus(2);
+                    materialHeaderRepository.update(materialViewmodelHeader);
+                    materialImagesRepository.deleteALl();
+
+
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
                 public void onFinish() {
                     super.onFinish();
                     Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
@@ -658,20 +1083,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
                         }
                     });
                     dialogo.dismiss();
-                }
-
-                @SuppressLint("RestrictedApi")
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    isOk = true;
-                    Gson gson = new GsonBuilder().create();
-                    // Define Response class to correspond to the JSON response returned
-                    lastCreatedNUmberDocument = gson.fromJson(responseString, String.class);
-                    materialViewmodelHeader.setStatus(2);
-                    materialHeaderRepository.update(materialViewmodelHeader);
-                    materialImagesRepository.deleteALl();
-
-
                 }
             });
         } catch (Exception e) {
@@ -795,27 +1206,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         dialog.show();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String prefijo = "GENERAL";
-        prefijo = prefijo.replace(' ', '_');
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-        String fechaActual = sdf.format(new Date());
-        String nombreFichero = prefijo + "_" + fechaActual;
-        File storageDir = Objects.requireNonNull(getActivity()).getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                nombreFichero,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        GlobalClass.getInstance().setmCurrentPhotoPath(mCurrentPhotoPath);
-        return image;
-    }
-
     private void createLegalizationHeader() {
 
         materialViewmodelHeader = new MaterialViewmodelHeader(GlobalClass.getInstance().getIdSelectedWareHouseWarehouse(),
@@ -903,14 +1293,6 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
-    public static WarehouseFragment newInstance(MaterialViewModel param1) {
-        WarehouseFragment fragment = new WarehouseFragment();
-        Bundle args = new Bundle();
-        _MaterialViewModel = param1;
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     private String parseImage(String photo) {
         File folder = new File(Environment.getExternalStorageDirectory().toString() + "/bodegas_images");
         byte[] b = readPhotoAndRezise(photo);
@@ -986,140 +1368,97 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
             public void onClick(ProductionViewModel wareHouseViewModel) {
 
             }
+        }, new onRecyclerProductionListLongItemClick() {
+            @Override
+            public void onLongClick(int imagePos) {
+                showConfirmDeleteImageDialog("Seguro de eliminar la imagen?", imagePos);
+            }
         });
         photos_recycler_view.setAdapter(adapter);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void showCamera() {
-        try {
-
-            if (!chkIsAdmin.isChecked())
-                if (warehouse_element_barcode_edit.getText().toString().equals("")) {
-                    showMessageDialog(getString(R.string.message_not_barcode));
-                    return;
-                }
-
-            List<String> listPermissionsNeeded = new ArrayList<>();
-            int camera = ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), android.Manifest.permission.CAMERA);
-            int storage = ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-            if (camera != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
-            }
-            if (storage != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
-            if (!listPermissionsNeeded.isEmpty()) {
-                ActivityCompat.requestPermissions(getActivity(), listPermissionsNeeded.toArray
-                        (new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
-
-            } else {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                String destination = Environment.getExternalStorageDirectory().getPath() + "/image.jpg";
-                Uri outputUri = Uri.fromFile(new File(destination));
-                // Ensure that there's a camera activity to handle the intent
-                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    // Create the File where the photo should go
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                    } catch (IOException ex) {
-                        // Error occurred while creating the File
-
+    private void showConfirmDeleteImageDialog(String message, final int imagePos) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setTitle("Bodegas");
+        builder.setMessage(message);
+        builder.setPositiveButton("Aceptar",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ListaImagenes.remove(imagePos);
+                        setListImagesAdapter();
                     }
-                    // Continue only if the File was successfully created
-                    if (photoFile != null) {
-
-                        Uri photoURI = FileProvider.getUriForFile(getActivity(),
-                                "com.rcnbodegas.fileprovider",
-                                photoFile);
-                        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        startActivityForResult(takePictureIntent, CAMERA_REQUEST);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void showKeyBoard() {
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService((Context.INPUT_METHOD_SERVICE));
-        imm.showSoftInput(warehouse_element_desc_edit, InputMethodManager.SHOW_IMPLICIT);
-    }
-
-    private void showMessageDialog(String res) {
-        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getActivity());
-
-        dlgAlert.setMessage(res);
-        dlgAlert.setTitle(getString(R.string.app_name));
-        //dlgAlert.setPositiveButton(getString(R.string.Texto_Boton_Ok), null);
-        dlgAlert.setPositiveButton(R.string.Texto_Boton_Ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // if this button is clicked, close
-                // current activity
-
+                });
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
         });
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void validateFields() {
-        warehouse_element_barcode_edit.setError(null);
-        warehouse_element_desc_edit.setError(null);
-        warehouse_element_type_edit.setError(null);
-        warehouse_element_edit.setError(null);
-        warehouse_element_price_edit.setError(null);
-        warehouse_element_value_edit.setError(null);
+        try {
+            warehouse_element_barcode_edit.setError(null);
+            warehouse_element_desc_edit.setError(null);
+            warehouse_element_type_edit.setError(null);
+            warehouse_element_edit.setError(null);
+            warehouse_element_price_edit.setError(null);
+            warehouse_element_value_edit.setError(null);
 
-        boolean cancel = false;
-        View focusView = null;
+            boolean cancel = false;
+            View focusView = null;
 
-        if (!chkIsAdmin.isChecked())
-            if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
-                warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
-                focusView = warehouse_element_barcode_edit;
+            if (!chkIsAdmin.isChecked())
+                if (TextUtils.isEmpty(warehouse_element_barcode_edit.getText().toString())) {
+                    warehouse_element_barcode_edit.setError(getString(R.string.error_warehouse_empty));
+                    focusView = warehouse_element_barcode_edit;
+                    cancel = true;
+                }
+
+            if (TextUtils.isEmpty(warehouse_element_desc_edit.getText().toString())) {
+                warehouse_element_desc_edit.setError(getString(R.string.error_program_empty));
+                focusView = warehouse_element_desc_edit;
+                cancel = true;
+            }
+            if (TextUtils.isEmpty(warehouse_element_type_edit.getText().toString())) {
+                warehouse_element_type_edit.setError(getString(R.string.error_fecha_empty));
+                focusView = warehouse_element_type_edit;
+                cancel = true;
+            }
+            if (TextUtils.isEmpty(warehouse_element_edit.getText().toString())) {
+                warehouse_element_edit.setError(getString(R.string.error_responsible_empty));
+                focusView = warehouse_element_edit;
+                cancel = true;
+            }
+            if (TextUtils.isEmpty(warehouse_element_price_edit.getText().toString())) {
+                warehouse_element_price_edit.setError(getString(R.string.error_fecha_empty));
+                focusView = warehouse_element_price_edit;
+                cancel = true;
+            }
+            if (TextUtils.isEmpty(warehouse_element_value_edit.getText().toString())) {
+                warehouse_element_value_edit.setError(getString(R.string.error_valor_materia_empty));
+                focusView = warehouse_element_value_edit;
+                cancel = true;
+            }
+            if (ListaImagenes == null || ListaImagenes.size() == 0) {
+                showMessageDialog("Debe ingresar al menos un imagen");
+                focusView = warehouse_element_value_edit;
                 cancel = true;
             }
 
-        if (TextUtils.isEmpty(warehouse_element_desc_edit.getText().toString())) {
-            warehouse_element_desc_edit.setError(getString(R.string.error_program_empty));
-            focusView = warehouse_element_desc_edit;
-            cancel = true;
-        }
-        if (TextUtils.isEmpty(warehouse_element_type_edit.getText().toString())) {
-            warehouse_element_type_edit.setError(getString(R.string.error_fecha_empty));
-            focusView = warehouse_element_type_edit;
-            cancel = true;
-        }
-        if (TextUtils.isEmpty(warehouse_element_edit.getText().toString())) {
-            warehouse_element_edit.setError(getString(R.string.error_responsible_empty));
-            focusView = warehouse_element_edit;
-            cancel = true;
-        }
-        if (TextUtils.isEmpty(warehouse_element_price_edit.getText().toString())) {
-            warehouse_element_price_edit.setError(getString(R.string.error_fecha_empty));
-            focusView = warehouse_element_price_edit;
-            cancel = true;
-        }
-        if (TextUtils.isEmpty(warehouse_element_value_edit.getText().toString())) {
-            warehouse_element_value_edit.setError(getString(R.string.error_valor_materia_empty));
-            focusView = warehouse_element_value_edit;
-            cancel = true;
-        }
-        if (ListaImagenes == null || ListaImagenes.size() == 0) {
-            showMessageDialog("Debe ingresar al menos un imagen");
-            focusView = warehouse_element_value_edit;
-            cancel = true;
-        }
-
-        if (cancel) {
-            focusView.requestFocus();
-        } else {
-            addElement();
+            if (cancel) {
+                focusView.requestFocus();
+            } else {
+                addElement();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showMessageDialog("Error" + e.getMessage().toString());
         }
     }
 
@@ -1169,318 +1508,15 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
         }
     }
 
-    //Valida si hay un proceso de inventario en proceso
-    private boolean validateInventoryProcess() {
-
-        MaterialHeaderRepository materialHeaderRepository = new MaterialHeaderRepository(getActivity());
-        materialViewmodelHeader = materialHeaderRepository.getLegalizationPendingProcess();
-
-
-        return materialViewmodelHeader == null ? false : true;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    @Override
-    public void DataRecived(final String BarcodeData) {
-        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!chkIsAdmin.isChecked()) {
-                    warehouse_element_barcode_edit.setText(BarcodeData);
-                    if (!ValidateBarCode()) {
-                        showMessageDialog("El código de barras " + BarcodeData + " ya ha sido agregado a este documento de legalización");
-                        warehouse_element_barcode_edit.setText("");
-                    } else {
-                        warehouse_element_desc_edit.requestFocus();
-                        showKeyBoard();
-                    }
-                } else {
-                    showMessageDialog("El elemento es administrativo, lo cual no se asignará codigo de barras");
-                    warehouse_element_barcode_edit.setText("");
-                }
-            }
-        });
-
-    }
-
-    @Override
-    public void ScannerReady() {
-        Scanner_manager.ScannerON(true);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            SetImage();
-        }
-        if (requestCode == REQUEST_PRODUCTION) {
-            if (resultCode == -1) {
-                selectedProductionName = data.getStringExtra("productionName");
-                GlobalClass.getInstance().setIdSelectedProductionWarehouse(data.getStringExtra("productionId"));
-                this.warehouse_program_option.setText(selectedProductionName);
-
-            }
-        }
-        if (requestCode == REQUEST_RESPONSIBLE) {
-            if (resultCode == -1) {
-                String result = data.getStringExtra("responsibleName");
-                GlobalClass.getInstance().setIdSelectedResponsibleWarehouse(Integer.valueOf(data.getStringExtra("responsibleId")));
-                this.warehouse_legalizedBy_option.setText(result);
-
-            }
-        }
-        if (requestCode == REQUEST_TYPE_ELEMENT) {
-            if (resultCode == -1) {
-                String result = data.getStringExtra("typeElementName");
-                GlobalClass.getInstance().setIdSelectedTypeElementWarehouse(Integer.valueOf(data.getStringExtra("typeElementId")));
-                this.warehouse_element_type_edit.setText(result);
-
-                if (GlobalClass.getInstance().getIdSelectedTypeElementWarehouse().toString().equals(GlobalClass.getInstance().getAdminTypeElementId()))
-                    this.warehouse_element_barcode_edit.setText("");
-
-            }
-        }
-        if (requestCode == REQUEST_WAREHOUSE) {
-            if (resultCode == RESULT_OK) {
-                String result = data.getStringExtra("wareHouseName");
-                this.warehouse_option.setText(result);
-                GlobalClass.getInstance().setIdSelectedWareHouseWarehouse(data.getStringExtra("wareHouseId"));
-                GlobalClass.getInstance().setNameSelectedWareHouseWarehouse(data.getStringExtra("wareHouseName"));
-            }
-        }
-        if (requestCode == REQUEST_USER_WAREHOUSE) {
-            if (resultCode == RESULT_OK) {
-                String result = data.getStringExtra("responsibleWarehouseName");
-                GlobalClass.getInstance().setIdSelectedUserWarehouse(Integer.valueOf(data.getStringExtra("responsibleWarehouseId")));
-                this.warehouse_user_option.setText(result);
-            }
-        }
-        if (requestCode == REQUEST_REVIEW) {
-            if (resultCode == RESULT_OK) {
-                PrintCountElementes();
-            }
-        }
-
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getActivity().setTitle(getString(R.string.title_element_legalization));
-        materialRepository = new MaterialRepository(getActivity());
-        materialHeaderRepository = new MaterialHeaderRepository(getActivity());
-        materialImagesRepository = new MaterialImagesRepository(getActivity());
-
-        dateTimeUtilities = new DateTimeUtilities(getActivity());
-        setHasOptionsMenu(true);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    @NonNull
-    @SuppressLint("RestrictedApi")
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View layout = Objects.requireNonNull(getActivity()).getLayoutInflater().inflate(R.layout.activity_warehouse, null, false);
-        assert layout != null;
-        AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
-        b.setView(layout);
-
-        InitializeControls(layout);
-        InitializeEvents();
-
-
-        if (!validateInventoryProcess()) {
-            warehouse_element_layout.setVisibility(View.GONE);
-            warehouse_data.setVisibility(View.VISIBLE);
-        } else {
-            warehouse_element_layout.setVisibility(View.VISIBLE);
-            warehouse_data.setVisibility(View.GONE);
-
-        }
-
-        String title = getArguments().getString("title");
-        b.setTitle(title);
-        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                _MaterialViewModel.setBarCode(warehouse_element_barcode_edit.getText().toString());
-                _MaterialViewModel.setMaterialName(warehouse_element_desc_edit.getText().toString());
-                _MaterialViewModel.setTypeElementName(warehouse_element_type_edit.getText().toString());
-                _MaterialViewModel.setMarca(warehouse_element_edit.getText().toString());
-                String currencyUnitPriceString = warehouse_element_price_edit.getText().toString()
-                        .replace(",", "")
-                        .replace(".", ".")
-                        .replaceAll("[^\\d.-]", "");
-
-                String currencyPurchaseString = warehouse_element_value_edit.getText().toString()
-                        .replace(",", "")
-                        .replace(".", ".")
-                        .replaceAll("[^\\d.-]", "");
-
-                _MaterialViewModel.setUnitPrice(Double.valueOf(currencyUnitPriceString));
-                _MaterialViewModel.setPurchaseValue(Double.valueOf(currencyPurchaseString));
-                materialRepository.update(_MaterialViewModel);
-
-                if (ListFotos != null) {
-                    for (String photo : ListFotos) {
-                        String photoParsed = parseImage(photo);
-                        _MaterialViewModel.getListaImagenesStr().add(photoParsed);
-
-
-                    }
-                }
-
-
-            }
-        });
-        b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        loadEditData();
-        this.ListaImagenes = _MaterialViewModel.getListaImagenesBmp();
-        setListImagesAdapter();
-        warehouse_btn_new_element.setVisibility(View.GONE);
-        return b.create();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_ingreso_elemento, menu);
-        iconScanMenu = menu.findItem(R.id.menu_review);
-        PrintCountElementes();
-
-
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = null;
-        if (_MaterialViewModel == null) {
-            view = SetDialogConfig(inflater, container);
-
-        }
-
-        return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        _MaterialViewModel = null;
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-
-    }
-
-    @Override
-    public void onDestroy() {
-
-        super.onDestroy();
-        Scanner_manager.ScannerOFF();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // handle item selection
-        Intent intent;
-        switch (item.getItemId()) {
-            /**/
-            case R.id.menu_review:
-                GlobalClass.getInstance().setListMaterialForAdd(GlobalClass.getInstance().getDataMaterial());
-                intent = new Intent(getActivity(), ListItemAddedActivity.class);
-                intent.putExtra("Inventory", "0");
-                startActivityForResult(intent, REQUEST_REVIEW);
-                return true;
-            case R.id.mnu_save:
-                confirmAddNewELement();
-                return true;
-            case R.id.mnu_cancel:
-                confirmCancelProcess();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Scanner_manager.ScannerOFF();
-
-    }
-
-    @SuppressLint("RestrictedApi")
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        menuReview = menu.findItem(R.id.menu_review);
-        menuSave = menu.findItem(R.id.mnu_save);
-        mnuCancel = menu.findItem(R.id.mnu_cancel);
-        if (_MaterialViewModel == null)
-            if (!validateInventoryProcess()) {
-                menuReview.setVisible(false);
-                menuSave.setVisible(false);
-                mnuCancel.setVisible(false);
-                warehouse_btn_camera.setVisibility(View.GONE);
-                warehouse_btn_new_element.setVisibility(View.GONE);
-
-
-            } else {
-                menuReview.setVisible(true);
-                menuSave.setVisible(true);
-                mnuCancel.setVisible(true);
-                warehouse_btn_camera.setVisibility(View.VISIBLE);
-                warehouse_btn_new_element.setVisibility(View.VISIBLE);
-            }
-
-
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-
-        boolean canUseExternalStorage = false;
-
-        if (requestCode == REQUEST_ID_MULTIPLE_PERMISSIONS) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                canUseExternalStorage = true;
-                showCamera();
-            }
-            if (!canUseExternalStorage) {
-                Toast.makeText(getActivity(), "No se puede usar esta función sin el permiso solicitado", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    @Override
-    public void onResume() {
-        super.onResume();
-        Objects.requireNonNull(getActivity()).registerReceiver(this.mConnReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-
-        Scanner_manager = ScannerFactory.CreateScanner(getActivity().getApplicationContext(), getActivity());
-        Scanner_manager.AddObserver(this);
-        Scanner_manager.ScannerON(true);
+    public WarehouseFragment() {
+        // Required empty public constructor
     }
 
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
-        public EditText txtDate;
         private DateTimeUtilities dateTimeUtilities;
+        public EditText txtDate;
 
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @NonNull

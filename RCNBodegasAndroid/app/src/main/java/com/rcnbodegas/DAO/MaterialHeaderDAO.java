@@ -1,6 +1,7 @@
 package com.rcnbodegas.DAO;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -22,4 +23,7 @@ public interface MaterialHeaderDAO {
 
     @Update
     void update(MaterialViewmodelHeader materialViewModel);
+
+    @Delete
+    void delete(MaterialViewmodelHeader materialViewModel);
 }

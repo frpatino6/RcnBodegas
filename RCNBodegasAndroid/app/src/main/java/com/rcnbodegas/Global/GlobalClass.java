@@ -36,10 +36,9 @@ import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class GlobalClass extends Application implements LifecycleObserver {
 
-    private static GlobalClass instance;
     private String AdminTypeElementId;
     private boolean continueInventory = false;
-    private String currentproductionName; //Persiste en memoria el nombre de la producci[on de un inventario pendiente por finalizar
+    private String currentproductionName; // Persiste en memoria el nombre de la producci[on de un inventario pendiente por finalizar
     private ArrayList<MaterialViewModel> dataMaterial;
     private ArrayList<MaterialViewModel> dataMaterialInventory;
     private ArrayList<MaterialViewModel> dataReviewMaterial;
@@ -68,16 +67,16 @@ public class GlobalClass extends Application implements LifecycleObserver {
     private String nameSelectedWareHouseWarehouse = "";
     private SharedPreferences pref;
     private Boolean queryByInventory = false;
-    private boolean responsable = true;//Indica si la pantalla que se carga es responsable o legalizado por
-    private String urlServices = "http://solpe.rcntv.com.co:8083/";
-    //private String urlServices = "http://192.168.0.7/bodegas/";
+    private boolean responsable = true; // Indica si la pantalla que se carga es responsable o legalizado por
+     private String urlServices = "http://solpe.rcntv.com.co:8083/";
+     // private String urlServices = "http://192.168.0.8/bodegas/";
     private String userName;
     private String userRole;
+    private static GlobalClass instance;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void asyncUpdateElements(int finalize, int inventoryId, String deliveryDate, Context context, boolean showProgresdialog,
                                     final onHttpRequestSuccess _onHttpRequestSuccess, final onHttpRequestError _onHttpRequestError) {
-
 
         String url = GlobalClass.getInstance().getUrlServices() + "Inventory/CreateInventoryDetail/" + finalize + "/" + inventoryId;
 
@@ -132,18 +131,18 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
                 @SuppressLint("RestrictedApi")
                 @Override
-                public void onFinish() {
-                    super.onFinish();
-
-                    dialogo.dismiss();
-                }
-
-                @SuppressLint("RestrictedApi")
-                @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
                     if (_onHttpRequestSuccess != null)
                         _onHttpRequestSuccess.onSuccess(false);
 
+                }
+
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onFinish() {
+                    super.onFinish();
+
+                    dialogo.dismiss();
                 }
             });
         } catch (Exception e) {
@@ -151,6 +150,26 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
         }
 
+    }
+
+    public String getUrlServices() {
+        return urlServices;
+    }
+
+    public static GlobalClass getInstance() {
+        return instance;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setUrlServices(String urlServices) {
+        this.urlServices = urlServices;
     }
 
     public String getAdminTypeElementId() {
@@ -173,6 +192,8 @@ public class GlobalClass extends Application implements LifecycleObserver {
         return isCurrentInventoryActiveProcess;
     }
 
+    //<editor-fold desc="Custom object">
+
     public void setCurrentInventoryActiveProcess(Boolean currentActiveProcess) {
         isCurrentInventoryActiveProcess = currentActiveProcess;
     }
@@ -184,18 +205,6 @@ public class GlobalClass extends Application implements LifecycleObserver {
     public void setCurrentproductionName(String currentproductionName) {
         this.currentproductionName = currentproductionName;
     }
-
-    public ArrayList<MaterialViewModel> getDataMaterial() {
-
-        if (dataMaterial == null) dataMaterial = new ArrayList<>();
-        return dataMaterial;
-    }
-
-    public void setDataMaterial(ArrayList<MaterialViewModel> dataMaterial) {
-        this.dataMaterial = dataMaterial;
-    }
-
-    //<editor-fold desc="Custom object">
 
     public List<MaterialViewModel> getDataMaterialInventory() {
         if (dataMaterialInventory == null) dataMaterialInventory = new ArrayList<>();
@@ -307,19 +316,25 @@ public class GlobalClass extends Application implements LifecycleObserver {
     public String getIdSelectedWareHouseWarehouse() {
 
         if (idSelectedWareHouseWarehouse == null) {
-            if (GlobalClass.getInstance().getDataMaterial() != null)
+            if (GlobalClass.getInstance().getDataMaterial() != null && GlobalClass.getInstance().getDataMaterial().size() > 0)
                 idSelectedWareHouseWarehouse = GlobalClass.getInstance().getDataMaterial().get(0).getWareHouseId();
         }
 
         return idSelectedWareHouseWarehouse;
     }
 
-    public void setIdSelectedWareHouseWarehouse(String idSelectedWareHouseWarehouse) {
-        this.idSelectedWareHouseWarehouse = idSelectedWareHouseWarehouse;
+    public ArrayList<MaterialViewModel> getDataMaterial() {
+
+        if (dataMaterial == null) dataMaterial = new ArrayList<>();
+        return dataMaterial;
     }
 
-    public static GlobalClass getInstance() {
-        return instance;
+    public void setDataMaterial(ArrayList<MaterialViewModel> dataMaterial) {
+        this.dataMaterial = dataMaterial;
+    }
+
+    public void setIdSelectedWareHouseWarehouse(String idSelectedWareHouseWarehouse) {
+        this.idSelectedWareHouseWarehouse = idSelectedWareHouseWarehouse;
     }
 
     public ArrayList<Integer> getLastDocuments() {
@@ -389,22 +404,6 @@ public class GlobalClass extends Application implements LifecycleObserver {
 
     public void setQueryByInventory(Boolean queryByInventory) {
         this.queryByInventory = queryByInventory;
-    }
-
-    public String getUrlServices() {
-        return urlServices;
-    }
-
-    public void setUrlServices(String urlServices) {
-        this.urlServices = urlServices;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getUserRole() {

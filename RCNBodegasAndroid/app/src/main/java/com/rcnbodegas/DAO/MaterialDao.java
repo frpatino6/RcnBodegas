@@ -48,4 +48,5 @@ public interface MaterialDao {
 
     @Update
     void update(MaterialViewModel materialViewModel);
+
 }

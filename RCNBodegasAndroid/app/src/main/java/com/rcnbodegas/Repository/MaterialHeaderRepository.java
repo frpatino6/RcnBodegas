@@ -51,6 +51,11 @@ public class MaterialHeaderRepository {
         return bodegasDatabase.materialHeaderDAO().insert(materialViewmodelHeader);
     }
 
+    public long delete(MaterialViewmodelHeader materialViewmodelHeader) {
+
+        return bodegasDatabase.materialHeaderDAO().insert(materialViewmodelHeader);
+    }
+
     public void update(MaterialViewmodelHeader materialViewmodelHeader) {
         try {
 

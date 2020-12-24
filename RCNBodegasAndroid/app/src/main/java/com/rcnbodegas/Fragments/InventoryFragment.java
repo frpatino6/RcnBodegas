@@ -64,6 +64,7 @@ import com.rcnbodegas.Activities.WareHouseListActivity;
 import com.rcnbodegas.CustomEvents.onHttpRequestError;
 import com.rcnbodegas.CustomEvents.onHttpRequestSuccess;
 import com.rcnbodegas.CustomEvents.onRecyclerProductionListItemClick;
+import com.rcnbodegas.CustomEvents.onRecyclerProductionListLongItemClick;
 import com.rcnbodegas.Global.DateTimeUtilities;
 import com.rcnbodegas.Global.GlobalClass;
 import com.rcnbodegas.Global.PhotosAdapter;
@@ -874,6 +875,11 @@ public class InventoryFragment extends CustomActivity implements IObserver, Date
         adapter = new PhotosAdapter(ListaImagenes, listaNombresImagenes, new onRecyclerProductionListItemClick() {
             @Override
             public void onClick(ProductionViewModel wareHouseViewModel) {
+
+            }
+        }, new onRecyclerProductionListLongItemClick() {
+            @Override
+            public void onLongClick(int imagePos) {
 
             }
         });

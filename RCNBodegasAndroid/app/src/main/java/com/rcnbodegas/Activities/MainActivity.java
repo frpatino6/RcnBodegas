@@ -751,6 +751,10 @@ public class MainActivity extends AppCompatActivity
                 GlobalClass.getInstance().setContinueInventory(true);
                 fragment = new InventoryFragment();
                 break;
+            case R.id.navViewDatabase:
+                Intent dbmanager = new Intent(MainActivity.this,AndroidDatabaseManager.class);
+                startActivity(dbmanager);
+                break;
 
 
         }

@@ -1,25 +1,28 @@
 package com.rcnbodegas.Global;
 
 import android.graphics.Bitmap;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.rcnbodegas.CustomEvents.onRecyclerProductionListItemClick;
+import com.rcnbodegas.CustomEvents.onRecyclerProductionListLongItemClick;
 import com.rcnbodegas.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.MyViewHolder> {
-    List<RelativeLayout> layoutViewList = new ArrayList<>();
     private Integer SelectedIncidencia;
     private onRecyclerProductionListItemClick _event;
+    private onRecyclerProductionListLongItemClick _onRecyclerProductionListLongItemClick;
     private View _view;
     private ArrayList<Bitmap> dataSet;
     private boolean isClicked = false;
@@ -42,31 +45,6 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.MyViewHold
         this.listaNombresImagenes = listaNombresImagenes;
     }
 
-    public PhotosAdapter(ArrayList<Bitmap> data, ArrayList<String> _listaNombresImagenes, onRecyclerProductionListItemClick event) {
-        this.dataSet = data;
-        this._event = event;
-        this.listaNombresImagenes = _listaNombresImagenes;
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return dataSet.size();
-    }
-
-    @Override
-    public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
-
-        ImageView iv = holder.iv;
-        TextView tvNombreFichero = holder.tvNombreFichero;
-
-        iv.setImageBitmap(dataSet.get(listPosition));
-
-        if (listaNombresImagenes != null)
-            tvNombreFichero.setText(listaNombresImagenes.get(listPosition));
-
-    }
-
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent,
                                            int viewType) {
@@ -83,6 +61,44 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.MyViewHold
             e.printStackTrace();
         }
         return myViewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(final MyViewHolder holder, final int listPosition) {
+
+        ImageView iv = holder.iv;
+        TextView tvNombreFichero = holder.tvNombreFichero;
+
+        iv.setImageBitmap(dataSet.get(listPosition));
+
+        if (listaNombresImagenes != null && listaNombresImagenes.size() > 0)
+            tvNombreFichero.setText(listaNombresImagenes.get(listPosition));
+
+        iv.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (_onRecyclerProductionListLongItemClick != null) {
+                    _onRecyclerProductionListLongItemClick.onLongClick(listPosition);
+                }
+                return false;
+            }
+        });
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return dataSet.size();
+    }
+
+    List<RelativeLayout> layoutViewList = new ArrayList<>();
+
+    public PhotosAdapter(ArrayList<Bitmap> data, ArrayList<String> _listaNombresImagenes, onRecyclerProductionListItemClick event, onRecyclerProductionListLongItemClick _onRecyclerProductionListLongItemClick) {
+        this.dataSet = data;
+        this._event = event;
+        this._onRecyclerProductionListLongItemClick = _onRecyclerProductionListLongItemClick;
+        this.listaNombresImagenes = _listaNombresImagenes;
+
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {

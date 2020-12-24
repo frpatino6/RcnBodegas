@@ -47,9 +47,10 @@ public class SyncService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void asyncListMaterialsByProduction(ArrayList<MaterialViewModel> listForSync) {
 
-
+        // voy a la clase globa y cargo la baseurl
         String wareHouse = GlobalClass.getInstance().getQueryByInventory() ? GlobalClass.getInstance().getIdSelectedWareHouseInventory() : GlobalClass.getInstance().getIdSelectedWareHouseWarehouse();
 
+        // concateno con el serivio especifico del api que crea elementos
         String url = GlobalClass.getInstance().getUrlServices() + "warehouse/CreateElement/" + wareHouse;
         AsyncHttpClient client = new AsyncHttpClient();
         client.setTimeout(60000);
@@ -64,9 +65,9 @@ public class SyncService extends Service {
         String resultJson = json.toJson(listForSync);
 
         entity = new StringEntity(resultJson, StandardCharsets.UTF_8);
-
+        
+        // inicias
         client.post(getApplicationContext(), url, entity, tipo, new TextHttpResponseHandler() {
-
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
                 isOk = false;
@@ -79,6 +80,7 @@ public class SyncService extends Service {
                 if (isOk) {
                     notificationManager.cancel(ID_NOTIFICACION_SYNC);
                     GlobalClass.getInstance().getListMaterialForSync().clear();
+
                 }
             }
 
@@ -92,6 +94,7 @@ public class SyncService extends Service {
 
             }
         });
+
     }
 
     private void createNotification() {

@@ -67,8 +67,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
         if (BuildConfig.DEBUG) {
-            input_email.setText("jicastaneda");
-            input_password.setText("marzo.20");
+            input_email.setText("frodriguezp");
+            input_password.setText("Cualquierc054");
             // do something for a debug build
         } else {
             input_email.setText("");

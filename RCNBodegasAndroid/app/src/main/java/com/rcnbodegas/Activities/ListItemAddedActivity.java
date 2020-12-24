@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class ListItemAddedActivity extends AppCompatActivity {
+    private MaterialRepository materialRepository;
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private ArrayList<MaterialViewModel> listMaterialByReview;
@@ -76,7 +77,7 @@ public class ListItemAddedActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(ListItemAddedActivity.this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
+         materialRepository = new MaterialRepository(getApplicationContext());
 
     }
 
@@ -112,25 +113,17 @@ public class ListItemAddedActivity extends AppCompatActivity {
             DialogFragment warehouseFragment = WarehouseFragment.newInstance(wareHouseViewModel);
             warehouseFragment.show(fm, "Editar");
 
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void filterListByNotReview() {
-
         materialHeaderRepository = new MaterialHeaderRepository(getApplicationContext());
-        MaterialRepository materialRepository = new MaterialRepository(getApplicationContext());
-
         MaterialViewmodelHeader materialViewmodelHeader = materialHeaderRepository.getLegalizationPendingProcess();
-
-
         listMaterialByReview = (ArrayList<MaterialViewModel>) materialRepository.getMaterialLegalizationDetail(materialViewmodelHeader.getId());
-
         txtResumen.setText(getString(R.string.message_resume_legalization_list) + listMaterialByReview.size());
         SumPurchaseValue();
-
     }
 
     private void setRecyclerViewData() {
@@ -264,6 +257,8 @@ public class ListItemAddedActivity extends AppCompatActivity {
     private void DropElement(MaterialViewModel dropElement) {
 
         int index = listMaterialByReview.indexOf(dropElement);
+
+        //materialRepository.delete(dropElement);
 
         if (index != -1) {
             listMaterialByReview.remove(dropElement);

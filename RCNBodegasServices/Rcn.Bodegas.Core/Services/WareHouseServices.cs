@@ -58,7 +58,7 @@ namespace Rcn.Bodegas.Core.Services
 
             numeroRecepcion = getDocumentNumber(warehouseid);
             dateLegalization = listNewMaterial[0].saleDate.ToString("yyyy-MM-dd");
-
+            String currentBarcode = "";
 
             using (OracleConnection con = new OracleConnection(_IOracleManagment.GetOracleConnectionParameters()))
             {
@@ -72,6 +72,7 @@ namespace Rcn.Bodegas.Core.Services
                         {
                             if (numeroRecepcion > 0)
                             {
+
                                 foreach (MaterialViewModel newMaterial in listNewMaterial)
                                 {
                                     oraUpdate.Parameters.Clear();
@@ -89,7 +90,8 @@ namespace Rcn.Bodegas.Core.Services
                                         oraUpdate.CommandText = SetSqlQuery(warehouseid, dateLegalization, numeroRecepcion);
                                     }
 
-                                    OraBarCode.Value = newMaterial.barCode == null ? "" : newMaterial.barCode;
+                                    OraBarCode.Value = OraBarCode.Value == null ? "" : newMaterial.barCode;
+                                    currentBarcode = newMaterial.barCode;
                                     OraDescripcion.Value = newMaterial.materialName;
                                     OraTipoBodega.Value = newMaterial.wareHouseId;
                                     OraUbicacionActua.Value = 1;
@@ -120,7 +122,7 @@ namespace Rcn.Bodegas.Core.Services
                         catch (System.Exception ex)
                         {
                             transaction.Rollback();
-                            throw new System.Exception(ex.Message);
+                            throw new System.Exception($"Error creando el material con código de barras {currentBarcode}. {ex.Message}");
                         }
                     }
                 }
@@ -202,7 +204,7 @@ namespace Rcn.Bodegas.Core.Services
                 OraMaterialCodigo.Value = codigoMaterial;
                 OraConsecutivo.Value = consecutivo;
                 OraDescripcion.Value = string.Empty;
-                OraArchivo.Value = string.Empty;//ESTE CAMPO SE LLENA CON EL CÓDIGO DE BARRAS MÁS LA EXTENSIÓN DEL ARCHIVO
+                OraArchivo.Value = string.Empty;
                 OraFoto.Value = bytesImage;
                 consecutivo++;
                 rowCount = oraUpdate.ExecuteNonQuery();
