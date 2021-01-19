@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
@@ -1249,7 +1250,7 @@ public class WarehouseFragment extends CustomActivity implements IObserver, Date
 
     private byte[] getByteArrayFromBitmap(Bitmap photo) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        photo.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        photo.compress(CompressFormat.JPEG, 30, stream);
         return stream.toByteArray();
     }
 
