@@ -2,7 +2,6 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\web.co
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\appsettings.Development.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\appsettings.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\libman.json
-E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Properties\launchSettings.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.deps.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.runtimeconfig.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Debug\netcoreapp2.2\Rcn.Bodegas.Api.runtimeconfig.dev.json

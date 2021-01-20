@@ -2,7 +2,6 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\web.
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\appsettings.Development.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\appsettings.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\libman.json
-E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\Properties\launchSettings.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\Rcn.Bodegas.Api.deps.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\Rcn.Bodegas.Api.runtimeconfig.json
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\Rcn.Bodegas.Api.runtimeconfig.dev.json
@@ -19,3 +18,5 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Release\netcoreapp2.2\Rcn.
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Release\netcoreapp2.2\Rcn.Bodegas.Api.csproj.CopyComplete
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Release\netcoreapp2.2\Rcn.Bodegas.Api.dll
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Release\netcoreapp2.2\Rcn.Bodegas.Api.pdb
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Release\netcoreapp2.2\Rcn.Bodegas.Api.csproj.CoreCompileInputs.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\obj\Release\netcoreapp2.2\Rcn.Bodegas.Api.genruntimeconfig.cache

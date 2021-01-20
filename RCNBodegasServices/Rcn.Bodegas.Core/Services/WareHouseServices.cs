@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -194,9 +195,16 @@ namespace Rcn.Bodegas.Core.Services
 
                 byte[] bytesImage = Convert.FromBase64String(item);
 
+
                 using (MemoryStream mStream = new MemoryStream(bytesImage))
                 {
-                    imageForSave = Image.FromStream(mStream);
+
+                    using (Bitmap bitmap = new Bitmap(mStream))
+                    {
+                        ImageFormat imageFormat = bitmap.RawFormat;
+                    }
+
+                    imageForSave = Image.FromStream(mStream);                  
                 }
 
 

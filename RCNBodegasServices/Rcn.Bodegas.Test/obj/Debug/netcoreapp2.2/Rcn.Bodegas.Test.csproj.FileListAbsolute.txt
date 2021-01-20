@@ -39,3 +39,5 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.B
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.AssemblyInfo.cs
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.dll
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.pdb
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.csproj.CoreCompileInputs.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Test\obj\Debug\netcoreapp2.2\Rcn.Bodegas.Test.genruntimeconfig.cache

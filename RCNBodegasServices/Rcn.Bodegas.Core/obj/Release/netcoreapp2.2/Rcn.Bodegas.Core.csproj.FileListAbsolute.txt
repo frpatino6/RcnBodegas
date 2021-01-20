@@ -6,3 +6,4 @@ E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.dll
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.pdb
 E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.csprojAssemblyReference.cache
+E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Core\obj\Release\netcoreapp2.2\Rcn.Bodegas.Core.csproj.CoreCompileInputs.cache
