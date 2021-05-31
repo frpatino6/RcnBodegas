@@ -7,5 +7,6 @@ by editing this MSBuild file. In order to learn more about this please visit htt
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <_PublishTargetUrl>E:\Rcn\Bodegas\RCNBodegasServices\Rcn.Bodegas.Api\bin\Release\netcoreapp2.2\publish\</_PublishTargetUrl>
+    <History>True|2021-05-31T16:36:40.0459306Z;True|2021-05-31T11:36:07.9946047-05:00;</History>
   </PropertyGroup>
 </Project>

@@ -95,10 +95,10 @@ namespace Rcn.Bodegas.Core.Services
                                     currentBarcode = newMaterial.barCode;
                                     OraDescripcion.Value = newMaterial.materialName;
                                     OraTipoBodega.Value = newMaterial.wareHouseId;
-                                    OraUbicacionActua.Value = 1;
+                                    OraUbicacionActua.Value = warehouseid == "A" ? 2 : 1;
                                     OraEstado.Value = "A";
                                     OraEmpresaCodigo.Value = 1;
-                                    OraUbicacionCodigo.Value = 1;
+                                    OraUbicacionCodigo.Value = warehouseid == "A" ? 2 : 1;
                                     OraUsuarioCreacion.Value = "BODEGAS";
                                     OraValorCompra.Value = newMaterial.unitPrice;
                                     OraValorMateria.Value = newMaterial.purchaseValue;
@@ -107,17 +107,25 @@ namespace Rcn.Bodegas.Core.Services
                                     OraMarca.Value = newMaterial.marca;
                                     OraUbicacionRecibido.Value = newMaterial.productionId;
                                     OraTerceroRecibido.Value = newMaterial.legalizedBy;
-                                    rowCount = oraUpdate.ExecuteNonQuery();
 
-                                    if (newMaterial.ListaImagenesStr != null && newMaterial.ListaImagenesStr.Count > 0)
+                                    try
                                     {
-                                        InsertImagesByMaterial(OraCodigoElemento.Value.ToString(), newMaterial.ListaImagenesStr, con, transaction, newMaterial.isAdmin);
+                                        rowCount = oraUpdate.ExecuteNonQuery();
+
+                                        if (newMaterial.ListaImagenesStr != null && newMaterial.ListaImagenesStr.Count > 0)
+                                        {
+                                            InsertImagesByMaterial(OraCodigoElemento.Value.ToString(), newMaterial.ListaImagenesStr, con, transaction, newMaterial.isAdmin);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                        _logger.LogInformation($"Error controlado al crear el árticulo ${ex.InnerException}");
                                     }
                                 }
                             }
 
                             transaction.Commit();
-
 
                         }
                         catch (System.Exception ex)
@@ -204,7 +212,7 @@ namespace Rcn.Bodegas.Core.Services
                         ImageFormat imageFormat = bitmap.RawFormat;
                     }
 
-                    imageForSave = Image.FromStream(mStream);                  
+                    imageForSave = Image.FromStream(mStream);
                 }
 
 
